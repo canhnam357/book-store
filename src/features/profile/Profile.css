@@ -1,0 +1,152 @@
+.profile-container {
+    display: flex;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+  
+  .profile-content {
+    flex: 1;
+    padding: 24px;
+  }
+  
+  .profile-title {
+    font-size: 28px;
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 24px;
+  }
+  
+  .profile-avatar-section {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  
+  .profile-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #e2e8f0;
+  }
+  
+  .profile-change-avatar-button {
+    background-color: #3b82f6;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+  }
+  
+  .profile-change-avatar-button:hover {
+    background-color: #2563eb;
+  }
+  
+  .profile-form {
+    max-width: 500px;
+  }
+  
+  .profile-form-group {
+    margin-bottom: 16px;
+  }
+  
+  .profile-label {
+    display: block;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: #4a5568;
+    margin-bottom: 8px;
+  }
+  
+  .profile-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    color: #2d3748;
+    background-color: white;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    transition: border-color 0.3s ease;
+  }
+  
+  .profile-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+  
+  .profile-input:disabled {
+    background-color: #f3f4f6;
+    color: #6b7280;
+    cursor: not-allowed;
+  }
+  
+  .profile-form-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+  }
+  
+  .profile-confirm-button,
+  .profile-cancel-button,
+  .profile-edit-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .profile-confirm-button {
+    background-color: #3b82f6;
+    color: white;
+  }
+  
+  .profile-confirm-button:hover:not(:disabled) {
+    background-color: #2563eb;
+  }
+  
+  .profile-confirm-button:disabled {
+    background-color: #d1d5db;
+    cursor: not-allowed;
+  }
+  
+  .profile-cancel-button {
+    background-color: #e5e7eb;
+    color: #4a5568;
+  }
+  
+  .profile-cancel-button:hover:not(:disabled) {
+    background-color: #d1d5db;
+  }
+  
+  .profile-cancel-button:disabled {
+    background-color: #f3f4f6;
+    cursor: not-allowed;
+  }
+  
+  .profile-edit-button {
+    background-color: #10b981;
+    color: white;
+  }
+  
+  .profile-edit-button:hover {
+    background-color: #059669;
+  }
+  
+  .profile-loading {
+    text-align: center;
+    font-family: 'Poppins', sans-serif;
+    font-size: 16px;
+    color: #4a5568;
+  }

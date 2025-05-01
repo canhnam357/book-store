@@ -1,0 +1,245 @@
+.book-list-container {
+  display: flex;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.booklist-filter-panel {
+  width: 300px;
+  padding: 16px;
+  background-color: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  margin-right: 16px;
+}
+
+.booklist-filter-panel h2 {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 16px;
+}
+
+.booklist-filter-group {
+  margin-bottom: 16px;
+}
+
+.booklist-filter-group label {
+  display: block;
+  font-size: 14px;
+  color: #4a5568;
+  margin-bottom: 4px;
+}
+
+.booklist-filter-group input,
+.booklist-filter-group select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+}
+
+.booklist-range-slider {
+  margin-top: 16px;
+  height: 30px;
+}
+
+.booklist-range-fill {
+  height: 6px;
+  background: #3b82f6;
+  border-radius: 3px;
+}
+
+.booklist-price-range-values {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #4a5568;
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+
+.booklist-selected-items {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.booklist-selected-item {
+  display: flex;
+  align-items: center;
+  background-color: #e2e8f0;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.booklist-selected-item span {
+  margin-right: 4px;
+}
+
+.booklist-remove-item {
+  background: none;
+  border: none;
+  color: #ef4444;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.booklist-remove-item:hover {
+  color: #dc2626;
+}
+
+.booklist-checkbox-list {
+  margin-top: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+  width: 100%;
+  padding-left: 0; /* Loại bỏ padding bên trái */
+  margin-left: 0; /* Loại bỏ margin bên trái */
+}
+
+.booklist-checkbox-item {
+  display: flex;
+  align-items: center; /* Căn giữa theo chiều dọc */
+  margin-bottom: 2px; /* Khoảng cách giữa các hàng */
+  width: 100%;
+  overflow: hidden;
+}
+
+.booklist-checkbox-item input {
+  width: 16px; /* Đặt chiều rộng cố định cho checkbox */
+  height: 16px; /* Đặt chiều cao cố định cho checkbox */
+  margin-right: 8px; /* Khoảng cách giữa checkbox và label */
+  margin-left: 0;
+}
+
+.booklist-checkbox-item label {
+  font-size: 14px;
+  color: #2d3748;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: calc(100% - 30px);
+}
+
+.booklist-show-more-button {
+  background: none;
+  border: none;
+  color: #3b82f6;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 0;
+  margin-top: 4px;
+}
+
+.booklist-show-more-button:hover {
+  text-decoration: underline;
+}
+
+.booklist-reset-button {
+  width: 100%;
+  padding: 8px;
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.booklist-reset-button:hover {
+  background-color: #dc2626;
+}
+
+.booklist-book-list {
+  flex: 1;
+}
+
+.booklist-book-list h2 {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 16px;
+}
+
+.booklist-book-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.booklist-pagination {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Căn giữa các nút phân trang */
+  gap: 16px;
+  position: relative; /* Để sử dụng position absolute cho dropdown */
+}
+
+.booklist-page-size {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: absolute; /* Đặt dropdown ở bên trái */
+  left: 0;
+}
+
+.booklist-page-size label {
+  font-size: 14px;
+  color: #4a5568;
+}
+
+.booklist-page-size select {
+  padding: 6px 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.booklist-page-size select:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.booklist-page-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.booklist-page-button {
+  padding: 8px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  background-color: white;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.booklist-page-button:hover {
+  background-color: #edf2f7;
+}
+
+.booklist-page-button.active {
+  background-color: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+.booklist-nav-button {
+  padding: 8px 10px;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.booklist-nav-button:hover {
+  background-color: #edf2f7;
+}
+
+.booklist-ellipsis {
+  padding: 8px 12px;
+  font-size: 14px;
+  color: #4a5568;
+}

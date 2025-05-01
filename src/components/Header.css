@@ -1,0 +1,187 @@
+.header {
+  background-color: #f8f9fa;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 12px 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 20px; /* Khoảng cách giữa Book Store và Sản Phẩm */
+}
+
+.header-title {
+  margin: 0;
+  font-size: 28px;
+  font-family: 'Playfair Display', serif; /* Font thanh lịch cho Book Store */
+  font-weight: 700;
+  color: #3b82f6;
+}
+
+.header-link {
+  text-decoration: none;
+  color: #3b82f6;
+  transition: color 0.3s ease;
+}
+
+.header-link:hover {
+  color: #2563eb;
+}
+
+.header-actions {
+  margin-left: auto; /* Đẩy các phần tử bên phải ra mép phải */
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header-button {
+  text-decoration: none;
+  font-family: 'Poppins', sans-serif; /* Font hiện đại cho Sản Phẩm và Đăng Nhập */
+  font-weight: 500;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+.product-button {
+  color: #4a5568;
+  padding: 8px 12px;
+  border-radius: 4px;
+}
+
+.product-button:hover {
+  color: #3b82f6;
+  background-color: #f1f5f9;
+}
+
+.login-button {
+  background: linear-gradient(90deg, #3b82f6, #60a5fa); /* Gradient cho nút Đăng Nhập */
+  color: white;
+  padding: 8px 20px;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.login-button:hover {
+  background: linear-gradient(90deg, #2563eb, #3b82f6);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+
+.header-username {
+  font-family: 'Poppins', sans-serif;
+  font-size: 16px;
+  color: #4a5568;
+}
+
+.header-user-actions {
+  display: flex;
+  align-items: center;
+  gap: 24px; /* Tăng khoảng cách giữa icon giỏ hàng và hình người */
+  position: relative;
+}
+
+.header-icon {
+  background: none;
+  border: none;
+  font-size: 22px; /* Tăng kích thước icon */
+  color: #4a5568;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.header-icon:hover {
+  color: #3b82f6;
+  background-color: #f1f5f9;
+}
+
+.header-cart {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.header-cart-count {
+  position: absolute;
+  top: -2px; /* Điều chỉnh vị trí để nằm ở góc trên bên phải */
+  right: -2px;
+  background-color: #ef4444;
+  color: white;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 12px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+}
+
+.header-user-dropdown {
+  position: relative;
+}
+
+.header-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: white;
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 180px;
+  z-index: 10;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.header-user-dropdown.open .header-dropdown-menu {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.header-dropdown-item {
+  display: block;
+  padding: 10px 16px;
+  text-decoration: none;
+  color: #2d3748;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.header-dropdown-item:hover {
+  background-color: #f1f5f9;
+}
+
+.header-dropdown-item:not(:last-child) {
+  border-bottom: 1px solid #e2e8f0; /* Thêm đường phân cách giữa các item */
+}
+
+.header-logout {
+  color: #ef4444;
+}
+
+.header-logout:hover {
+  background-color: #fee2e2;
+}

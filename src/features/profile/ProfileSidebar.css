@@ -1,0 +1,45 @@
+.profile-sidebar {
+    width: 250px;
+    background-color: #f8f9fa;
+    padding: 24px;
+    border-right: 1px solid #e2e8f0;
+  }
+  
+  .profile-sidebar-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 24px;
+  }
+  
+  .profile-sidebar-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .profile-sidebar-menu li {
+    margin-bottom: 8px;
+  }
+  
+  .profile-sidebar-link {
+    display: block;
+    padding: 10px 16px;
+    text-decoration: none;
+    font-family: 'Poppins', sans-serif;
+    font-size: 16px;
+    color: #4a5568;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+  }
+  
+  .profile-sidebar-link:hover {
+    background-color: #e5e7eb;
+    color: #3b82f6;
+  }
+  
+  .profile-sidebar-link.active {
+    background-color: #e5e7eb;
+    color: #3b82f6;
+    font-weight: 600;
+  }

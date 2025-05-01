@@ -1,0 +1,225 @@
+.orders-container {
+    display: flex;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .orders-content {
+    flex: 1;
+    padding-left: 20px;
+  }
+  
+  .orders-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #333;
+  }
+  
+  .orders-filter {
+    margin-bottom: 20px;
+  }
+  
+  .orders-filter label {
+    font-size: 14px;
+    font-weight: 500;
+    margin-right: 10px;
+    color: #555;
+  }
+  
+  .orders-status-select {
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    outline: none;
+    cursor: pointer;
+  }
+  
+  .orders-list {
+    margin-top: 20px;
+  }
+  
+  .orders-item {
+    background-color: #fff;
+    padding: 15px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .orders-summary p {
+    margin: 5px 0;
+    font-size: 14px;
+    color: #333;
+  }
+  
+  .orders-summary p strong {
+    color: #555;
+  }
+  
+  .orders-status {
+    padding: 2px 8px;
+    font-size: 12px;
+    color: #fff;
+    border-radius: 4px;
+    margin-left: 5px;
+  }
+  
+  .orders-status-PENDING {
+    background-color: #FFA500;
+  }
+  
+  .orders-status-REJECTED {
+    background-color: #FF0000;
+  }
+  
+  .orders-status-IN_PREPARATION {
+    background-color: #FFD700;
+  }
+  
+  .orders-status-CANCELLATION_REQUESTED {
+    background-color: #FF4500;
+  }
+  
+  .orders-status-READY_TO_SHIP {
+    background-color: #32CD32;
+  }
+  
+  .orders-status-DELIVERING {
+    background-color: #1E90FF;
+  }
+  
+  .orders-status-DELIVERED {
+    background-color: #008000;
+  }
+  
+  .orders-status-CANCELLED {
+    background-color: #808080;
+  }
+  
+  .orders-actions {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+  }
+  
+  .orders-details-button,
+  .orders-cancel-button,
+  .orders-cancel-request-button {
+    padding: 8px 15px;
+    font-size: 14px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .orders-details-button {
+    background-color: #007bff;
+    color: #fff;
+  }
+  
+  .orders-details-button:hover {
+    background-color: #0056b3;
+  }
+  
+  .orders-cancel-button {
+    background-color: #dc3545;
+    color: #fff;
+  }
+  
+  .orders-cancel-button:hover {
+    background-color: #c82333;
+  }
+  
+  .orders-cancel-request-button {
+    background-color: #ff4500;
+    color: #fff;
+  }
+  
+  .orders-cancel-request-button:hover {
+    background-color: #e03e00;
+  }
+  
+  .orders-details-button:disabled,
+  .orders-cancel-button:disabled,
+  .orders-cancel-request-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+  }
+  
+  .orders-details {
+    margin-top: 15px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+  }
+  
+  .orders-details h4 {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #333;
+  }
+  
+  .orders-details-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .orders-details-table th,
+  .orders-details-table td {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .orders-details-table th {
+    background-color: #f1f1f1;
+    font-weight: 500;
+    color: #555;
+  }
+  
+  .orders-book-thumbnail {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+  
+  .orders-pagination {
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  
+  .orders-pagination-button {
+    padding: 8px 15px;
+    font-size: 14px;
+    border: none;
+    border-radius: 4px;
+    background-color: #007bff;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .orders-pagination-button:hover {
+    background-color: #0056b3;
+  }
+  
+  .orders-pagination-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+  }
+  
+  .orders-loading {
+    text-align: center;
+    font-size: 16px;
+    color: #555;
+  }

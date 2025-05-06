@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { loginUser } from '../authSlice';
 import './Login.css';
 
@@ -9,7 +9,16 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   const { loading } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const error = params.get('error');
+    if (error === 'account_locked') {
+      // Thông báo đã được hiển thị trong authSlice.js, nhưng bạn có thể thêm logic bổ sung nếu cần
+    }
+  }, [location]);
 
   const handleSubmit = (e) => {
     e.preventDefault();

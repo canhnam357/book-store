@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { Link } from 'react-router-dom'; // Thêm import Link
 import { toast } from 'react-toastify';
 import {
   fetchOrders,
@@ -23,12 +24,15 @@ const Orders = () => {
     { value: 'PENDING', label: 'Chờ duyệt' },
     { value: 'REJECTED', label: 'Bị từ chối' },
     { value: 'IN_PREPARATION', label: 'Đang chuẩn bị hàng' },
-    { value: 'CANCELLATION_REQUESTED', label: 'Đã gửi yêu cầu hủy đơn' },
     { value: 'READY_TO_SHIP', label: 'Chuẩn bị giao' },
     { value: 'DELIVERING', label: 'Đang giao' },
     { value: 'DELIVERED', label: 'Đã giao' },
-    { value: 'CANCELLED', label: 'Đã hủy' },
+    { value: 'CANCELLED', label: 'Đã huỷ' },
+    { value: 'FAILED_DELIVERY', label: 'Giao thất bại' },
+    { value: 'RETURNED', label: 'Đã hoàn hàng' },
   ];
+
+  const scrollPositionRef = useRef(0); // Lưu vị trí cuộn
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -50,6 +54,9 @@ const Orders = () => {
   };
 
   const toggleOrderDetails = async (orderId) => {
+    // Lưu vị trí cuộn hiện tại trước khi thay đổi
+    scrollPositionRef.current = window.scrollY;
+
     if (expandedOrderId === orderId) {
       setExpandedOrderId(null);
     } else {
@@ -62,16 +69,17 @@ const Orders = () => {
         }
       }
     }
+
+    // Khôi phục vị trí cuộn sau khi re-render
+    setTimeout(() => {
+      window.scrollTo(0, scrollPositionRef.current);
+    }, 0);
   };
 
   const handleChangeOrderStatus = async (orderId, fromStatus, toStatus) => {
     try {
       await dispatch(changeOrderStatus({ orderId, fromStatus, toStatus })).unwrap();
-      toast.success(
-        toStatus === 'CANCELLED'
-          ? 'Hủy đơn thành công!'
-          : 'Gửi yêu cầu hủy đơn thành công!'
-      );
+      toast.success('Hủy đơn thành công!');
     } catch (error) {
       toast.error(error);
     }
@@ -88,6 +96,19 @@ const Orders = () => {
       dateStyle: 'short',
       timeStyle: 'short',
     });
+  };
+
+  const formatDateTime = (dateTimeString) => {
+    if (!dateTimeString || dateTimeString.length !== 14) return 'N/A';
+    const year = parseInt(dateTimeString.substring(0, 4), 10);
+    const month = parseInt(dateTimeString.substring(4, 6), 10) - 1; // Tháng 0-based
+    const day = parseInt(dateTimeString.substring(6, 8), 10);
+    const hour = parseInt(dateTimeString.substring(8, 10), 10);
+    const minute = parseInt(dateTimeString.substring(10, 12), 10);
+    const second = parseInt(dateTimeString.substring(12, 14), 10);
+
+    const date = new Date(year, month, day, hour, minute, second);
+    return date.toLocaleString('vi-VN', { dateStyle: 'short', timeStyle: 'short' });
   };
 
   const formatPrice = (price) => {
@@ -139,7 +160,24 @@ const Orders = () => {
                   </p>
                   <p>
                     <strong>Trạng thái thanh toán:</strong> {order.paymentStatus}
+                    {order.refundStatus === 'REFUNDED' && (
+                      <span className="orders-refund-status orders-refund-status-REFUNDED">
+                        {' '}
+                        - Hoàn tiền thành công, kiểm tra email để xem thông tin chi tiết
+                      </span>
+                    )}
+                    {order.refundStatus === 'FAILED_REFUND' && order.refundTimesRemain === 0 && (
+                      <span className="orders-refund-status orders-refund-status-FAILED_REFUND">
+                        {' '}
+                        - Hoàn tiền thất bại, vui lòng liên hệ admin để hoàn tiền
+                      </span>
+                    )}
                   </p>
+                  {order.refundStatus === 'REFUNDED' && order.refundAt && (
+                    <p>
+                      <strong>Thời gian hoàn tiền:</strong> {formatDateTime(order.refundAt)}
+                    </p>
+                  )}
                   <p>
                     <strong>Địa chỉ:</strong> {order.address}
                   </p>
@@ -159,30 +197,15 @@ const Orders = () => {
                     >
                       {expandedOrderId === order.orderId ? 'Ẩn chi tiết' : 'Xem chi tiết'}
                     </button>
-                    {order.orderStatus === 'PENDING' && (
+                    {(order.orderStatus === 'PENDING' || order.orderStatus === 'IN_PREPARATION') && (
                       <button
                         className="orders-cancel-button"
                         onClick={() =>
-                          handleChangeOrderStatus(order.orderId, 'PENDING', 'CANCELLED')
+                          handleChangeOrderStatus(order.orderId, order.orderStatus, 'CANCELLED')
                         }
                         disabled={loading}
                       >
                         Hủy đơn
-                      </button>
-                    )}
-                    {order.orderStatus === 'IN_PREPARATION' && (
-                      <button
-                        className="orders-cancel-request-button"
-                        onClick={() =>
-                          handleChangeOrderStatus(
-                            order.orderId,
-                            'IN_PREPARATION',
-                            'CANCELLATION_REQUESTED'
-                          )
-                        }
-                        disabled={loading}
-                      >
-                        Gửi yêu cầu hủy đơn
                       </button>
                     )}
                   </div>
@@ -216,7 +239,9 @@ const Orders = () => {
                                   'Không có ảnh'
                                 )}
                               </td>
-                              <td>{detail.bookName}</td>
+                              <td>
+                                <Link to={`/books/${detail.bookId}`}>{detail.bookName}</Link>
+                              </td>
                               <td>{detail.quantity}</td>
                               <td>{formatPrice(detail.totalPrice)}</td>
                             </tr>

@@ -104,7 +104,6 @@ const BookDetail = () => {
       const fetchCartResult = await dispatch(fetchCart()).unwrap();
       console.log('Dữ liệu giỏ hàng sau khi thêm:', fetchCartResult);
     } catch (error) {
-      toast.error(error);
     }
   };
 

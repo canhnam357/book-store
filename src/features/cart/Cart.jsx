@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { Link } from 'react-router-dom'; // Thêm import Link
 import { fetchCart, changeQuantity, updateQuantity, removeFromCart } from './cartSlice';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
@@ -160,7 +161,9 @@ const Cart = () => {
                   onChange={() => handleSelectItem(item.bookId)}
                 />
                 <img src={item.urlThumbnail} alt={item.bookName} className="cart-item-image" />
-                <h3 className="cart-item-name">{item.bookName}</h3>
+                <h3 className="cart-item-name">
+                  <Link to={`/books/${item.bookId}`}>{item.bookName}</Link>
+                </h3>
                 <p className="cart-item-price">{item.price.toLocaleString('vi-VN')} VNĐ</p>
                 <div className="cart-item-quantity">
                   <button

@@ -63,7 +63,6 @@ const Addresses = () => {
         otherDetail: '',
       });
     } catch (error) {
-      toast.error(error);
     }
   };
 
@@ -99,7 +98,6 @@ const Addresses = () => {
         otherDetail: '',
       });
     } catch (error) {
-      toast.error(error);
     }
   };
 
@@ -118,7 +116,6 @@ const Addresses = () => {
       await dispatch(deleteAddress(addressId)).unwrap();
       toast.success('Xóa địa chỉ thành công!');
     } catch (error) {
-      toast.error(error);
     }
   };
 
@@ -127,7 +124,6 @@ const Addresses = () => {
       await dispatch(setDefaultAddress(addressId)).unwrap();
       toast.success('Đặt địa chỉ mặc định thành công!');
     } catch (error) {
-      toast.error(error);
     }
   };
 

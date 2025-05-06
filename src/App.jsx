@@ -5,6 +5,8 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { fetchCart } from './features/cart/cartSlice';
 import Header from './components/Header';
+import Footer from './components/Footer';
+import Home from './components/Home';
 import Login from './features/auth/login/Login';
 import Register from './features/auth/register/Register';
 import VerifyOTP from './features/auth/verifyOTP/VerifyOTP';
@@ -53,9 +55,10 @@ function App() {
             <Route path="/change-password" element={<ChangePassword />} />
             <Route path="/addresses" element={<Addresses />} />
             <Route path="/orders" element={<Orders />} />
-            <Route path="/" element={<div>Trang Chủ (Chưa triển khai)</div>} />
+            <Route path="/" element={<Home />} />
           </Routes>
         </div>
+        <Footer />
         <ToastContainer />
       </div>
     </Router>

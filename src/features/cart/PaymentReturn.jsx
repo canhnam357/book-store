@@ -22,8 +22,15 @@ const PaymentReturn = () => {
   }, [paymentStatus]);
 
   const formatDateTime = (dateTimeString) => {
-    if (!dateTimeString) return 'N/A';
-    const date = new Date(dateTimeString);
+    if (!dateTimeString || dateTimeString.length !== 14) return 'N/A';
+    const year = parseInt(dateTimeString.substring(0, 4), 10);
+    const month = parseInt(dateTimeString.substring(4, 6), 10) - 1; // Tháng trong JS là 0-based
+    const day = parseInt(dateTimeString.substring(6, 8), 10);
+    const hour = parseInt(dateTimeString.substring(8, 10), 10);
+    const minute = parseInt(dateTimeString.substring(10, 12), 10);
+    const second = parseInt(dateTimeString.substring(12, 14), 10);
+  
+    const date = new Date(year, month, day, hour, minute, second);
     return date.toLocaleString('vi-VN', { dateStyle: 'short', timeStyle: 'short' });
   };
 

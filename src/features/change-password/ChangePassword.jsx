@@ -56,17 +56,6 @@ const ChangePassword = () => {
         setOtpSent(false);
       }
     } catch (error) {
-      if (error.response?.status === 422) {
-        toast.error('Mật khẩu mới phải có độ dài từ 8 đến 32 ký tự!');
-      } else if (error.response?.status === 403) {
-        toast.error('Mật khẩu hiện tại không đúng!');
-      } else if (error.response?.status === 400) {
-        toast.error('OTP không đúng!');
-      } else if (error.response?.status === 409) {
-        toast.error('Mật khẩu mới không được trùng với mật khẩu hiện tại!');
-      } else {
-        toast.error('Lỗi khi đổi mật khẩu!');
-      }
     } finally {
       setLoading(false);
     }

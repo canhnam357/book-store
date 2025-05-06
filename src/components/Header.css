@@ -13,18 +13,19 @@
   display: flex;
   align-items: center;
   padding: 0 16px;
+  justify-content: space-between; /* Phân bố đều và xích các div về vị trí */
 }
 
 .header-left {
   display: flex;
   align-items: center;
-  gap: 20px; /* Khoảng cách giữa Book Store và Sản Phẩm */
+  gap: 20px;
 }
 
 .header-title {
   margin: 0;
   font-size: 28px;
-  font-family: 'Playfair Display', serif; /* Font thanh lịch cho Book Store */
+  font-family: 'Playfair Display', serif;
   font-weight: 700;
   color: #3b82f6;
 }
@@ -39,8 +40,97 @@
   color: #2563eb;
 }
 
-.header-actions {
-  margin-left: auto; /* Đẩy các phần tử bên phải ra mép phải */
+.header-center {
+  flex-grow: 1; /* Chiếm không gian giữa */
+  max-width: 500px;
+  position: relative;
+}
+
+.header-search-form {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.header-search-input {
+  width: 100%;
+  padding: 8px 40px 8px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  color: #2d3748;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.header-search-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.header-search-button {
+  position: absolute;
+  right: 8px;
+  background: none;
+  border: none;
+  font-size: 16px;
+  color: #4a5568;
+  cursor: pointer;
+  padding: 4px;
+  transition: color 0.3s ease;
+}
+
+.header-search-button:hover {
+  color: #3b82f6;
+}
+
+.header-search-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 10;
+  margin-top: 4px;
+}
+
+.header-search-result {
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.header-search-result:hover {
+  background-color: #f1f5f9;
+}
+
+.header-search-thumbnail {
+  width: 30px;
+  height: 40px;
+  object-fit: cover;
+  margin-right: 8px;
+  border-radius: 2px;
+}
+
+.header-search-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  color: #2d3748;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.header-right {
   display: flex;
   align-items: center;
   gap: 16px;
@@ -48,7 +138,7 @@
 
 .header-button {
   text-decoration: none;
-  font-family: 'Poppins', sans-serif; /* Font hiện đại cho Sản Phẩm và Đăng Nhập */
+  font-family: 'Poppins', sans-serif;
   font-weight: 500;
   font-size: 16px;
   transition: all 0.3s ease;
@@ -66,7 +156,7 @@
 }
 
 .login-button {
-  background: linear-gradient(90deg, #3b82f6, #60a5fa); /* Gradient cho nút Đăng Nhập */
+  background: linear-gradient(90deg, #3b82f6, #60a5fa);
   color: white;
   padding: 8px 20px;
   border-radius: 6px;
@@ -88,14 +178,14 @@
 .header-user-actions {
   display: flex;
   align-items: center;
-  gap: 24px; /* Tăng khoảng cách giữa icon giỏ hàng và hình người */
+  gap: 24px;
   position: relative;
 }
 
 .header-icon {
   background: none;
   border: none;
-  font-size: 22px; /* Tăng kích thước icon */
+  font-size: 22px;
   color: #4a5568;
   cursor: pointer;
   padding: 6px;
@@ -116,7 +206,7 @@
 
 .header-cart-count {
   position: absolute;
-  top: -2px; /* Điều chỉnh vị trí để nằm ở góc trên bên phải */
+  top: -2px;
   right: -2px;
   background-color: #ef4444;
   color: white;
@@ -175,7 +265,7 @@
 }
 
 .header-dropdown-item:not(:last-child) {
-  border-bottom: 1px solid #e2e8f0; /* Thêm đường phân cách giữa các item */
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .header-logout {

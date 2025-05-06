@@ -50,15 +50,6 @@ export const deleteAddress = createAsyncThunk(
       }
       return rejectWithValue('Không thể xóa địa chỉ!');
     } catch (error) {
-      if (error.response?.status === 404) {
-        return rejectWithValue('Địa chỉ không tồn tại!');
-      }
-      if (error.response?.status === 409) {
-        return rejectWithValue('Không thể xóa địa chỉ mặc định! Hãy chọn địa chỉ khác làm mặc định trước.');
-      }
-      if (error.response?.status === 500) {
-        return rejectWithValue('Lỗi server khi xóa địa chỉ!');
-      }
       return rejectWithValue(error.response?.data?.message || 'Lỗi khi xóa địa chỉ!');
     }
   }

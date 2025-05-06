@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { logoutUser } from '../features/auth/authSlice';
-import { FaShoppingCart, FaUser } from 'react-icons/fa';
+import { FaShoppingCart, FaUser, FaSearch } from 'react-icons/fa';
+import api from '../api/api';
 import './Header.css';
 
 const Header = () => {
@@ -11,10 +12,11 @@ const Header = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [searchKeyword, setSearchKeyword] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const searchRef = useRef(null);
 
   const cartItemCount = cartItems.reduce((total, item) => total + (item.quantity || 0), 0);
-  console.log('cartItems trong Header:', cartItems);
-  console.log('cartItemCount:', cartItemCount);
 
   const handleLogout = () => {
     dispatch(logoutUser()).then((result) => {
@@ -29,6 +31,53 @@ const Header = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
 
+  const handleSearchChange = (e) => {
+    const keyword = e.target.value;
+    setSearchKeyword(keyword);
+    if (keyword) {
+      fetchSearchResults(keyword);
+    } else {
+      setSearchResults([]);
+    }
+  };
+
+  const fetchSearchResults = async (keyword) => {
+    try {
+      const response = await api.get('/books/search', {
+        params: { keyword },
+      });
+      if (response.status === 200) {
+        const results = response.data.result.slice(0, 5); // Giới hạn 5 kết quả
+        setSearchResults(results);
+      }
+    } catch (error) {
+      console.error('Lỗi tìm kiếm sách:', error);
+      if (error.response?.status === 500) {
+        alert('Tìm kiếm thất bại do lỗi server. Vui lòng thử lại sau!');
+      }
+      setSearchResults([]);
+    }
+  };
+
+  const handleResultClick = (bookId) => {
+    navigate(`/books/${bookId}`);
+    setSearchKeyword('');
+    setSearchResults([]);
+  };
+
+  const handleClickOutside = (e) => {
+    if (searchRef.current && !searchRef.current.contains(e.target)) {
+      setSearchResults([]);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   return (
     <header className="header">
       <div className="header-container">
@@ -40,7 +89,37 @@ const Header = () => {
             Sản Phẩm
           </a>
         </div>
-        <div className="header-actions">
+
+        <div className="header-center" ref={searchRef}>
+          <form onSubmit={(e) => e.preventDefault()} className="header-search-form">
+            <input
+              type="text"
+              value={searchKeyword}
+              onChange={handleSearchChange}
+              placeholder="Bạn đang tìm kiếm sách?"
+              className="header-search-input"
+            />
+            <button type="button" className="header-search-button" onClick={() => fetchSearchResults(searchKeyword)}>
+              <FaSearch />
+            </button>
+          </form>
+          {searchResults.length > 0 && (
+            <div className="header-search-dropdown">
+              {searchResults.map((book) => (
+                <div
+                  key={book.bookId}
+                  className="header-search-result"
+                  onClick={() => handleResultClick(book.bookId)}
+                >
+                  <img src={book.urlThumbnail} alt={book.bookName} className="header-search-thumbnail" />
+                  <span className="header-search-title">{book.bookName}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="header-right">
           {isAuthenticated ? (
             <div className="header-user-actions">
               <a href="/cart" className="header-icon header-cart">

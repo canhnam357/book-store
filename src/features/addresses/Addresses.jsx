@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import {
   fetchAddresses,
@@ -13,6 +14,7 @@ import './Addresses.css';
 
 const Addresses = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { addresses, loading } = useSelector((state) => state.addresses);
   const { isAuthenticated } = useSelector((state) => state.auth);
 
@@ -32,16 +34,18 @@ const Addresses = () => {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      window.location.href = '/login';
-      return;
+      navigate('/login');
+    } else {
+      dispatch(fetchAddresses());
     }
-    dispatch(fetchAddresses());
-  }, [dispatch, isAuthenticated]);
+  }, [dispatch, isAuthenticated, navigate]);
 
   const handleInputChange = (e, setState) => {
     const { name, value } = e.target;
     setState((prev) => ({ ...prev, [name]: value }));
   };
+
+  const isValidPhoneNumber = (phone) => /^\d{10,11}$/.test(phone);
 
   const handleCreateAddress = async (e) => {
     e.preventDefault();
@@ -53,16 +57,25 @@ const Addresses = () => {
       toast.error('Vui lòng điền đầy đủ thông tin bắt buộc!');
       return;
     }
+    if (!isValidPhoneNumber(newAddress.phoneNumber)) {
+      toast.error('Số điện thoại phải có 10-11 chữ số!');
+      return;
+    }
     try {
-      await dispatch(createAddress(newAddress)).unwrap();
-      toast.success('Thêm địa chỉ thành công!');
-      setNewAddress({
-        fullName: '',
-        phoneNumber: '',
-        addressInformation: '',
-        otherDetail: '',
-      });
+      const result = await dispatch(createAddress(newAddress)).unwrap();
+      console.log('Create address result:', result);
+      if (result?.result) {
+        toast.success(result.message || 'Thêm địa chỉ thành công!');
+        setNewAddress({
+          fullName: '',
+          phoneNumber: '',
+          addressInformation: '',
+          otherDetail: '',
+        });
+      }
     } catch (error) {
+      console.error('Lỗi khi thêm địa chỉ:', error);
+      // Không hiển thị toast.error vì addressSlice.js đã xử lý
     }
   };
 
@@ -85,19 +98,28 @@ const Addresses = () => {
       toast.error('Vui lòng điền đầy đủ thông tin bắt buộc!');
       return;
     }
+    if (!isValidPhoneNumber(editAddress.phoneNumber)) {
+      toast.error('Số điện thoại phải có 10-11 chữ số!');
+      return;
+    }
     try {
-      await dispatch(
+      const result = await dispatch(
         updateAddress({ addressId, addressData: editAddress })
       ).unwrap();
-      toast.success('Cập nhật địa chỉ thành công!');
-      setEditingAddressId(null);
-      setEditAddress({
-        fullName: '',
-        phoneNumber: '',
-        addressInformation: '',
-        otherDetail: '',
-      });
+      console.log('Update address result:', result);
+      if (result?.result) {
+        toast.success(result.message || 'Cập nhật địa chỉ thành công!');
+        setEditingAddressId(null);
+        setEditAddress({
+          fullName: '',
+          phoneNumber: '',
+          addressInformation: '',
+          otherDetail: '',
+        });
+      }
     } catch (error) {
+      console.error('Lỗi khi cập nhật địa chỉ:', error);
+      // Không hiển thị toast.error vì addressSlice.js đã xử lý
     }
   };
 
@@ -112,18 +134,30 @@ const Addresses = () => {
   };
 
   const handleDeleteAddress = async (addressId) => {
-    try {
-      await dispatch(deleteAddress(addressId)).unwrap();
-      toast.success('Xóa địa chỉ thành công!');
-    } catch (error) {
+    if (window.confirm('Bạn có chắc muốn xóa địa chỉ này không?')) {
+      try {
+        const result = await dispatch(deleteAddress(addressId)).unwrap();
+        console.log('Delete address result:', result);
+        if (result?.addressId) {
+          toast.success(result.message || 'Xóa địa chỉ thành công!');
+        }
+      } catch (error) {
+        console.error('Lỗi khi xóa địa chỉ:', error);
+        // Không hiển thị toast.error vì addressSlice.js đã xử lý
+      }
     }
   };
 
   const handleSetDefault = async (addressId) => {
     try {
-      await dispatch(setDefaultAddress(addressId)).unwrap();
-      toast.success('Đặt địa chỉ mặc định thành công!');
+      const result = await dispatch(setDefaultAddress(addressId)).unwrap();
+      console.log('Set default address result:', result);
+      if (result?.addressId) {
+        toast.success(result.message || 'Đặt địa chỉ mặc định thành công!');
+      }
     } catch (error) {
+      console.error('Lỗi khi đặt địa chỉ mặc định:', error);
+      // Không hiển thị toast.error vì addressSlice.js đã xử lý
     }
   };
 

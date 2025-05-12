@@ -29,15 +29,15 @@ const Checkout = () => {
   }, [dispatch, isAuthenticated, location, navigate]);
 
   useEffect(() => {
-    const defaultAddress = addresses.find((addr) => addr.default);
+    const defaultAddress = (addresses || []).find((addr) => addr.default);
     if (defaultAddress) {
       setSelectedAddressId(defaultAddress.addressId);
-    } else if (addresses.length > 0) {
+    } else if ((addresses || []).length > 0) {
       setSelectedAddressId(addresses[0].addressId);
     }
   }, [addresses]);
 
-  const selectedCartItems = cartItems.filter((item) => selectedItems.includes(item.bookId));
+  const selectedCartItems = (cartItems || []).filter((item) => selectedItems.includes(item.bookId));
   const selectedTotalPrice = selectedCartItems.reduce((total, item) => total + (item.totalPrice || 0), 0);
 
   const handleConfirmCheckout = async () => {
@@ -46,21 +46,20 @@ const Checkout = () => {
       navigate('/addresses');
       return;
     }
+
     try {
       const result = await dispatch(
         createOrder({ bookIds: selectedItems, addressId: selectedAddressId, paymentMethod })
       ).unwrap();
+      console.log('Create order result:', result);
       if (paymentMethod === 'CARD') {
         window.location.href = result; // Redirect tới VNPAY URL
       } else {
-        toast.success('Đặt hàng thành công!');
         navigate('/orders');
       }
     } catch (error) {
-      if (error.includes('bị khóa hoặc chưa xác thực')) {
-        navigate('/login');
-      }
-      toast.error(error);
+      console.error('Lỗi khi tạo đơn hàng:', error);
+      // Toast đã được hiển thị trong cartSlice, không cần lặp lại
     }
   };
 
@@ -95,18 +94,33 @@ const Checkout = () => {
         </div>
         {selectedCartItems.map((item) => (
           <div key={item.bookId} className="checkout-item">
-            <img src={item.urlThumbnail} alt={item.bookName} className="checkout-item-image" />
-            <h3 className="checkout-item-name">{item.bookName}</h3>
-            <p className="checkout-item-price">{item.price.toLocaleString('vi-VN')} VNĐ</p>
-            <p className="checkout-item-quantity">{item.quantity}</p>
-            <p className="checkout-item-total-price">{item.totalPrice.toLocaleString('vi-VN')} VNĐ</p>
+            <img
+              src={item.urlThumbnail || '/no-image.png'}
+              alt={item.bookName || 'Sách'}
+              className="checkout-item-image"
+            />
+            <h3 className="checkout-item-name">{item.bookName || 'Không có tiêu đề'}</h3>
+            <p className="checkout-item-price">
+              {item.priceAfterSales !== null && (
+                <span className="original-price">
+                  {(item.price || 0).toLocaleString('vi-VN')} VNĐ
+                </span>
+              )}
+              <span>
+                {(item.priceAfterSales !== null ? item.priceAfterSales : item.price || 0).toLocaleString('vi-VN')} VNĐ
+              </span>
+            </p>
+            <p className="checkout-item-quantity">{item.quantity || 0}</p>
+            <p className="checkout-item-total-price">
+              {(item.totalPrice || 0).toLocaleString('vi-VN')} VNĐ
+            </p>
           </div>
         ))}
       </div>
       <div className="checkout-options">
         <div className="checkout-address-selection">
           <label>Địa chỉ giao hàng:</label>
-          {addresses.length === 0 ? (
+          {(addresses?.length || 0) === 0 ? (
             <p className="checkout-no-address">
               Chưa có địa chỉ! <a href="/addresses">Tạo địa chỉ</a>
             </p>
@@ -118,7 +132,8 @@ const Checkout = () => {
             >
               {addresses.map((address) => (
                 <option key={address.addressId} value={address.addressId}>
-                  {address.fullName} - {address.phoneNumber} - {address.addressInformation}
+                  {address.fullName || 'Không có tên'} - {address.phoneNumber || 'Không có số điện thoại'} -{' '}
+                  {address.addressInformation || 'Không có địa chỉ'}
                   {address.default && ' (Mặc định)'}
                 </option>
               ))}

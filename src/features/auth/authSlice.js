@@ -7,16 +7,16 @@ export const loginUser = createAsyncThunk(
   async ({ email, password }, { rejectWithValue }) => {
     try {
       const response = await api.post('/auth/login', { email, password });
-      if (response.data.success) {
+      console.log('Login response:', response.data);
+      if (response.status === 200 && response.data.result) {
         const { accessToken, refreshToken, username } = response.data.result;
         localStorage.setItem('accessToken', accessToken);
         localStorage.setItem('refreshToken', refreshToken);
-        toast.dismiss();
-        toast.success('Đăng nhập thành công');
         return { username };
       }
-      return rejectWithValue(response.data.message);
+      throw new Error(response.data.message || 'Đăng nhập thất bại!');
     } catch (error) {
+      console.error('Login error:', error.response?.data || error);
       return rejectWithValue(error.response?.data?.message || 'Đăng nhập thất bại!');
     }
   }
@@ -26,23 +26,16 @@ export const handleGoogleCallback = createAsyncThunk(
   'auth/handleGoogleCallback',
   async ({ accessToken, refreshToken, username, error }, { rejectWithValue }) => {
     try {
-      console.log(error);
       if (error) {
-        if (error === 'account_locked') {
-          toast.error('Đăng nhập bằng Google thất bại do tài khoản bị khóa!');
-        } else {
-          toast.error('Đăng nhập bằng Google thất bại!');
-        }
-        return rejectWithValue(error);
+        throw new Error(error);
       }
+      console.log('Google callback params:', { accessToken, refreshToken, username });
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
-      toast.dismiss();
-      toast.success('Đăng nhập bằng Google thành công!');
       return { username };
     } catch (error) {
-      toast.error('Đăng nhập bằng Google thất bại!');
-      return rejectWithValue(error.message);
+      console.error('Google callback error:', error);
+      return rejectWithValue(error.message || 'Đăng nhập bằng Google thất bại!');
     }
   }
 );
@@ -58,13 +51,13 @@ export const registerUser = createAsyncThunk(
         password,
         confirmPassword,
       });
-      if (response.data.success) {
-        toast.dismiss();
-        toast.success('Đăng ký thành công , vui lòng kiểm tra email để nhận OTP xác thực tài khoản.');
+      console.log('Register response:', response.data);
+      if (response.status === 200) {
         return email;
       }
-      return rejectWithValue(response.data.message);
+      throw new Error(response.data.message || 'Đăng ký thất bại!');
     } catch (error) {
+      console.error('Register error:', error.response?.data || error);
       return rejectWithValue(error.response?.data?.message || 'Đăng ký thất bại!');
     }
   }
@@ -75,13 +68,13 @@ export const verifyOTP = createAsyncThunk(
   async ({ email, otp }, { rejectWithValue }) => {
     try {
       const response = await api.post('/auth/verify-otp', { email, otp });
-      if (response.data.success) {
-        toast.dismiss();
-        toast.success('Xác thực tài khoản thành công, bây giờ bạn có thể tiến hành đăng nhập.');
+      console.log('Verify OTP response:', response.data);
+      if (response.status === 200) {
         return true;
       }
-      return rejectWithValue(response.data.message);
+      throw new Error(response.data.message || 'Xác nhận OTP thất bại!');
     } catch (error) {
+      console.error('Verify OTP error:', error.response?.data || error);
       return rejectWithValue(error.response?.data?.message || 'Xác nhận OTP thất bại!');
     }
   }
@@ -92,13 +85,13 @@ export const sendOTPResetPassword = createAsyncThunk(
   async (email, { rejectWithValue }) => {
     try {
       const response = await api.post('/auth/send-otp-reset-password', null, { params: { email } });
-      if (response.data.success) {
-        toast.dismiss();
-        toast.success('Gửi OTP qua email thành công, vui lòng kiểm tra email để lấy OTP đặt lại mật khẩu!');
+      console.log('Send OTP response:', response.data);
+      if (response.status === 200) {
         return email;
       }
-      return rejectWithValue(response.data.message);
+      throw new Error(response.data.message || 'Gửi OTP thất bại!');
     } catch (error) {
+      console.error('Send OTP error:', error.response?.data || error);
       return rejectWithValue(error.response?.data?.message || 'Gửi OTP thất bại!');
     }
   }
@@ -114,13 +107,13 @@ export const resetPassword = createAsyncThunk(
         newPassword,
         confirmPassword,
       });
-      if (response.data.success) {
-        toast.dismiss();
-        toast.success('Đặt lại mật khẩu thành công!');
+      console.log('Reset password response:', response.data);
+      if (response.status === 200) {
         return true;
       }
-      return rejectWithValue(response.data.message);
+      throw new Error(response.data.message || 'Reset mật khẩu thất bại!');
     } catch (error) {
+      console.error('Reset password error:', error.response?.data || error);
       return rejectWithValue(error.response?.data?.message || 'Reset mật khẩu thất bại!');
     }
   }
@@ -132,15 +125,15 @@ export const logoutUser = createAsyncThunk(
     try {
       const refreshToken = localStorage.getItem('refreshToken');
       const response = await api.post('/auth/logout', null, { params: { refreshToken } });
-      if (response.data.success) {
-        toast.dismiss();
-        toast.success('Đăng xuất thành công!');
+      console.log('Logout response:', response.data);
+      if (response.status === 200) {
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
         return true;
       }
-      return rejectWithValue(response.data.message);
+      throw new Error(response.data.message || 'Đăng xuất thất bại!');
     } catch (error) {
+      console.error('Logout error:', error.response?.data || error);
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
       return rejectWithValue(error.response?.data?.message || 'Đăng xuất thất bại!');
@@ -168,6 +161,7 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      // Login User
       .addCase(loginUser.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -176,18 +170,27 @@ const authSlice = createSlice({
         state.loading = false;
         state.isAuthenticated = true;
         state.user = action.payload;
+        toast.success('Đăng nhập thành công!');
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.error(action.payload);
       })
+      // Google Callback
       .addCase(handleGoogleCallback.fulfilled, (state, action) => {
         state.isAuthenticated = true;
         state.user = action.payload;
+        toast.success('Đăng nhập bằng Google thành công!');
       })
       .addCase(handleGoogleCallback.rejected, (state, action) => {
         state.error = action.payload;
+        const message = action.payload === 'account_locked'
+          ? 'Đăng nhập bằng Google thất bại do tài khoản bị khóa!'
+          : action.payload;
+        toast.error(message);
       })
+      // Register User
       .addCase(registerUser.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -195,11 +198,14 @@ const authSlice = createSlice({
       .addCase(registerUser.fulfilled, (state, action) => {
         state.loading = false;
         state.registerEmail = action.payload;
+        toast.success('Đăng ký thành công, vui lòng kiểm tra email để nhận OTP xác thực tài khoản.');
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.error(action.payload);
       })
+      // Verify OTP
       .addCase(verifyOTP.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -207,11 +213,14 @@ const authSlice = createSlice({
       .addCase(verifyOTP.fulfilled, (state) => {
         state.loading = false;
         state.registerEmail = null;
+        toast.success('Xác thực tài khoản thành công, bây giờ bạn có thể tiến hành đăng nhập.');
       })
       .addCase(verifyOTP.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.error(action.payload);
       })
+      // Send OTP Reset Password
       .addCase(sendOTPResetPassword.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -219,11 +228,14 @@ const authSlice = createSlice({
       .addCase(sendOTPResetPassword.fulfilled, (state, action) => {
         state.loading = false;
         state.resetPasswordEmail = action.payload;
+        toast.success('Gửi OTP qua email thành công, vui lòng kiểm tra email để lấy OTP đặt lại mật khẩu!');
       })
       .addCase(sendOTPResetPassword.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.error(action.payload);
       })
+      // Reset Password
       .addCase(resetPassword.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -231,19 +243,24 @@ const authSlice = createSlice({
       .addCase(resetPassword.fulfilled, (state) => {
         state.loading = false;
         state.resetPasswordEmail = null;
+        toast.success('Đặt lại mật khẩu thành công!');
       })
       .addCase(resetPassword.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.error(action.payload);
       })
+      // Logout User
       .addCase(logoutUser.fulfilled, (state) => {
         state.isAuthenticated = false;
         state.user = null;
+        toast.success('Đăng xuất thành công!');
       })
       .addCase(logoutUser.rejected, (state, action) => {
         state.isAuthenticated = false;
         state.user = null;
         state.error = action.payload;
+        toast.error(action.payload);
       });
   },
 });

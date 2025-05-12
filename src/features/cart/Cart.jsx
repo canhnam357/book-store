@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link } from 'react-router-dom'; // Thêm import Link
+import { Link } from 'react-router-dom';
 import { fetchCart, changeQuantity, updateQuantity, removeFromCart } from './cartSlice';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
@@ -23,7 +23,7 @@ const Cart = () => {
 
   useEffect(() => {
     const initialQuantities = {};
-    cartItems.forEach((item) => {
+    (cartItems || []).forEach((item) => {
       initialQuantities[item.bookId] = item.quantity;
     });
     setInputQuantities(initialQuantities);
@@ -33,11 +33,11 @@ const Cart = () => {
     setSelectedItems((prev) => {
       if (prev.includes(bookId)) {
         const newSelected = prev.filter((id) => id !== bookId);
-        setSelectAll(newSelected.length === cartItems.length);
+        setSelectAll(newSelected.length === (cartItems?.length || 0));
         return newSelected;
       } else {
         const newSelected = [...prev, bookId];
-        setSelectAll(newSelected.length === cartItems.length);
+        setSelectAll(newSelected.length === (cartItems?.length || 0));
         return newSelected;
       }
     });
@@ -48,25 +48,19 @@ const Cart = () => {
       setSelectedItems([]);
       setSelectAll(false);
     } else {
-      setSelectedItems(cartItems.map((item) => item.bookId));
+      setSelectedItems((cartItems || []).map((item) => item.bookId));
       setSelectAll(true);
     }
   };
 
-  const handleIncreaseQuantity = (bookId) => {
-    dispatch(changeQuantity({ bookId, delta: 1 }))
-      .unwrap()
-      .catch((error) => {
-        toast.error(error);
-      });
+  const handleIncreaseQuantity = async (bookId) => {
+    const result = await dispatch(changeQuantity({ bookId, delta: 1 })).unwrap();
+    console.log('Increase quantity result:', result);
   };
 
-  const handleDecreaseQuantity = (bookId) => {
-    dispatch(changeQuantity({ bookId, delta: -1 }))
-      .unwrap()
-      .catch((error) => {
-        toast.error(error);
-      });
+  const handleDecreaseQuantity = async (bookId) => {
+    const result = await dispatch(changeQuantity({ bookId, delta: -1 })).unwrap();
+    console.log('Decrease quantity result:', result);
   };
 
   const handleQuantityInputChange = (bookId, value) => {
@@ -78,7 +72,7 @@ const Cart = () => {
     }));
   };
 
-  const handleQuantityInputBlurOrEnter = (bookId, originalQuantity) => {
+  const handleQuantityInputBlurOrEnter = async (bookId, originalQuantity) => {
     const newQuantity = inputQuantities[bookId];
     if (newQuantity === originalQuantity) return;
     if (newQuantity <= 0) {
@@ -89,27 +83,14 @@ const Cart = () => {
       }));
       return;
     }
-    dispatch(updateQuantity({ bookId, quantity: newQuantity }))
-      .unwrap()
-      .catch((error) => {
-        toast.error(error);
-        setInputQuantities((prev) => ({
-          ...prev,
-          [bookId]: originalQuantity,
-        }));
-      });
+    const result = await dispatch(updateQuantity({ bookId, quantity: newQuantity })).unwrap();
+    console.log('Update quantity result:', result);
   };
 
-  const handleRemoveFromCart = (bookId) => {
-    dispatch(removeFromCart(bookId))
-      .unwrap()
-      .then(() => {
-        toast.success('Đã xóa sản phẩm khỏi giỏ hàng!');
-        setSelectedItems((prev) => prev.filter((id) => id !== bookId));
-      })
-      .catch((error) => {
-        toast.error(error);
-      });
+  const handleRemoveFromCart = async (bookId) => {
+    const result = await dispatch(removeFromCart(bookId)).unwrap();
+    console.log('Remove from cart result:', result);
+    setSelectedItems((prev) => prev.filter((id) => id !== bookId));
   };
 
   const handleCheckout = () => {
@@ -120,7 +101,7 @@ const Cart = () => {
     navigate('/checkout', { state: { selectedItems } });
   };
 
-  const selectedTotalPrice = cartItems
+  const selectedTotalPrice = (cartItems || [])
     .filter((item) => selectedItems.includes(item.bookId))
     .reduce((total, item) => total + (item.totalPrice || 0), 0);
 
@@ -133,7 +114,7 @@ const Cart = () => {
   return (
     <div className="cart-container">
       <h2>Giỏ hàng</h2>
-      {cartItems.length === 0 ? (
+      {(cartItems?.length || 0) === 0 ? (
         <p>Giỏ hàng của bạn đang trống!</p>
       ) : (
         <>
@@ -160,11 +141,24 @@ const Cart = () => {
                   checked={selectedItems.includes(item.bookId)}
                   onChange={() => handleSelectItem(item.bookId)}
                 />
-                <img src={item.urlThumbnail} alt={item.bookName} className="cart-item-image" />
+                <img
+                  src={item.urlThumbnail || '/no-image.png'}
+                  alt={item.bookName || 'Sách'}
+                  className="cart-item-image"
+                />
                 <h3 className="cart-item-name">
-                  <Link to={`/books/${item.bookId}`}>{item.bookName}</Link>
+                  <Link to={`/books/${item.bookId}`}>{item.bookName || 'Không có tiêu đề'}</Link>
                 </h3>
-                <p className="cart-item-price">{item.price.toLocaleString('vi-VN')} VNĐ</p>
+                <p className="cart-item-price">
+                  {item.priceAfterSales !== null && (
+                    <span className="original-price">
+                      {(item.price || 0).toLocaleString('vi-VN')}
+                    </span>
+                  )}
+                  <span>
+                    {(item.priceAfterSales !== null ? item.priceAfterSales : item.price || 0).toLocaleString('vi-VN')} VNĐ
+                  </span>
+                </p>
                 <div className="cart-item-quantity">
                   <button
                     className="cart-item-quantity-button"
@@ -192,7 +186,9 @@ const Cart = () => {
                     +
                   </button>
                 </div>
-                <p className="cart-item-total-price">{item.totalPrice.toLocaleString('vi-VN')} VNĐ</p>
+                <p className="cart-item-total-price">
+                  {(item.totalPrice || 0).toLocaleString('vi-VN')} VNĐ
+                </p>
                 <button
                   className="cart-item-remove"
                   onClick={() => handleRemoveFromCart(item.bookId)}

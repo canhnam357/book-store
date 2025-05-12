@@ -6,7 +6,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { fetchCart } from './features/cart/cartSlice';
 import Header from './components/Header';
 import Footer from './components/Footer';
-import Home from './components/Home';
+import Home from './features/home/Home';
 import Login from './features/auth/login/Login';
 import Register from './features/auth/register/Register';
 import VerifyOTP from './features/auth/verifyOTP/VerifyOTP';

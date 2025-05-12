@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../../api/api';
+import { toast } from 'react-toastify';
 
-// Lấy danh sách đơn hàng (có phân trang)
 export const fetchOrders = createAsyncThunk(
   'orders/fetchOrders',
   async ({ index = 1, size = 10, orderStatus = '' }, { rejectWithValue }) => {
@@ -9,62 +9,64 @@ export const fetchOrders = createAsyncThunk(
       const response = await api.get('/order', {
         params: { index, size, orderStatus },
       });
-      if (response.status === 200) {
+      console.log('Fetch orders response:', response.data);
+      if (response.status === 200 && response.data.result) {
         return response.data.result;
       }
-      return rejectWithValue('Không thể lấy danh sách đơn hàng!');
+      throw new Error(response.data.message || 'Không thể lấy danh sách đơn hàng!');
     } catch (error) {
+      console.error('Fetch orders error:', error.response?.data || error);
+      const message = error.response?.data?.message || 'Lỗi khi lấy danh sách đơn hàng!';
       if (error.response?.status === 500) {
         return rejectWithValue('Lỗi server khi lấy danh sách đơn hàng!');
       }
-      return rejectWithValue(error.response?.data?.message || 'Lỗi khi lấy danh sách đơn hàng!');
+      return rejectWithValue(message);
     }
   }
 );
 
-// Lấy chi tiết đơn hàng
 export const fetchOrderDetails = createAsyncThunk(
   'orders/fetchOrderDetails',
   async (orderId, { rejectWithValue }) => {
     try {
       const response = await api.get(`/order/${orderId}`);
-      if (response.status === 200) {
+      console.log('Fetch order details response:', response.data);
+      if (response.status === 200 && response.data.result) {
         return { orderId, details: response.data.result };
       }
-      return rejectWithValue('Không thể lấy chi tiết đơn hàng!');
+      throw new Error(response.data.message || 'Không thể lấy chi tiết đơn hàng!');
     } catch (error) {
+      console.error('Fetch order details error:', error.response?.data || error);
+      const message = error.response?.data?.message || 'Lỗi khi lấy chi tiết đơn hàng!';
       if (error.response?.status === 404) {
         return rejectWithValue('Đơn hàng không tồn tại!');
-      }
-      if (error.response?.status === 403) {
-        return rejectWithValue('Bạn không có quyền xem đơn hàng này!');
       }
       if (error.response?.status === 500) {
         return rejectWithValue('Lỗi server khi lấy chi tiết đơn hàng!');
       }
-      return rejectWithValue(error.response?.data?.message || 'Lỗi khi lấy chi tiết đơn hàng!');
+      return rejectWithValue(message);
     }
   }
 );
 
-// Thay đổi trạng thái đơn hàng
 export const changeOrderStatus = createAsyncThunk(
   'orders/changeOrderStatus',
-  async ({ orderId, fromStatus, toStatus }, { rejectWithValue }) => {
+  async ({ orderId, fromStatus, toStatus, cause }, { rejectWithValue }) => {
     try {
-      const response = await api.put(
-        `/order/change-order-status`,
-        {},
-        { params: { orderId, fromStatus, toStatus } }
-      );
+      const response = await api.put('/order/change-order-status', {
+        orderId,
+        fromStatus,
+        toStatus,
+        cause: cause || null,
+      });
+      console.log('Change order status response:', response.data);
       if (response.status === 204) {
         return { orderId, toStatus };
       }
-      return rejectWithValue('Không thể thay đổi trạng thái đơn hàng!');
+      throw new Error(response.data.message || 'Không thể thay đổi trạng thái đơn hàng!');
     } catch (error) {
-      if (error.response?.status === 403) {
-        return rejectWithValue('Bạn không có quyền thay đổi trạng thái đơn hàng này!');
-      }
+      console.error('Change order status error:', error.response?.data || error);
+      const message = error.response?.data?.message || 'Lỗi khi thay đổi trạng thái đơn hàng!';
       if (error.response?.status === 404) {
         return rejectWithValue('Đơn hàng không tồn tại!');
       }
@@ -74,7 +76,7 @@ export const changeOrderStatus = createAsyncThunk(
       if (error.response?.status === 500) {
         return rejectWithValue('Lỗi server khi thay đổi trạng thái đơn hàng!');
       }
-      return rejectWithValue(error.response?.data?.message || 'Lỗi khi thay đổi trạng thái đơn hàng!');
+      return rejectWithValue(message);
     }
   }
 );
@@ -134,6 +136,7 @@ const orderSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
         state.orders = [];
+        toast.error(action.payload);
       })
       // Fetch Order Details
       .addCase(fetchOrderDetails.pending, (state) => {
@@ -147,6 +150,7 @@ const orderSlice = createSlice({
       .addCase(fetchOrderDetails.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.error(action.payload);
       })
       // Change Order Status
       .addCase(changeOrderStatus.pending, (state) => {
@@ -160,10 +164,12 @@ const orderSlice = createSlice({
         if (order) {
           order.orderStatus = toStatus;
         }
+        toast.success('Hủy đơn thành công!');
       })
       .addCase(changeOrderStatus.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        // Toast đã được hiển thị trong handleChangeOrderStatus, không cần lặp lại
       });
   },
 });

@@ -17,6 +17,7 @@ const Callback = () => {
     const error = params.get('error');
 
     dispatch(handleGoogleCallback({ accessToken, refreshToken, username, error })).then((result) => {
+      console.log('Google callback result:', result);
       if (result.meta.requestStatus === 'fulfilled') {
         navigate('/');
       } else {

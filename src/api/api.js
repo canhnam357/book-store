@@ -64,11 +64,11 @@ api.interceptors.response.use(
       }
     }
 
-    // Xử lý các lỗi khác
-    if (error.response) {
-      console.error('Lỗi API:', error.response.data);
-      toast.error(error.response.data.message || 'Đã có lỗi xảy ra, vui lòng thử lại!');
-    }
+    // // Xử lý các lỗi khác
+    // if (error.response) {
+    //   console.error('Lỗi API:', error.response.data);
+    //   toast.error(error.response.data.message || 'Đã có lỗi xảy ra, vui lòng thử lại!');
+    // }
     return Promise.reject(error);
   }
 );

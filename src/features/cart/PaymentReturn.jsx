@@ -7,18 +7,20 @@ const PaymentReturn = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  const paymentStatus = searchParams.get('paymentStatus');
-  const orderId = searchParams.get('orderId');
-  const paymentTime = searchParams.get('paymentTime');
-  const transactionId = searchParams.get('transactionId');
-  const totalPrice = searchParams.get('totalPrice');
+  const paymentStatus = searchParams.get('paymentStatus') || '0';
+  const orderId = searchParams.get('orderId') || 'N/A';
+  const paymentTime = searchParams.get('paymentTime') || '';
+  const transactionId = searchParams.get('transactionId') || 'N/A';
+  const totalPrice = searchParams.get('totalPrice') || '0';
 
   useEffect(() => {
+    console.log('Payment return params:', { paymentStatus, orderId, paymentTime, transactionId, totalPrice });
     if (paymentStatus === '1') {
       toast.success('Thanh toán thành công!');
     } else {
       toast.error('Thanh toán thất bại!');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paymentStatus]);
 
   const formatDateTime = (dateTimeString) => {
@@ -29,14 +31,16 @@ const PaymentReturn = () => {
     const hour = parseInt(dateTimeString.substring(8, 10), 10);
     const minute = parseInt(dateTimeString.substring(10, 12), 10);
     const second = parseInt(dateTimeString.substring(12, 14), 10);
-  
+
     const date = new Date(year, month, day, hour, minute, second);
+    if (isNaN(date.getTime())) return 'N/A';
     return date.toLocaleString('vi-VN', { dateStyle: 'short', timeStyle: 'short' });
   };
 
   const formatPrice = (price) => {
-    if (!price) return 'N/A';
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+    const priceNum = parseFloat(price);
+    if (isNaN(priceNum)) return 'N/A';
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(priceNum);
   };
 
   const handleRedirect = () => {
@@ -51,13 +55,13 @@ const PaymentReturn = () => {
       </div>
       <div className="payment-return-details">
         <p>
-          <strong>Mã đơn hàng:</strong> {orderId || 'N/A'}
+          <strong>Mã đơn hàng:</strong> {orderId}
         </p>
         <p>
           <strong>Thời gian thanh toán:</strong> {formatDateTime(paymentTime)}
         </p>
         <p>
-          <strong>Mã giao dịch:</strong> {transactionId || 'N/A'}
+          <strong>Mã giao dịch:</strong> {transactionId}
         </p>
         <p>
           <strong>Tổng tiền:</strong> {formatPrice(totalPrice)}

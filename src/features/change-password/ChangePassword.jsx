@@ -1,25 +1,27 @@
 import { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import { toast } from 'react-toastify';
-import api from '../../api/api';
+import { useDispatch, useSelector } from 'react-redux';
+import { sendOtpResetPassword, changePassword, resetOtpSent } from '../../features/change-password/changePasswordSlice'; // Fixed path
 import ProfileSidebar from '../profile/ProfileSidebar';
 import './ChangePassword.css';
 
 const ChangePassword = () => {
+  const dispatch = useDispatch();
   const { isAuthenticated } = useSelector((state) => state.auth);
+  const { otpSent, loading } = useSelector((state) => state.changePassword);
   const [formData, setFormData] = useState({
     otp: '',
     password: '',
     newPassword: '',
   });
-  const [otpSent, setOtpSent] = useState(false);
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated) {
       window.location.href = '/login';
     }
-  }, [isAuthenticated]);
+    return () => {
+      dispatch(resetOtpSent());
+    };
+  }, [isAuthenticated, dispatch]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -27,38 +29,21 @@ const ChangePassword = () => {
   };
 
   const handleSendOtp = async () => {
-    setLoading(true);
-    try {
-      const response = await api.post('/user/send-otp-reset-password');
-      if (response.status === 200) {
-        setOtpSent(true);
-        toast.success('OTP đã được gửi đến email của bạn!');
-      }
-    } catch (error) {
-      toast.error('Lỗi khi gửi OTP!');
-    } finally {
-      setLoading(false);
-    }
+    const result = await dispatch(sendOtpResetPassword()).unwrap();
+    console.log('Send OTP result:', result);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    try {
-      const response = await api.post('/user/change-password', {
+    const result = await dispatch(
+      changePassword({
         otp: formData.otp,
         password: formData.password,
         newPassword: formData.newPassword,
-      });
-      if (response.status === 200) {
-        toast.success('Đổi mật khẩu thành công!');
-        setFormData({ otp: '', password: '', newPassword: '' });
-        setOtpSent(false);
-      }
-    } catch (error) {
-    } finally {
-      setLoading(false);
-    }
+      })
+    ).unwrap();
+    console.log('Change password result:', result);
+    setFormData({ otp: '', password: '', newPassword: '' });
   };
 
   return (

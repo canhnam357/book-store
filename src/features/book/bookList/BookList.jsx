@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useSearchParams } from 'react-router-dom';
 import {
   fetchPriceRange,
   fetchCategories,
@@ -12,6 +13,15 @@ import {
 import { Range } from 'react-range';
 import BookCard from '../bookCard/BookCard';
 import './BookList.css';
+
+// Debounce utility function
+const debounce = (func, delay) => {
+  let timeoutId;
+  return (...args) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => func(...args), delay);
+  };
+};
 
 const BookList = () => {
   const dispatch = useDispatch();
@@ -28,6 +38,7 @@ const BookList = () => {
     loading,
   } = useSelector((state) => state.book);
 
+  const [searchParams, setSearchParams] = useSearchParams();
   const [filters, setFilters] = useState({
     minPrice: 0,
     maxPrice: 0,
@@ -56,11 +67,15 @@ const BookList = () => {
   const [showMorePublishers, setShowMorePublishers] = useState(false);
   const [showMoreDistributors, setShowMoreDistributors] = useState(false);
 
+  const [isPriceRangeReady, setIsPriceRangeReady] = useState(false);
+  const [isInitialFetchDone, setIsInitialFetchDone] = useState(false);
+
   const ITEMS_LIMIT = 5;
 
   // Fetch price range and set default min/max
   useEffect(() => {
     dispatch(fetchPriceRange()).then((result) => {
+      console.log('Fetch price range result:', result);
       if (result.meta.requestStatus === 'fulfilled') {
         const prices = result.payload;
         if (prices && prices.length > 0) {
@@ -69,6 +84,7 @@ const BookList = () => {
             minPrice: prices[0] || 0,
             maxPrice: prices[prices.length - 1] || 0,
           }));
+          setIsPriceRangeReady(true);
         }
       }
     });
@@ -82,7 +98,77 @@ const BookList = () => {
     dispatch(fetchDistributors());
   }, [dispatch]);
 
-  // Update filters when selections change
+  // Handle query params from URL only once when all data is ready (initial fetch)
+  useEffect(() => {
+    if (
+      !isInitialFetchDone &&
+      isPriceRangeReady &&
+      authors.length > 0 &&
+      categories.length > 0 &&
+      publishers.length > 0 &&
+      distributors.length > 0
+    ) {
+      const authorId = searchParams.get('authorId');
+      const categoryId = searchParams.get('categoryId');
+      const publisherId = searchParams.get('publisherId');
+      const distributorId = searchParams.get('distributorId');
+
+      const updatedFilters = { ...filters };
+      const updatedSelected = {
+        selectedAuthors: [],
+        selectedCategories: [],
+        selectedPublishers: [],
+        selectedDistributors: [],
+      };
+
+      if (authorId) {
+        const author = authors.find((a) => a.authorId === authorId);
+        if (author) {
+          updatedFilters.authorId = authorId;
+          updatedSelected.selectedAuthors = [author];
+        }
+      }
+      if (categoryId) {
+        const category = categories.find((c) => c.categoryId === categoryId);
+        if (category) {
+          updatedFilters.categoryId = categoryId;
+          updatedSelected.selectedCategories = [category];
+        }
+      }
+      if (publisherId) {
+        const publisher = publishers.find((p) => p.publisherId === publisherId);
+        if (publisher) {
+          updatedFilters.publisherId = publisherId;
+          updatedSelected.selectedPublishers = [publisher];
+        }
+      }
+      if (distributorId) {
+        const distributor = distributors.find((d) => d.distributorId === distributorId);
+        if (distributor) {
+          updatedFilters.distributorId = distributorId;
+          updatedSelected.selectedDistributors = [distributor];
+        }
+      }
+
+      setSelectedAuthors(updatedSelected.selectedAuthors);
+      setSelectedCategories(updatedSelected.selectedCategories);
+      setSelectedPublishers(updatedSelected.selectedPublishers);
+      setSelectedDistributors(updatedSelected.selectedDistributors);
+      setFilters((prev) => ({ ...prev, ...updatedFilters, index: 1 }));
+      setIsInitialFetchDone(true);
+    }
+  }, [
+    searchParams,
+    isPriceRangeReady,
+    authors,
+    categories,
+    publishers,
+    distributors,
+    isInitialFetchDone,
+    filters,
+  ]);
+
+  // Update filters when selections change (no fetch here)
   useEffect(() => {
     setFilters((prev) => ({
       ...prev,
@@ -94,45 +180,70 @@ const BookList = () => {
     }));
   }, [selectedCategories, selectedAuthors, selectedPublishers, selectedDistributors]);
 
-  // Fetch books when filters change
+  // Fetch books only when filters change (after initial fetch)
   useEffect(() => {
-    if (filters.minPrice && filters.maxPrice) {
+    if (isInitialFetchDone && filters.minPrice && filters.maxPrice) {
       dispatch(fetchBooks(filters));
     }
-  }, [dispatch, filters]);
+  }, [dispatch, filters, isInitialFetchDone]);
+
+  // Debounced search functions
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debouncedFetchCategories = useCallback(
+    debounce((keyword) => dispatch(fetchCategories(keyword)), 300),
+    [dispatch]
+  );
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debouncedFetchAuthors = useCallback(
+    debounce((keyword) => dispatch(fetchAuthors(keyword)), 300),
+    [dispatch]
+  );
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debouncedFetchPublishers = useCallback(
+    debounce((keyword) => dispatch(fetchPublishers(keyword)), 300),
+    [dispatch]
+  );
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debouncedFetchDistributors = useCallback(
+    debounce((keyword) => dispatch(fetchDistributors(keyword)), 300),
+    [dispatch]
+  );
 
   // Search categories
   const handleCategorySearch = (e) => {
     const keyword = e.target.value;
     setCategorySearch(keyword);
-    dispatch(fetchCategories(keyword));
+    debouncedFetchCategories(keyword);
   };
 
   // Search authors
   const handleAuthorSearch = (e) => {
     const keyword = e.target.value;
     setAuthorSearch(keyword);
-    dispatch(fetchAuthors(keyword));
+    debouncedFetchAuthors(keyword);
   };
 
   // Search publishers
   const handlePublisherSearch = (e) => {
     const keyword = e.target.value;
     setPublisherSearch(keyword);
-    dispatch(fetchPublishers(keyword));
+    debouncedFetchPublishers(keyword);
   };
 
   // Search distributors
   const handleDistributorSearch = (e) => {
     const keyword = e.target.value;
     setDistributorSearch(keyword);
-    dispatch(fetchDistributors(keyword));
+    debouncedFetchDistributors(keyword);
   };
 
   // Handle price range change with react-range
   const handlePriceRangeChange = (values) => {
-    const minPrice = priceRange[values[0]];
-    const maxPrice = priceRange[values[1]];
+    const minPrice = priceRange[values[0]] || 0;
+    const maxPrice = priceRange[values[1]] || 0;
     setFilters((prev) => ({
       ...prev,
       minPrice,
@@ -215,23 +326,20 @@ const BookList = () => {
     setShowMoreAuthors(false);
     setShowMorePublishers(false);
     setShowMoreDistributors(false);
-    dispatch(fetchCategories());
-    dispatch(fetchAuthors());
-    dispatch(fetchPublishers());
-    dispatch(fetchDistributors());
+    setSearchParams({});
   };
 
   // Filter available options (exclude selected ones)
-  const availableCategories = categories.filter(
+  const availableCategories = (categories || []).filter(
     (cat) => !selectedCategories.some((selected) => selected.categoryId === cat.categoryId)
   );
-  const availableAuthors = authors.filter(
+  const availableAuthors = (authors || []).filter(
     (auth) => !selectedAuthors.some((selected) => selected.authorId === auth.authorId)
   );
-  const availablePublishers = publishers.filter(
+  const availablePublishers = (publishers || []).filter(
     (pub) => !selectedPublishers.some((selected) => selected.publisherId === pub.publisherId)
   );
-  const availableDistributors = distributors.filter(
+  const availableDistributors = (distributors || []).filter(
     (dist) => !selectedDistributors.some((selected) => selected.distributorId === dist.distributorId)
   );
 
@@ -239,33 +347,26 @@ const BookList = () => {
   let minPriceIndex = priceRange.indexOf(filters.minPrice);
   let maxPriceIndex = priceRange.indexOf(filters.maxPrice);
 
-  if (minPriceIndex === -1) minPriceIndex = 0; // Giá trị mặc định nếu không tìm thấy
+  if (minPriceIndex === -1) minPriceIndex = 0;
   if (maxPriceIndex === -1) maxPriceIndex = priceRange.length > 0 ? priceRange.length - 1 : 0;
 
   // Logic hiển thị phân trang
   const getPageNumbers = () => {
-    const delta = 2; // Số trang hiển thị trước và sau trang hiện tại
+    const delta = 2;
     const range = [];
     const rangeWithDots = [];
 
-    // Tính khoảng trang cần hiển thị
     const start = Math.max(2, currentPage - delta);
     const end = Math.min(totalPages - 1, currentPage + delta);
 
-    // Luôn thêm trang đầu
     range.push(1);
-
-    // Thêm các trang từ start đến end
     for (let i = start; i <= end; i++) {
       range.push(i);
     }
-
-    // Luôn thêm trang cuối nếu totalPages > 1
     if (totalPages > 1) {
       range.push(totalPages);
     }
 
-    // Thêm dấu "..." nếu cần
     let prevPage = null;
     for (const page of range) {
       if (prevPage && page - prevPage > 1) {
@@ -287,7 +388,7 @@ const BookList = () => {
           <input
             type="text"
             name="bookName"
-            value={filters.bookName}
+            value={filters.bookName || ''}
             onChange={handleFilterChange}
             placeholder="Nhập tên sách..."
           />
@@ -345,8 +446,8 @@ const BookList = () => {
                 />
               </div>
               <div className="booklist-price-range-values">
-                <span>{filters.minPrice.toLocaleString('vi-VN')} VNĐ</span>
-                <span>{filters.maxPrice.toLocaleString('vi-VN')} VNĐ</span>
+                <span>{(filters.minPrice || 0).toLocaleString('vi-VN')} VNĐ</span>
+                <span>{(filters.maxPrice || 0).toLocaleString('vi-VN')} VNĐ</span>
               </div>
             </>
           ) : (
@@ -355,7 +456,7 @@ const BookList = () => {
         </div>
         <div className="booklist-filter-group">
           <label>Sắp xếp theo giá</label>
-          <select name="sort" value={filters.sort} onChange={handleFilterChange}>
+          <select name="sort" value={filters.sort || ''} onChange={handleFilterChange}>
             <option value="">Mặc định</option>
             <option value="asc">Tăng dần</option>
             <option value="desc">Giảm dần</option>
@@ -365,7 +466,7 @@ const BookList = () => {
           <label>Danh mục</label>
           <input
             type="text"
-            value={categorySearch}
+            value={categorySearch || ''}
             onChange={handleCategorySearch}
             placeholder="Tìm kiếm danh mục..."
           />
@@ -414,7 +515,7 @@ const BookList = () => {
           <label>Tác giả</label>
           <input
             type="text"
-            value={authorSearch}
+            value={authorSearch || ''}
             onChange={handleAuthorSearch}
             placeholder="Tìm kiếm tác giả..."
           />
@@ -461,7 +562,7 @@ const BookList = () => {
           <label>Nhà xuất bản</label>
           <input
             type="text"
-            value={publisherSearch}
+            value={publisherSearch || ''}
             onChange={handlePublisherSearch}
             placeholder="Tìm kiếm nhà xuất bản..."
           />
@@ -510,7 +611,7 @@ const BookList = () => {
           <label>Nhà phát hành</label>
           <input
             type="text"
-            value={distributorSearch}
+            value={distributorSearch || ''}
             onChange={handleDistributorSearch}
             placeholder="Tìm kiếm nhà phát hành..."
           />
@@ -560,7 +661,7 @@ const BookList = () => {
         </button>
       </div>
       <div className="booklist-book-list">
-        <h2>Danh Sách Sách ({totalElements} kết quả)</h2>
+        <h2>Danh Sách Sách ({totalElements || 0} kết quả)</h2>
         {loading ? (
           <p>Đang tải sách...</p>
         ) : books.length === 0 ? (
@@ -578,7 +679,7 @@ const BookList = () => {
                 <select
                   id="pageSize"
                   name="size"
-                  value={filters.size}
+                  value={filters.size || 10}
                   onChange={handleFilterChange}
                 >
                   <option value="10">10</option>
@@ -587,16 +688,14 @@ const BookList = () => {
                 </select>
               </div>
               <div className="booklist-page-buttons">
-                {/* Nút "Qua trái" */}
                 {currentPage > 1 && (
                   <button
                     className="booklist-page-button booklist-nav-button"
                     onClick={() => handlePageChange(currentPage - 1)}
                   >
-                    &lt;
+                    Trước
                   </button>
                 )}
-                {/* Danh sách trang */}
                 {getPageNumbers().map((page, index) =>
                   page === '...' ? (
                     <span key={`ellipsis-${index}`} className="booklist-ellipsis">
@@ -612,13 +711,12 @@ const BookList = () => {
                     </button>
                   )
                 )}
-                {/* Nút "Qua phải" */}
                 {currentPage < totalPages && (
                   <button
                     className="booklist-page-button booklist-nav-button"
                     onClick={() => handlePageChange(currentPage + 1)}
                   >
-                    &gt;
+                    Sau
                   </button>
                 )}
               </div>

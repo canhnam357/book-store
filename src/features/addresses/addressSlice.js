@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { toast } from 'react-toastify';
 import api from '../../api/api';
 
 // Lấy danh sách địa chỉ
@@ -7,15 +8,11 @@ export const fetchAddresses = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await api.get('/addresses');
-      if (response.status === 200) {
-        return response.data.result;
-      }
-      return rejectWithValue('Không thể lấy danh sách địa chỉ!');
+      console.log('Fetch addresses response:', response.data);
+      return response.data;
     } catch (error) {
-      if (error.response?.status === 500) {
-        return rejectWithValue('Lỗi server khi lấy danh sách địa chỉ!');
-      }
-      return rejectWithValue(error.response?.data?.message || 'Lỗi khi lấy danh sách địa chỉ!');
+      console.error('Fetch addresses error:', error.response?.data || error);
+      return rejectWithValue(error.response?.data?.message || 'Lỗi khi lấy danh sách địa chỉ');
     }
   }
 );
@@ -26,15 +23,11 @@ export const createAddress = createAsyncThunk(
   async (addressData, { rejectWithValue }) => {
     try {
       const response = await api.post('/addresses', addressData);
-      if (response.status === 201) {
-        return response.data.result;
-      }
-      return rejectWithValue('Không thể tạo địa chỉ mới!');
+      console.log('Create address response:', response.data);
+      return response.data;
     } catch (error) {
-      if (error.response?.status === 500) {
-        return rejectWithValue('Lỗi server khi tạo địa chỉ!');
-      }
-      return rejectWithValue(error.response?.data?.message || 'Lỗi khi tạo địa chỉ mới!');
+      console.error('Create address error:', error.response?.data || error);
+      return rejectWithValue(error.response?.data?.message || 'Lỗi khi tạo địa chỉ');
     }
   }
 );
@@ -45,12 +38,11 @@ export const deleteAddress = createAsyncThunk(
   async (addressId, { rejectWithValue }) => {
     try {
       const response = await api.delete(`/addresses/${addressId}`);
-      if (response.status === 204) {
-        return addressId;
-      }
-      return rejectWithValue('Không thể xóa địa chỉ!');
+      console.log('Delete address response:', response.data);
+      return { addressId, message: 'Xóa địa chỉ thành công!' };
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Lỗi khi xóa địa chỉ!');
+      console.error('Delete address error:', error.response?.data || error);
+      return rejectWithValue(error.response?.data?.message || 'Lỗi khi xóa địa chỉ');
     }
   }
 );
@@ -61,18 +53,11 @@ export const updateAddress = createAsyncThunk(
   async ({ addressId, addressData }, { rejectWithValue }) => {
     try {
       const response = await api.patch(`/addresses/${addressId}`, addressData);
-      if (response.status === 200) {
-        return response.data.result;
-      }
-      return rejectWithValue('Không thể cập nhật địa chỉ!');
+      console.log('Update address response:', response.data);
+      return response.data;
     } catch (error) {
-      if (error.response?.status === 404) {
-        return rejectWithValue('Địa chỉ không tồn tại!');
-      }
-      if (error.response?.status === 500) {
-        return rejectWithValue('Lỗi server khi cập nhật địa chỉ!');
-      }
-      return rejectWithValue(error.response?.data?.message || 'Lỗi khi cập nhật địa chỉ!');
+      console.error('Update address error:', error.response?.data || error);
+      return rejectWithValue(error.response?.data?.message || 'Lỗi khi cập nhật địa chỉ');
     }
   }
 );
@@ -83,21 +68,11 @@ export const setDefaultAddress = createAsyncThunk(
   async (addressId, { rejectWithValue }) => {
     try {
       const response = await api.post(`/addresses/${addressId}/set-default`);
-      if (response.status === 204) {
-        return addressId;
-      }
-      return rejectWithValue('Không thể đặt địa chỉ làm mặc định!');
+      console.log('Set default address response:', response.data);
+      return { addressId, message: 'Đặt địa chỉ mặc định thành công!' };
     } catch (error) {
-      if (error.response?.status === 404) {
-        return rejectWithValue('Địa chỉ không tồn tại!');
-      }
-      if (error.response?.status === 409) {
-        return rejectWithValue('Địa chỉ này đã là mặc định!');
-      }
-      if (error.response?.status === 500) {
-        return rejectWithValue('Lỗi server khi đặt địa chỉ làm mặc định!');
-      }
-      return rejectWithValue(error.response?.data?.message || 'Lỗi khi đặt địa chỉ làm mặc định!');
+      console.error('Set default address error:', error.response?.data || error);
+      return rejectWithValue(error.response?.data?.message || 'Lỗi khi đặt địa chỉ mặc định');
     }
   }
 );
@@ -125,7 +100,7 @@ const addressSlice = createSlice({
       })
       .addCase(fetchAddresses.fulfilled, (state, action) => {
         state.loading = false;
-        state.addresses = Array.isArray(action.payload) ? action.payload : [];
+        state.addresses = Array.isArray(action.payload.result) ? action.payload.result : [];
         // Sắp xếp để địa chỉ mặc định lên đầu
         state.addresses.sort((a, b) => (b.default ? 1 : 0) - (a.default ? 1 : 0));
       })
@@ -133,6 +108,7 @@ const addressSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
         state.addresses = [];
+        toast.error(action.payload);
       })
       // Create Address
       .addCase(createAddress.pending, (state) => {
@@ -141,13 +117,16 @@ const addressSlice = createSlice({
       })
       .addCase(createAddress.fulfilled, (state, action) => {
         state.loading = false;
-        state.addresses.push(action.payload);
-        // Sắp xếp lại để địa chỉ mặc định lên đầu
-        state.addresses.sort((a, b) => (b.default ? 1 : 0) - (a.default ? 1 : 0));
+        if (action.payload.result) {
+          state.addresses.push(action.payload.result);
+          // Sắp xếp lại để địa chỉ mặc định lên đầu
+          state.addresses.sort((a, b) => (b.default ? 1 : 0) - (a.default ? 1 : 0));
+        }
       })
       .addCase(createAddress.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.error(action.payload);
       })
       // Delete Address
       .addCase(deleteAddress.pending, (state) => {
@@ -156,11 +135,16 @@ const addressSlice = createSlice({
       })
       .addCase(deleteAddress.fulfilled, (state, action) => {
         state.loading = false;
-        state.addresses = state.addresses.filter((address) => address.addressId !== action.payload);
+        if (action.payload.addressId) {
+          state.addresses = state.addresses.filter(
+            (address) => address.addressId !== action.payload.addressId
+          );
+        }
       })
       .addCase(deleteAddress.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.error(action.payload);
       })
       // Update Address
       .addCase(updateAddress.pending, (state) => {
@@ -169,17 +153,22 @@ const addressSlice = createSlice({
       })
       .addCase(updateAddress.fulfilled, (state, action) => {
         state.loading = false;
-        const updatedAddress = action.payload;
-        const index = state.addresses.findIndex((addr) => addr.addressId === updatedAddress.addressId);
-        if (index !== -1) {
-          state.addresses[index] = updatedAddress;
+        if (action.payload.result) {
+          const updatedAddress = action.payload.result;
+          const index = state.addresses.findIndex(
+            (addr) => addr.addressId === updatedAddress.addressId
+          );
+          if (index !== -1) {
+            state.addresses[index] = updatedAddress;
+          }
+          // Sắp xếp lại để địa chỉ mặc định lên đầu
+          state.addresses.sort((a, b) => (b.default ? 1 : 0) - (a.default ? 1 : 0));
         }
-        // Sắp xếp lại để địa chỉ mặc định lên đầu
-        state.addresses.sort((a, b) => (b.default ? 1 : 0) - (a.default ? 1 : 0));
       })
       .addCase(updateAddress.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.error(action.payload);
       })
       // Set Default Address
       .addCase(setDefaultAddress.pending, (state) => {
@@ -188,17 +177,20 @@ const addressSlice = createSlice({
       })
       .addCase(setDefaultAddress.fulfilled, (state, action) => {
         state.loading = false;
-        const addressId = action.payload;
-        state.addresses = state.addresses.map((address) => ({
-          ...address,
-          default: address.addressId === addressId,
-        }));
-        // Sắp xếp lại để địa chỉ mặc định lên đầu
-        state.addresses.sort((a, b) => (b.default ? 1 : 0) - (a.default ? 1 : 0));
+        if (action.payload.addressId) {
+          const addressId = action.payload.addressId;
+          state.addresses = state.addresses.map((address) => ({
+            ...address,
+            default: address.addressId === addressId,
+          }));
+          // Sắp xếp lại để địa chỉ mặc định lên đầu
+          state.addresses.sort((a, b) => (b.default ? 1 : 0) - (a.default ? 1 : 0));
+        }
       })
       .addCase(setDefaultAddress.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.error(action.payload);
       });
   },
 });

@@ -1,0 +1,116 @@
+.home-container {
+  padding: 20px;
+}
+
+.home-section {
+  margin-bottom: 40px;
+}
+
+.home-carousel {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 70%;
+  margin: 0 auto;
+  position: relative;
+}
+
+.home-book-list {
+  display: flex;
+  overflow: hidden;
+  width: 100%;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  padding: 10px;
+  background-color: #f9f9f9;
+  box-sizing: border-box; /* Đảm bảo padding không làm tăng kích thước */
+}
+
+.home-book-card {
+  flex: 0 0 16%; /* Giảm xuống 16% để bù đắp padding và viền */
+  margin: 0;
+  text-align: center;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 5px;
+  box-sizing: border-box; /* Đảm bảo padding không làm tăng kích thước */
+}
+
+.home-book-image-wrapper {
+  position: relative;
+  width: 120px;
+  height: 160px;
+}
+
+.home-book-card img {
+  width: 120px;
+  height: 160px;
+  object-fit: cover;
+}
+
+.home-new-tag {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background-color: red;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+  z-index: 1;
+}
+
+.home-book-title {
+  font-size: 14px;
+  margin: 5px 0;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #007bff;
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home-book-price,
+.home-book-rating {
+  font-size: 12px;
+  margin: 3px 0;
+  min-height: 20px;
+}
+
+.home-prev-btn,
+.home-next-btn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+}
+
+.home-prev-btn {
+  left: -50px;
+}
+
+.home-next-btn {
+  right: -50px;
+}
+
+.home-prev-btn:hover,
+.home-next-btn:hover {
+  background-color: #0056b3;
+}

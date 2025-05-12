@@ -1,17 +1,20 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../../api/api';
+import { toast } from 'react-toastify';
 
 export const fetchPriceRange = createAsyncThunk(
   'book/fetchPriceRange',
   async (_, { rejectWithValue }) => {
     try {
       const response = await api.get('/books/price-range');
-      if (response.status === 200) {
+      console.log('Fetch price range response:', response.data);
+      if (response.status === 200 && response.data.result) {
         return response.data.result;
       }
-      return rejectWithValue('Không thể lấy khoảng giá!');
+      throw new Error(response.data.message || 'Không thể lấy khoảng giá!');
     } catch (error) {
-      return rejectWithValue(error.message);
+      console.error('Fetch price range error:', error.response?.data || error);
+      return rejectWithValue(error.response?.data?.message || 'Không thể lấy khoảng giá!');
     }
   }
 );
@@ -21,12 +24,14 @@ export const fetchCategories = createAsyncThunk(
   async (keyword = '', { rejectWithValue }) => {
     try {
       const response = await api.get('/categories', { params: { keyword } });
-      if (response.status === 200) {
+      console.log('Fetch categories response:', response.data);
+      if (response.status === 200 && response.data.result) {
         return response.data.result;
       }
-      return rejectWithValue('Không thể lấy danh sách danh mục!');
+      throw new Error(response.data.message || 'Không thể lấy danh sách danh mục!');
     } catch (error) {
-      return rejectWithValue(error.message);
+      console.error('Fetch categories error:', error.response?.data || error);
+      return rejectWithValue(error.response?.data?.message || 'Không thể lấy danh sách danh mục!');
     }
   }
 );
@@ -36,12 +41,14 @@ export const fetchAuthors = createAsyncThunk(
   async (keyword = '', { rejectWithValue }) => {
     try {
       const response = await api.get('/authors', { params: { keyword } });
-      if (response.status === 200) {
+      console.log('Fetch authors response:', response.data);
+      if (response.status === 200 && response.data.result) {
         return response.data.result;
       }
-      return rejectWithValue('Không thể lấy danh sách tác giả!');
+      throw new Error(response.data.message || 'Không thể lấy danh sách tác giả!');
     } catch (error) {
-      return rejectWithValue(error.message);
+      console.error('Fetch authors error:', error.response?.data || error);
+      return rejectWithValue(error.response?.data?.message || 'Không thể lấy danh sách tác giả!');
     }
   }
 );
@@ -51,12 +58,14 @@ export const fetchPublishers = createAsyncThunk(
   async (keyword = '', { rejectWithValue }) => {
     try {
       const response = await api.get('/publishers', { params: { keyword } });
-      if (response.status === 200) {
+      console.log('Fetch publishers response:', response.data);
+      if (response.status === 200 && response.data.result) {
         return response.data.result;
       }
-      return rejectWithValue('Không thể lấy danh sách nhà xuất bản!');
+      throw new Error(response.data.message || 'Không thể lấy danh sách nhà xuất bản!');
     } catch (error) {
-      return rejectWithValue(error.message);
+      console.error('Fetch publishers error:', error.response?.data || error);
+      return rejectWithValue(error.response?.data?.message || 'Không thể lấy danh sách nhà xuất bản!');
     }
   }
 );
@@ -66,12 +75,14 @@ export const fetchDistributors = createAsyncThunk(
   async (keyword = '', { rejectWithValue }) => {
     try {
       const response = await api.get('/distributors', { params: { keyword } });
-      if (response.status === 200) {
+      console.log('Fetch distributors response:', response.data);
+      if (response.status === 200 && response.data.result) {
         return response.data.result;
       }
-      return rejectWithValue('Không thể lấy danh sách nhà phát hành!');
+      throw new Error(response.data.message || 'Không thể lấy danh sách nhà phát hành!');
     } catch (error) {
-      return rejectWithValue(error.message);
+      console.error('Fetch distributors error:', error.response?.data || error);
+      return rejectWithValue(error.response?.data?.message || 'Không thể lấy danh sách nhà phát hành!');
     }
   }
 );
@@ -81,12 +92,14 @@ export const fetchBooks = createAsyncThunk(
   async (filters, { rejectWithValue }) => {
     try {
       const response = await api.get('/books', { params: filters });
-      if (response.status === 200) {
+      console.log('Fetch books response:', response.data);
+      if (response.status === 200 && response.data.result) {
         return response.data.result;
       }
-      return rejectWithValue('Không thể lấy danh sách sách!');
+      throw new Error(response.data.message || 'Không thể lấy danh sách sách!');
     } catch (error) {
-      return rejectWithValue(error.message);
+      console.error('Fetch books error:', error.response?.data || error);
+      return rejectWithValue(error.response?.data?.message || 'Không thể lấy danh sách sách!');
     }
   }
 );
@@ -96,14 +109,16 @@ export const fetchBookDetail = createAsyncThunk(
   async (bookId, { rejectWithValue }) => {
     try {
       const response = await api.get(`/books/${bookId}`);
-      if (response.status === 200) {
+      console.log('Fetch book detail response:', response.data);
+      if (response.status === 200 && response.data.result) {
         const bookData = response.data.result;
         bookData.rating = bookData.rating ?? 0;
         return bookData;
       }
-      return rejectWithValue('Không thể lấy chi tiết sách!');
+      throw new Error(response.data.message || 'Không thể lấy chi tiết sách!');
     } catch (error) {
-      return rejectWithValue(error.message);
+      console.error('Fetch book detail error:', error.response?.data || error);
+      return rejectWithValue(error.response?.data?.message || 'Không thể lấy chi tiết sách!');
     }
   }
 );
@@ -115,7 +130,8 @@ export const fetchReviews = createAsyncThunk(
       const response = await api.get(`/reviews/${bookId}`, {
         params: { index, size, rating },
       });
-      if (response.status === 200) {
+      console.log('Fetch reviews response:', response.data);
+      if (response.status === 200 && response.data.result) {
         const reviewData = response.data.result;
         reviewData.content = reviewData.content.map((review) => ({
           ...review,
@@ -123,9 +139,10 @@ export const fetchReviews = createAsyncThunk(
         }));
         return reviewData;
       }
-      return rejectWithValue('Không thể lấy danh sách đánh giá!');
+      throw new Error(response.data.message || 'Không thể lấy danh sách đánh giá!');
     } catch (error) {
-      return rejectWithValue(error.message);
+      console.error('Fetch reviews error:', error.response?.data || error);
+      return rejectWithValue(error.response?.data?.message || 'Không thể lấy danh sách đánh giá!');
     }
   }
 );
@@ -135,14 +152,16 @@ export const createReview = createAsyncThunk(
   async ({ bookId, content, rating }, { rejectWithValue }) => {
     try {
       const response = await api.post(`/reviews/${bookId}`, { content, rating });
-      if (response.status === 200 || response.status === 201) {
+      console.log('Create review response:', response.data);
+      if (response.status === 201 && response.data.result) {
         const reviewData = response.data.result;
         reviewData.rating = reviewData.rating ?? 0;
         return reviewData;
       }
-      return rejectWithValue('Không thể tạo đánh giá!');
+      throw new Error(response.data.message || 'Không thể tạo đánh giá!');
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Lỗi khi tạo đánh giá!');
+      console.error('Create review error:', error.response?.data || error);
+      return rejectWithValue(error.response?.data?.message || 'Không thể tạo đánh giá!');
     }
   }
 );
@@ -152,14 +171,16 @@ export const updateReview = createAsyncThunk(
   async ({ reviewId, content, rating }, { rejectWithValue }) => {
     try {
       const response = await api.put(`/reviews/${reviewId}`, { content, rating });
-      if (response.status === 200) {
+      console.log('Update review response:', response.data);
+      if (response.status === 200 && response.data.result) {
         const updatedReview = response.data.result;
         updatedReview.rating = updatedReview.rating ?? 0;
         return updatedReview;
       }
-      return rejectWithValue('Không thể cập nhật đánh giá!');
+      throw new Error(response.data.message || 'Không thể cập nhật đánh giá!');
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Lỗi khi cập nhật đánh giá!');
+      console.error('Update review error:', error.response?.data || error);
+      return rejectWithValue(error.response?.data?.message || 'Không thể cập nhật đánh giá!');
     }
   }
 );
@@ -169,12 +190,14 @@ export const deleteReview = createAsyncThunk(
   async (reviewId, { rejectWithValue }) => {
     try {
       const response = await api.delete(`/reviews/${reviewId}`);
+      console.log('Delete review response:', response.data);
       if (response.status === 200) {
         return reviewId;
       }
-      return rejectWithValue('Không thể xóa đánh giá!');
+      throw new Error(response.data.message || 'Không thể xóa đánh giá!');
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Lỗi khi xóa đánh giá!');
+      console.error('Delete review error:', error.response?.data || error);
+      return rejectWithValue(error.response?.data?.message || 'Không thể xóa đánh giá!');
     }
   }
 );
@@ -221,6 +244,7 @@ const bookSlice = createSlice({
       .addCase(fetchPriceRange.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.error(action.payload);
       })
       // Fetch Categories
       .addCase(fetchCategories.pending, (state) => {
@@ -234,6 +258,7 @@ const bookSlice = createSlice({
       .addCase(fetchCategories.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.error(action.payload);
       })
       // Fetch Authors
       .addCase(fetchAuthors.pending, (state) => {
@@ -247,6 +272,7 @@ const bookSlice = createSlice({
       .addCase(fetchAuthors.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.error(action.payload);
       })
       // Fetch Publishers
       .addCase(fetchPublishers.pending, (state) => {
@@ -260,6 +286,7 @@ const bookSlice = createSlice({
       .addCase(fetchPublishers.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.error(action.payload);
       })
       // Fetch Distributors
       .addCase(fetchDistributors.pending, (state) => {
@@ -273,6 +300,7 @@ const bookSlice = createSlice({
       .addCase(fetchDistributors.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.error(action.payload);
       })
       // Fetch Books
       .addCase(fetchBooks.pending, (state) => {
@@ -289,6 +317,7 @@ const bookSlice = createSlice({
       .addCase(fetchBooks.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.error(action.payload);
       })
       // Fetch Book Detail
       .addCase(fetchBookDetail.pending, (state) => {
@@ -302,6 +331,7 @@ const bookSlice = createSlice({
       .addCase(fetchBookDetail.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.error(action.payload);
       })
       // Fetch Reviews
       .addCase(fetchReviews.pending, (state) => {
@@ -318,6 +348,7 @@ const bookSlice = createSlice({
       .addCase(fetchReviews.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.error(action.payload);
       })
       // Create Review
       .addCase(createReview.pending, (state) => {
@@ -326,12 +357,14 @@ const bookSlice = createSlice({
       })
       .addCase(createReview.fulfilled, (state, action) => {
         state.loading = false;
-        state.reviews.unshift(action.payload); // Thêm review mới vào đầu danh sách
+        state.reviews.unshift(action.payload);
         state.totalReviews += 1;
+        toast.success('Tạo đánh giá thành công!');
       })
       .addCase(createReview.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.error(action.payload);
       })
       // Update Review
       .addCase(updateReview.pending, (state) => {
@@ -345,10 +378,12 @@ const bookSlice = createSlice({
         if (reviewIndex !== -1) {
           state.reviews[reviewIndex] = updatedReview;
         }
+        toast.success('Cập nhật đánh giá thành công!');
       })
       .addCase(updateReview.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.error(action.payload);
       })
       // Delete Review
       .addCase(deleteReview.pending, (state) => {
@@ -360,10 +395,12 @@ const bookSlice = createSlice({
         const reviewId = action.payload;
         state.reviews = state.reviews.filter((review) => review.reviewId !== reviewId);
         state.totalReviews -= 1;
+        toast.success('Xóa đánh giá thành công!');
       })
       .addCase(deleteReview.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.error(action.payload);
       });
   },
 });

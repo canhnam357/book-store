@@ -13,6 +13,7 @@ const ForgotPassword = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     dispatch(sendOTPResetPassword(email)).then((result) => {
+      console.log('Send OTP result:', result);
       if (result.meta.requestStatus === 'fulfilled') {
         navigate('/reset-password');
       }

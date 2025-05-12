@@ -16,13 +16,14 @@ const Login = () => {
     const params = new URLSearchParams(location.search);
     const error = params.get('error');
     if (error === 'account_locked') {
-      // Thông báo đã được hiển thị trong authSlice.js, nhưng bạn có thể thêm logic bổ sung nếu cần
+      // Thông báo đã được hiển thị trong authSlice.js (handleGoogleCallback)
     }
   }, [location]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     dispatch(loginUser({ email, password })).then((result) => {
+      console.log('Login result:', result);
       if (result.meta.requestStatus === 'fulfilled') {
         navigate('/');
       }

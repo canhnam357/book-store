@@ -6,7 +6,6 @@ import {
   fetchReviews,
   createReview,
   updateReview,
-  deleteReview,
 } from '../bookSlice';
 import { addToCart, fetchCart } from '../../cart/cartSlice';
 import { FaStar, FaStarHalfAlt, FaRegStar } from 'react-icons/fa';
@@ -43,11 +42,12 @@ const BookDetail = () => {
       if (isAuthenticated) {
         try {
           const response = await api.get('/user/user-id');
-          if (response.data.success) {
+          console.log('Fetch user ID response:', response.data);
+          if (response.data.result) {
             setCurrentUserId(response.data.result);
           }
         } catch (error) {
-          console.error('Lỗi khi lấy userId:', error);
+          console.error('Lỗi khi lấy userId:', error.response?.data || error);
           setCurrentUserId(null);
         }
       } else {
@@ -65,7 +65,7 @@ const BookDetail = () => {
 
   useEffect(() => {
     if (bookDetail) {
-      setMainImage(bookDetail.urlThumbnail);
+      setMainImage(bookDetail.urlThumbnail || '');
     }
   }, [bookDetail]);
 
@@ -81,7 +81,7 @@ const BookDetail = () => {
   };
 
   const handleIncreaseQuantity = () => {
-    if (quantity < bookDetail?.inStock) {
+    if (quantity < (bookDetail?.inStock || 1)) {
       setQuantity(quantity + 1);
     }
   };
@@ -97,13 +97,12 @@ const BookDetail = () => {
       navigate('/login');
       return;
     }
-    try {
-      await dispatch(addToCart({ bookId, quantity })).unwrap();
-      toast.success(`Đã thêm ${quantity} cuốn "${bookDetail?.bookName}" vào giỏ hàng!`);
-      // Làm mới dữ liệu giỏ hàng từ server
-      const fetchCartResult = await dispatch(fetchCart()).unwrap();
+    const result = await dispatch(addToCart({ bookId, quantity }));
+    console.log('Add to cart result:', result);
+    if (result.meta.requestStatus === 'fulfilled') {
+      toast.success(`Đã thêm ${quantity} cuốn "${bookDetail?.bookName || 'sách'}" vào giỏ hàng!`);
+      const fetchCartResult = await dispatch(fetchCart());
       console.log('Dữ liệu giỏ hàng sau khi thêm:', fetchCartResult);
-    } catch (error) {
     }
   };
 
@@ -120,21 +119,18 @@ const BookDetail = () => {
     if (submitting) return;
 
     setSubmitting(true);
-    try {
-      await dispatch(createReview({ bookId, content: reviewContent, rating: reviewRating })).unwrap();
-      toast.success('Tạo đánh giá thành công!');
+    const result = await dispatch(createReview({ bookId, content: reviewContent, rating: reviewRating }));
+    console.log('Create review result:', result);
+    if (result.meta.requestStatus === 'fulfilled') {
       setReviewContent('');
       setReviewRating(0);
-    } catch (error) {
-      toast.error(`Tạo đánh giá thất bại: ${error}`);
-    } finally {
-      setSubmitting(false);
     }
+    setSubmitting(false);
   };
 
   const handleEditReview = (review) => {
     setEditingReviewId(review.reviewId);
-    setEditContent(review.content);
+    setEditContent(review.content || '');
     setEditRating(review.rating ?? 0);
   };
 
@@ -144,14 +140,12 @@ const BookDetail = () => {
       return;
     }
 
-    try {
-      await dispatch(updateReview({ reviewId, content: editContent, rating: editRating })).unwrap();
-      toast.success('Cập nhật đánh giá thành công!');
+    const result = await dispatch(updateReview({ reviewId, content: editContent, rating: editRating }));
+    console.log('Update review result:', result);
+    if (result.meta.requestStatus === 'fulfilled') {
       setEditingReviewId(null);
       setEditContent('');
       setEditRating(0);
-    } catch (error) {
-      toast.error(`Cập nhật đánh giá thất bại: ${error}`);
     }
   };
 
@@ -161,14 +155,6 @@ const BookDetail = () => {
     setEditRating(0);
   };
 
-  const handleDeleteReview = async (reviewId) => {
-    try {
-      await dispatch(deleteReview(reviewId)).unwrap();
-      toast.success('Xóa đánh giá thành công!');
-    } catch (error) {
-      toast.error(`Xóa đánh giá thất bại: ${error}`);
-    }
-  };
 
   const handlePageChange = (page) => {
     setReviewFilters((prev) => ({ ...prev, index: page }));
@@ -219,6 +205,22 @@ const BookDetail = () => {
     return rangeWithDots;
   };
 
+  const handleAuthorClick = (authorId, authorName) => {
+    navigate(`/books?authorId=${authorId}`);
+  };
+
+  const handleCategoryClick = (categoryId, categoryName) => {
+    navigate(`/books?categoryId=${categoryId}`);
+  };
+
+  const handlePublisherClick = (publisherId, publisherName) => {
+    navigate(`/books?publisherId=${publisherId}`);
+  };
+
+  const handleDistributorClick = (distributorId, distributorName) => {
+    navigate(`/books?distributorId=${distributorId}`);
+  };
+
   if (loading) return <p>Đang tải...</p>;
   if (!bookDetail) return <p>Sách không tìm thấy!</p>;
 
@@ -226,7 +228,9 @@ const BookDetail = () => {
     <div className="bookdetail-container">
       <div className="bookdetail-main">
         <div className="bookdetail-images">
-          <img src={mainImage} alt={bookDetail.bookName} className="bookdetail-main-image" />
+          <div className="bookdetail-image-wrapper">
+            <img src={mainImage || '/no-image.png'} alt={bookDetail.bookName || 'Sách'} className="bookdetail-main-image" />
+          </div>
           {Array.isArray(bookDetail.images) && bookDetail.images.length > 1 && (
             <div className="bookdetail-image-list">
               {bookDetail.images.map((image, index) => (
@@ -243,48 +247,94 @@ const BookDetail = () => {
           )}
         </div>
         <div className="bookdetail-info">
-          <h1 className="bookdetail-title">{bookDetail.bookName}</h1>
+          <h1 className="bookdetail-title">
+            {bookDetail.bookName || 'Không có tiêu đề'}
+            {bookDetail.newArrival && <span className="bookdetail-new-tag">Mới</span>}
+          </h1>
           <div className="bookdetail-rating">
             {renderStars(bookDetail.rating)}
-            <span>({bookDetail.rating.toFixed(1)})</span>
+            <span>({bookDetail.rating?.toFixed(1) || 'Chưa có đánh giá'})</span>
           </div>
-          <p className="bookdetail-price">{bookDetail.price.toLocaleString('vi-VN')} VNĐ</p>
-          <p className="bookdetail-stock">Còn hàng: {bookDetail.inStock}</p>
+          <div className="bookdetail-price-container">
+            {bookDetail.priceAfterSale ? (
+              <>
+                <span className="bookdetail-price-original">
+                  {(bookDetail.price || 0).toLocaleString('vi-VN')}
+                </span>
+                <span className="bookdetail-price-discounted">
+                  {(bookDetail.priceAfterSale || 0).toLocaleString('vi-VN')} VNĐ
+                </span>
+              </>
+            ) : (
+              <span className="bookdetail-price-regular">
+                {(bookDetail.price || 0).toLocaleString('vi-VN')} VNĐ
+              </span>
+            )}
+          </div>
+          <p className="bookdetail-stock">Còn hàng: {bookDetail.inStock || 0}</p>
           <p className="bookdetail-detail">
-            <strong>Số trang:</strong> {bookDetail.numberOfPage}
+            <strong>Số trang:</strong> {bookDetail.numberOfPage || 'Không rõ'}
           </p>
           <p className="bookdetail-detail">
             <strong>Ngày xuất bản:</strong>{' '}
-            {new Date(bookDetail.publishedDate).toLocaleDateString('vi-VN')}
+            {bookDetail.publishedDate
+              ? new Date(bookDetail.publishedDate).toLocaleDateString('vi-VN')
+              : 'Không rõ'}
           </p>
           <p className="bookdetail-detail">
-            <strong>Trọng lượng:</strong> {bookDetail.weight}g
+            <strong>Trọng lượng:</strong> {bookDetail.weight || 0}g
           </p>
           <p className="bookdetail-detail">
-            <strong>Tác giả:</strong> {bookDetail.authorName || 'Không có thông tin'}
+            <strong>Tác giả:</strong>{' '}
+            <span
+              onClick={() => handleAuthorClick(bookDetail.author?.authorId, bookDetail.author?.authorName)}
+              style={{ cursor: 'pointer', color: 'blue' }}
+            >
+              {bookDetail.author?.authorName || 'Không rõ'}
+            </span>
           </p>
           <p className="bookdetail-detail">
             <strong>Danh mục:</strong>{' '}
-            {bookDetail.categories.length > 0
-              ? bookDetail.categories.map((cat) => cat.categoryName).join(', ')
+            {bookDetail.categories?.length > 0
+              ? bookDetail.categories.map((cat) => (
+                  <span
+                    key={cat.categoryId}
+                    onClick={() => handleCategoryClick(cat.categoryId, cat.categoryName)}
+                    style={{ cursor: 'pointer', color: 'blue', marginRight: '5px' }}
+                  >
+                    {cat.categoryName}
+                  </span>
+                ))
               : 'Không có danh mục'}
           </p>
           <p className="bookdetail-detail">
-            <strong>Nhà xuất bản:</strong> {bookDetail.publisherName}
+            <strong>Nhà xuất bản:</strong>{' '}
+            <span
+              onClick={() => handlePublisherClick(bookDetail.publisher?.publisherId, bookDetail.publisher?.publisherName)}
+              style={{ cursor: 'pointer', color: 'blue' }}
+            >
+              {bookDetail.publisher?.publisherName || 'Không rõ'}
+            </span>
           </p>
           <p className="bookdetail-detail">
-            <strong>Nhà phát hành:</strong> {bookDetail.distributorName}
+            <strong>Nhà phát hành:</strong>{' '}
+            <span
+              onClick={() => handleDistributorClick(bookDetail.distributor?.distributorId, bookDetail.distributor?.distributorName)}
+              style={{ cursor: 'pointer', color: 'blue' }}
+            >
+              {bookDetail.distributor?.distributorName || 'Không rõ'}
+            </span>
           </p>
           <p className="bookdetail-detail">
-            <strong>Loại bìa:</strong> {bookDetail.bookType}
+            <strong>Loại bìa:</strong> {bookDetail.bookType?.bookTypeName || 'Không rõ'}
           </p>
           <div className="bookdetail-cart">
             <div className="bookdetail-quantity">
               <button onClick={handleDecreaseQuantity} disabled={quantity <= 1}>
                 -
               </button>
-              <input type="number" value={quantity} onChange={handleQuantityChange} min="1" max={bookDetail.inStock} />
-              <button onClick={handleIncreaseQuantity} disabled={quantity >= bookDetail.inStock}>
+              <input type="number" value={quantity} onChange={handleQuantityChange} min="1" max={bookDetail.inStock || 1} />
+              <button onClick={handleIncreaseQuantity} disabled={quantity >= (bookDetail.inStock || 1)}>
                 +
               </button>
             </div>
@@ -296,10 +346,10 @@ const BookDetail = () => {
       </div>
       <div className="bookdetail-description">
         <h2>Mô tả sách</h2>
-        <p>{bookDetail.description}</p>
+        <p style={{ whiteSpace: 'pre-wrap' }}>{bookDetail.description || 'Không có mô tả'}</p>
       </div>
       <div className="bookdetail-reviews">
-        <h2>Đánh giá ({totalReviews})</h2>
+        <h2>Đánh giá ({totalReviews || 0})</h2>
         {isAuthenticated && (
           <form className="bookdetail-review-form" onSubmit={handleReviewSubmit}>
             <textarea
@@ -332,7 +382,7 @@ const BookDetail = () => {
               {reviews.map((review) => (
                 <div key={review.reviewId} className="bookdetail-review-item">
                   <div className="bookdetail-review-header">
-                    <span className="bookdetail-review-user">{review.userReviewed}</span>
+                    <span className="bookdetail-review-user">{review.userReviewed || 'Ẩn danh'}</span>
                     <span className="bookdetail-review-date">
                       {new Date(review.createdAt).toLocaleDateString('vi-VN')}
                     </span>
@@ -361,7 +411,7 @@ const BookDetail = () => {
                   ) : (
                     <>
                       <div className="bookdetail-review-rating">{renderStars(review.rating)}</div>
-                      <p className="bookdetail-review-content">{review.content}</p>
+                      <p className="bookdetail-review-content">{review.content || 'Không có nội dung'}</p>
                     </>
                   )}
                   {currentUserId && currentUserId === review.userId && (
@@ -388,12 +438,6 @@ const BookDetail = () => {
                             onClick={() => handleEditReview(review)}
                           >
                             Sửa
-                          </button>
-                          <button
-                            className="bookdetail-review-button bookdetail-delete-button"
-                            onClick={() => handleDeleteReview(review.reviewId)}
-                          >
-                            Xóa
                           </button>
                         </>
                       )}

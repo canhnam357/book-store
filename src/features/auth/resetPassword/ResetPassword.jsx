@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { resetPassword, clearResetPasswordEmail } from '../authSlice';
-import { toast } from 'react-toastify'; // Thêm dòng này
+import { toast } from 'react-toastify';
 import './ResetPassword.css';
 
 const ResetPassword = () => {
@@ -40,6 +40,7 @@ const ResetPassword = () => {
     }
 
     dispatch(resetPassword({ otp, email, newPassword, confirmPassword })).then((result) => {
+      console.log('Reset password result:', result);
       if (result.meta.requestStatus === 'fulfilled') {
         dispatch(clearResetPasswordEmail());
         navigate('/login');

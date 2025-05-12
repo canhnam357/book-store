@@ -1,13 +1,15 @@
 import { useEffect, useState, useRef } from 'react';
-import { useSelector } from 'react-redux';
-import { toast } from 'react-toastify';
-import api from '../../api/api';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchProfile, changeAvatar, changeProfile } from '../../features/profile/profileSlice';
 import ProfileSidebar from './ProfileSidebar';
+import { toast } from 'react-toastify';
 import './Profile.css';
 
 const Profile = () => {
+  const dispatch = useDispatch();
   const { isAuthenticated } = useSelector((state) => state.auth);
-  const [profile, setProfile] = useState({
+  const { profile, loading } = useSelector((state) => state.profile);
+  const [formData, setFormData] = useState({
     fullName: '',
     phoneNumber: '',
     email: '',
@@ -15,10 +17,8 @@ const Profile = () => {
     gender: 'OTHER',
     dateOfBirth: '',
   });
-  const [originalProfile, setOriginalProfile] = useState(null);
+  const [originalFormData, setOriginalFormData] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [avatarLoading, setAvatarLoading] = useState(false);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -26,69 +26,41 @@ const Profile = () => {
       window.location.href = '/login';
       return;
     }
-    fetchProfile();
-  }, [isAuthenticated]);
+    dispatch(fetchProfile());
+  }, [dispatch, isAuthenticated]);
 
-  const fetchProfile = async () => {
-    setLoading(true);
-    try {
-      const response = await api.get('/user/profile');
-      if (response.status === 200) {
-        const data = response.data.result;
-        const profileData = {
-          fullName: data.fullName || '',
-          phoneNumber: data.phoneNumber || '',
-          email: data.email || '',
-          avatar: data.avatar || null,
-          gender: data.gender || 'OTHER',
-          dateOfBirth: data.dateOfBirth ? data.dateOfBirth.split('T')[0] : '',
-        };
-        setProfile(profileData);
-        setOriginalProfile(profileData);
-      }
-    } catch (error) {
-      if (error.response?.status === 403) {
-        toast.error('Tài khoản của bạn đang bị khóa!');
-        window.location.href = '/login';
-      }
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    if (profile) {
+      const profileData = {
+        fullName: profile.fullName || '',
+        phoneNumber: profile.phoneNumber || '',
+        email: profile.email || '',
+        avatar: profile.avatar || null,
+        gender: profile.gender || 'OTHER',
+        dateOfBirth: profile.dateOfBirth ? profile.dateOfBirth.split('T')[0] : '',
+      };
+      setFormData(profileData);
+      setOriginalFormData(profileData);
     }
-  };
+  }, [profile]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setProfile((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleAvatarChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    const formData = new FormData();
-    formData.append('image', file);
-
-    setAvatarLoading(true);
     try {
-      const response = await api.post('/user/change-avatar', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-        params: { image: file.name },
-      });
-      if (response.status === 200) {
-        const newAvatarUrl = response.data.result;
-        setProfile((prev) => ({ ...prev, avatar: newAvatarUrl }));
-        setOriginalProfile((prev) => ({ ...prev, avatar: newAvatarUrl }));
-        toast.success('Thay đổi avatar thành công!', {
-          autoClose: 2000,
-        });
-        setTimeout(() => {
-          window.location.reload();
-        }, 2000);
-      }
+      const result = await dispatch(changeAvatar(file)).unwrap();
+      console.log('Change avatar result:', result);
+      setFormData((prev) => ({ ...prev, avatar: result.avatar || prev.avatar }));
+      toast.success('Thay đổi avatar thành công!');
     } catch (error) {
-      toast.error('Lỗi khi thay đổi avatar!');
-    } finally {
-      setAvatarLoading(false);
+      console.error('Lỗi khi thay đổi avatar:', error);
+      toast.error(error || 'Lỗi khi thay đổi avatar!');
     }
   };
 
@@ -98,41 +70,30 @@ const Profile = () => {
   };
 
   const handleSubmit = async () => {
-    if (profile.phoneNumber && !validatePhoneNumber(profile.phoneNumber)) {
+    if (formData.phoneNumber && !validatePhoneNumber(formData.phoneNumber)) {
       toast.error('Số điện thoại phải gồm 10 chữ số!');
       return;
     }
 
-    setLoading(true);
     try {
-      const response = await api.post('/user/change-profile', {
-        fullName: profile.fullName,
-        phoneNumber: profile.phoneNumber || null,
-        gender: profile.gender,
-        dateOfBirth: profile.dateOfBirth || null,
-      });
-      if (response.status === 200) {
-        const updatedProfile = {
-          ...profile,
-          ...response.data.result,
-          dateOfBirth: response.data.result.dateOfBirth
-            ? response.data.result.dateOfBirth.split('T')[0]
-            : '',
-        };
-        setProfile(updatedProfile);
-        setOriginalProfile(updatedProfile);
-        toast.success('Cập nhật thông tin thành công!');
-        setIsEditing(false);
-      }
+      const result = await dispatch(
+        changeProfile({
+          fullName: formData.fullName,
+          phoneNumber: formData.phoneNumber,
+          gender: formData.gender,
+          dateOfBirth: formData.dateOfBirth,
+        })
+      ).unwrap();
+      console.log('Change profile result:', result);
+      setIsEditing(false);
     } catch (error) {
-      toast.error('Lỗi khi cập nhật thông tin!');
-    } finally {
-      setLoading(false);
+      console.error('Lỗi khi cập nhật thông tin:', error);
+      toast.error(error || 'Lỗi khi cập nhật thông tin!');
     }
   };
 
   const handleCancel = () => {
-    setProfile(originalProfile);
+    setFormData(originalFormData);
     setIsEditing(false);
   };
 
@@ -148,8 +109,6 @@ const Profile = () => {
     return `${maskedLocal}@${maskedDomain}`;
   };
 
-  if (loading) return <p className="profile-loading">Đang tải thông tin...</p>;
-
   return (
     <div className="profile-container">
       <ProfileSidebar />
@@ -157,16 +116,16 @@ const Profile = () => {
         <h2 className="profile-title">Thông tin cá nhân</h2>
         <div className="profile-avatar-section">
           <img
-            src={profile.avatar || 'https://via.placeholder.com/150'}
+            src={formData.avatar || 'https://via.placeholder.com/150'}
             alt="Avatar"
             className="profile-avatar"
           />
           <button
             className="profile-change-avatar-button"
             onClick={() => fileInputRef.current.click()}
-            disabled={avatarLoading}
+            disabled={loading}
           >
-            {avatarLoading ? 'Đang tải...' : 'Thay đổi ảnh'}
+            {loading ? 'Đang tải...' : 'Thay đổi ảnh'}
           </button>
           <input
             type="file"
@@ -183,7 +142,7 @@ const Profile = () => {
             <input
               type="text"
               name="fullName"
-              value={profile.fullName}
+              value={formData.fullName}
               onChange={handleInputChange}
               className="profile-input"
               disabled={!isEditing}
@@ -195,7 +154,7 @@ const Profile = () => {
             <input
               type="text"
               name="phoneNumber"
-              value={profile.phoneNumber}
+              value={formData.phoneNumber}
               onChange={handleInputChange}
               className="profile-input"
               disabled={!isEditing}
@@ -208,7 +167,7 @@ const Profile = () => {
             <input
               type="email"
               name="email"
-              value={maskEmail(profile.email)}
+              value={maskEmail(formData.email)}
               className="profile-input"
               disabled
             />
@@ -217,7 +176,7 @@ const Profile = () => {
             <label className="profile-label">Giới tính</label>
             <select
               name="gender"
-              value={profile.gender}
+              value={formData.gender}
               onChange={handleInputChange}
               className="profile-input"
               disabled={!isEditing}
@@ -232,7 +191,7 @@ const Profile = () => {
             <input
               type="date"
               name="dateOfBirth"
-              value={profile.dateOfBirth}
+              value={formData.dateOfBirth}
               onChange={handleInputChange}
               className="profile-input"
               disabled={!isEditing}
@@ -245,7 +204,7 @@ const Profile = () => {
                   type="button"
                   className="profile-confirm-button"
                   onClick={handleSubmit}
-                  disabled={loading || avatarLoading}
+                  disabled={loading}
                 >
                   Xác nhận
                 </button>
@@ -253,7 +212,7 @@ const Profile = () => {
                   type="button"
                   className="profile-cancel-button"
                   onClick={handleCancel}
-                  disabled={loading || avatarLoading}
+                  disabled={loading}
                 >
                   Hủy
                 </button>
@@ -263,7 +222,7 @@ const Profile = () => {
                 type="button"
                 className="profile-edit-button"
                 onClick={() => setIsEditing(true)}
-                disabled={avatarLoading}
+                disabled={loading}
               >
                 Chỉnh sửa
               </button>

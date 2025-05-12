@@ -1,13 +1,9 @@
 import { useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link } from 'react-router-dom'; // Thêm import Link
-import { toast } from 'react-toastify';
-import {
-  fetchOrders,
-  fetchOrderDetails,
-  changeOrderStatus,
-} from './orderSlice';
+import { Link } from 'react-router-dom';
+import { fetchOrders, fetchOrderDetails, changeOrderStatus } from '../../features/orders/orderSlice';
 import ProfileSidebar from '../profile/ProfileSidebar';
+import { toast } from 'react-toastify';
 import './Orders.css';
 
 const Orders = () => {
@@ -18,6 +14,8 @@ const Orders = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedStatus, setSelectedStatus] = useState('');
   const [expandedOrderId, setExpandedOrderId] = useState(null);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [cancelOrderData, setCancelOrderData] = useState({ orderId: null, fromStatus: '', cause: '' });
 
   const orderStatuses = [
     { value: '', label: 'Tất cả trạng thái' },
@@ -32,7 +30,7 @@ const Orders = () => {
     { value: 'RETURNED', label: 'Đã hoàn hàng' },
   ];
 
-  const scrollPositionRef = useRef(0); // Lưu vị trí cuộn
+  const scrollPositionRef = useRef(0);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -54,7 +52,6 @@ const Orders = () => {
   };
 
   const toggleOrderDetails = async (orderId) => {
-    // Lưu vị trí cuộn hiện tại trước khi thay đổi
     scrollPositionRef.current = window.scrollY;
 
     if (expandedOrderId === orderId) {
@@ -63,34 +60,53 @@ const Orders = () => {
       setExpandedOrderId(orderId);
       if (!orderDetails[orderId]) {
         try {
-          await dispatch(fetchOrderDetails(orderId)).unwrap();
+          const result = await dispatch(fetchOrderDetails(orderId)).unwrap();
+          console.log('Fetch order details result:', result);
         } catch (error) {
-          toast.error(error);
+          toast.error(error || 'Lỗi khi lấy chi tiết đơn hàng!');
         }
       }
     }
 
-    // Khôi phục vị trí cuộn sau khi re-render
     setTimeout(() => {
       window.scrollTo(0, scrollPositionRef.current);
     }, 0);
   };
 
-  const handleChangeOrderStatus = async (orderId, fromStatus, toStatus) => {
+  const handleOpenCancelModal = (orderId, fromStatus) => {
+    setCancelOrderData({ orderId, fromStatus, cause: '' });
+    setShowCancelModal(true);
+  };
+
+  const handleCloseCancelModal = () => {
+    setShowCancelModal(false);
+    setCancelOrderData({ orderId: null, fromStatus: '', cause: '' });
+  };
+
+  const handleChangeOrderStatus = async () => {
+    const { orderId, fromStatus, cause } = cancelOrderData;
+    if (!cause.trim()) {
+      toast.error('Vui lòng nhập lý do hủy đơn!');
+      return;
+    }
     try {
-      await dispatch(changeOrderStatus({ orderId, fromStatus, toStatus })).unwrap();
-      toast.success('Hủy đơn thành công!');
+      const result = await dispatch(
+        changeOrderStatus({ orderId, fromStatus, toStatus: 'CANCELLED', cause })
+      ).unwrap();
+      console.log('Change order status result:', result);
+      handleCloseCancelModal();
     } catch (error) {
-      toast.error(error);
+      toast.error(error || 'Lỗi khi hủy đơn hàng!');
     }
   };
 
   const getStatusLabel = (status) => {
     const statusObj = orderStatuses.find((s) => s.value === status);
-    return statusObj ? statusObj.label : status;
+    return statusObj ? statusObj.label : status || 'N/A';
   };
 
   const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
     const date = new Date(dateString);
     return date.toLocaleString('vi-VN', {
       dateStyle: 'short',
@@ -101,17 +117,19 @@ const Orders = () => {
   const formatDateTime = (dateTimeString) => {
     if (!dateTimeString || dateTimeString.length !== 14) return 'N/A';
     const year = parseInt(dateTimeString.substring(0, 4), 10);
-    const month = parseInt(dateTimeString.substring(4, 6), 10) - 1; // Tháng 0-based
+    const month = parseInt(dateTimeString.substring(4, 6), 10) - 1;
     const day = parseInt(dateTimeString.substring(6, 8), 10);
     const hour = parseInt(dateTimeString.substring(8, 10), 10);
     const minute = parseInt(dateTimeString.substring(10, 12), 10);
     const second = parseInt(dateTimeString.substring(12, 14), 10);
 
     const date = new Date(year, month, day, hour, minute, second);
+    if (isNaN(date.getTime())) return 'N/A';
     return date.toLocaleString('vi-VN', { dateStyle: 'short', timeStyle: 'short' });
   };
 
   const formatPrice = (price) => {
+    if (!price) return 'N/A';
     return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
       currency: 'VND',
@@ -140,14 +158,14 @@ const Orders = () => {
           </select>
         </div>
         <div className="orders-list">
-          {orders.length === 0 ? (
+          {(orders?.length || 0) === 0 ? (
             <p>Chưa có đơn hàng nào!</p>
           ) : (
             orders.map((order) => (
               <div key={order.orderId} className="orders-item">
                 <div className="orders-summary">
                   <p>
-                    <strong>Mã đơn hàng:</strong> {order.orderId}
+                    <strong>Mã đơn hàng:</strong> {order.orderId || 'N/A'}
                   </p>
                   <p>
                     <strong>Trạng thái:</strong>{' '}
@@ -156,10 +174,10 @@ const Orders = () => {
                     </span>
                   </p>
                   <p>
-                    <strong>Phương thức thanh toán:</strong> {order.paymentMethod}
+                    <strong>Phương thức thanh toán:</strong> {order.paymentMethod || 'N/A'}
                   </p>
                   <p>
-                    <strong>Trạng thái thanh toán:</strong> {order.paymentStatus}
+                    <strong>Trạng thái thanh toán:</strong> {order.paymentStatus || 'N/A'}
                     {order.refundStatus === 'REFUNDED' && (
                       <span className="orders-refund-status orders-refund-status-REFUNDED">
                         {' '}
@@ -179,10 +197,10 @@ const Orders = () => {
                     </p>
                   )}
                   <p>
-                    <strong>Địa chỉ:</strong> {order.address}
+                    <strong>Địa chỉ:</strong> {order.address || 'N/A'}
                   </p>
                   <p>
-                    <strong>Số điện thoại:</strong> {order.phoneNumber}
+                    <strong>Số điện thoại:</strong> {order.phoneNumber || 'N/A'}
                   </p>
                   <p>
                     <strong>Ngày đặt hàng:</strong> {formatDate(order.orderAt)}
@@ -200,9 +218,7 @@ const Orders = () => {
                     {(order.orderStatus === 'PENDING' || order.orderStatus === 'IN_PREPARATION') && (
                       <button
                         className="orders-cancel-button"
-                        onClick={() =>
-                          handleChangeOrderStatus(order.orderId, order.orderStatus, 'CANCELLED')
-                        }
+                        onClick={() => handleOpenCancelModal(order.orderId, order.orderStatus)}
                         disabled={loading}
                       >
                         Hủy đơn
@@ -213,7 +229,7 @@ const Orders = () => {
                 {expandedOrderId === order.orderId && orderDetails[order.orderId] && (
                   <div className="orders-details">
                     <h4>Chi tiết đơn hàng</h4>
-                    {orderDetails[order.orderId].length === 0 ? (
+                    {(orderDetails[order.orderId]?.length || 0) === 0 ? (
                       <p>Không có sản phẩm nào trong đơn hàng này!</p>
                     ) : (
                       <table className="orders-details-table">
@@ -221,6 +237,7 @@ const Orders = () => {
                           <tr>
                             <th>Hình ảnh</th>
                             <th>Tên sách</th>
+                            <th>Đơn giá</th>
                             <th>Số lượng</th>
                             <th>Tổng tiền</th>
                           </tr>
@@ -232,7 +249,7 @@ const Orders = () => {
                                 {detail.urlThumbnail ? (
                                   <img
                                     src={detail.urlThumbnail}
-                                    alt={detail.bookName}
+                                    alt={detail.bookName || 'Sách'}
                                     className="orders-book-thumbnail"
                                   />
                                 ) : (
@@ -240,9 +257,33 @@ const Orders = () => {
                                 )}
                               </td>
                               <td>
-                                <Link to={`/books/${detail.bookId}`}>{detail.bookName}</Link>
+                                <Link to={`/books/${detail.bookId}`}>
+                                  {detail.bookName || 'N/A'}
+                                </Link>
                               </td>
-                              <td>{detail.quantity}</td>
+                              <td>
+                                {detail.priceAfterSales !== null ? (
+                                  <>
+                                    <span
+                                      style={{
+                                        textDecoration: 'line-through',
+                                        color: '#4a5568',
+                                        marginRight: '8px',
+                                      }}
+                                    >
+                                      {formatPrice(detail.price)}
+                                    </span>
+                                    <span style={{ color: '#ef4444' }}>
+                                      {formatPrice(detail.priceAfterSales)}
+                                    </span>
+                                  </>
+                                ) : (
+                                  <span style={{ color: '#ef4444' }}>
+                                    {formatPrice(detail.price)}
+                                  </span>
+                                )}
+                              </td>
+                              <td>{detail.quantity || 0}</td>
                               <td>{formatPrice(detail.totalPrice)}</td>
                             </tr>
                           ))}
@@ -255,7 +296,7 @@ const Orders = () => {
             ))
           )}
         </div>
-        {orders.length > 0 && (
+        {(orders?.length || 0) > 0 && (
           <div className="orders-pagination">
             <button
               onClick={() => handlePageChange(currentPage - 1)}
@@ -277,6 +318,37 @@ const Orders = () => {
           </div>
         )}
       </div>
+
+      {showCancelModal && (
+        <div className="orders-modal">
+          <div className="orders-modal-content">
+            <h3>Lý do hủy đơn hàng</h3>
+            <textarea
+              className="orders-cancel-reason"
+              value={cancelOrderData.cause}
+              onChange={(e) =>
+                setCancelOrderData({ ...cancelOrderData, cause: e.target.value })
+              }
+              placeholder="Nhập lý do hủy đơn hàng..."
+              rows="4"
+            />
+            <div className="orders-modal-actions">
+              <button
+                className="orders-modal-button orders-modal-cancel"
+                onClick={handleCloseCancelModal}
+              >
+                Hủy
+              </button>
+              <button
+                className="orders-modal-button orders-modal-confirm"
+                onClick={handleChangeOrderStatus}
+              >
+                Xác nhận
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

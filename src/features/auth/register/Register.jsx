@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { registerUser } from '../authSlice';
-import { toast } from 'react-toastify'; // Thêm dòng này
+import { toast } from 'react-toastify';
 import './Register.css';
 
 const Register = () => {
@@ -35,6 +35,7 @@ const Register = () => {
     }
 
     dispatch(registerUser({ fullName, email, phoneNumber, password, confirmPassword })).then((result) => {
+      console.log('Register result:', result);
       if (result.meta.requestStatus === 'fulfilled') {
         navigate('/verify-otp');
       }

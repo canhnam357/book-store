@@ -38,6 +38,9 @@
 
 .cart-header-name {
   flex: 2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .cart-header-price {
@@ -90,15 +93,24 @@
 }
 
 .cart-item-name {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   flex: 2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .cart-item-price {
   font-size: 14px;
-  color: #4a5568;
+  color: #ef4444;
   flex: 1;
+}
+
+.cart-item-price .original-price {
+  text-decoration: line-through;
+  margin-right: 8px;
+  color: #4a5568;
 }
 
 .cart-item-quantity {

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { verifyOTP, clearRegisterEmail } from '../authSlice';
-import { toast } from 'react-toastify'; // Thêm dòng này
+import { toast } from 'react-toastify';
 import './VerifyOTP.css';
 
 const VerifyOTP = () => {
@@ -21,6 +21,7 @@ const VerifyOTP = () => {
     }
 
     dispatch(verifyOTP({ email, otp })).then((result) => {
+      console.log('Verify OTP result:', result);
       if (result.meta.requestStatus === 'fulfilled') {
         dispatch(clearRegisterEmail());
         navigate('/login');

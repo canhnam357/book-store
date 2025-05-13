@@ -2,11 +2,15 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../../api/api';
 import { toast } from 'react-toastify';
 
+// Cấu hình timeout cho API (30 giây)
+const apiWithTimeout = api; // Giả định api đã là axios instance, nếu không, tạo instance mới
+apiWithTimeout.defaults.timeout = 30000; // Đặt timeout toàn cục cho tất cả các yêu cầu
+
 export const fetchCart = createAsyncThunk(
   'cart/fetchCart',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await api.get('/cart');
+      const response = await apiWithTimeout.get('/cart');
       console.log('Fetch cart response:', response.data);
       if (response.status === 200 && response.data.result) {
         return response.data.result.cartItemList || [];
@@ -23,7 +27,7 @@ export const addToCart = createAsyncThunk(
   'cart/addToCart',
   async ({ bookId, quantity }, { rejectWithValue }) => {
     try {
-      const response = await api.post('/cart/add-to-cart', { bookId, quantity });
+      const response = await apiWithTimeout.post('/cart/add-to-cart', { bookId, quantity });
       console.log('Add to cart response:', response.data);
       if (response.status === 200 && response.data.result) {
         return response.data.result.cartItemList || [];
@@ -47,7 +51,7 @@ export const removeFromCart = createAsyncThunk(
   'cart/removeFromCart',
   async (bookId, { rejectWithValue }) => {
     try {
-      const response = await api.delete(`/cart/${bookId}`);
+      const response = await apiWithTimeout.delete(`/cart/${bookId}`);
       console.log('Remove from cart response:', response.data);
       if (response.status === 200) {
         return bookId;
@@ -67,7 +71,7 @@ export const changeQuantity = createAsyncThunk(
   'cart/changeQuantity',
   async ({ bookId, delta }, { rejectWithValue }) => {
     try {
-      const response = await api.post('/cart/change-quantity', { bookId, quantity: delta });
+      const response = await apiWithTimeout.post('/cart/change-quantity', { bookId, quantity: delta });
       console.log('Change quantity response:', response.data);
       if (response.status === 200 && response.data.result) {
         return response.data.result;
@@ -90,7 +94,7 @@ export const updateQuantity = createAsyncThunk(
   'cart/updateQuantity',
   async ({ bookId, quantity }, { rejectWithValue }) => {
     try {
-      const response = await api.post('/cart/update-quantity', { bookId, quantity });
+      const response = await apiWithTimeout.post('/cart/update-quantity', { bookId, quantity });
       console.log('Update quantity response:', response.data);
       if (response.status === 200 && response.data.result) {
         return response.data.result;
@@ -113,7 +117,7 @@ export const createOrder = createAsyncThunk(
   'cart/createOrder',
   async ({ bookIds, addressId, paymentMethod }, { rejectWithValue, dispatch }) => {
     try {
-      const response = await api.post('/create-order', { bookIds, addressId, paymentMethod });
+      const response = await apiWithTimeout.post('/create-order', { bookIds, addressId, paymentMethod });
       console.log('Create order response:', response.data);
       if (response.status === 201 && response.data.result) {
         return response.data.result; // Nếu paymentMethod là CARD, result sẽ là URL VNPAY

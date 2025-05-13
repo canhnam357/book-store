@@ -35,7 +35,7 @@ const BookList = () => {
     totalPages,
     currentPage,
     totalElements,
-    loading,
+    booksLoading,
   } = useSelector((state) => state.book);
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -662,7 +662,7 @@ const BookList = () => {
       </div>
       <div className="booklist-book-list">
         <h2>Danh Sách Sách ({totalElements || 0} kết quả)</h2>
-        {loading ? (
+        {booksLoading ? (
           <p>Đang tải sách...</p>
         ) : books.length === 0 ? (
           <p>Không tìm thấy sách nào!</p>

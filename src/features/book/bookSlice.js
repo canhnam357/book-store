@@ -21,12 +21,15 @@ export const fetchPriceRange = createAsyncThunk(
 
 export const fetchCategories = createAsyncThunk(
   'book/fetchCategories',
-  async (keyword = '', { rejectWithValue }) => {
+  async (keyword = '', { dispatch, getState, rejectWithValue }) => {
+    const state = getState().book;
+    const newRequestId = state.currentCategoryRequestId + 1;
+    dispatch(setCategoryRequestId(newRequestId));
     try {
       const response = await api.get('/categories', { params: { keyword } });
       console.log('Fetch categories response:', response.data);
       if (response.status === 200 && response.data.result) {
-        return response.data.result;
+        return { data: response.data.result, requestId: newRequestId };
       }
       throw new Error(response.data.message || 'Không thể lấy danh sách danh mục!');
     } catch (error) {
@@ -38,12 +41,15 @@ export const fetchCategories = createAsyncThunk(
 
 export const fetchAuthors = createAsyncThunk(
   'book/fetchAuthors',
-  async (keyword = '', { rejectWithValue }) => {
+  async (keyword = '', { dispatch, getState, rejectWithValue }) => {
+    const state = getState().book;
+    const newRequestId = state.currentAuthorRequestId + 1;
+    dispatch(setAuthorRequestId(newRequestId));
     try {
       const response = await api.get('/authors', { params: { keyword } });
       console.log('Fetch authors response:', response.data);
       if (response.status === 200 && response.data.result) {
-        return response.data.result;
+        return { data: response.data.result, requestId: newRequestId };
       }
       throw new Error(response.data.message || 'Không thể lấy danh sách tác giả!');
     } catch (error) {
@@ -55,12 +61,15 @@ export const fetchAuthors = createAsyncThunk(
 
 export const fetchPublishers = createAsyncThunk(
   'book/fetchPublishers',
-  async (keyword = '', { rejectWithValue }) => {
+  async (keyword = '', { dispatch, getState, rejectWithValue }) => {
+    const state = getState().book;
+    const newRequestId = state.currentPublisherRequestId + 1;
+    dispatch(setPublisherRequestId(newRequestId));
     try {
       const response = await api.get('/publishers', { params: { keyword } });
       console.log('Fetch publishers response:', response.data);
       if (response.status === 200 && response.data.result) {
-        return response.data.result;
+        return { data: response.data.result, requestId: newRequestId };
       }
       throw new Error(response.data.message || 'Không thể lấy danh sách nhà xuất bản!');
     } catch (error) {
@@ -72,12 +81,15 @@ export const fetchPublishers = createAsyncThunk(
 
 export const fetchDistributors = createAsyncThunk(
   'book/fetchDistributors',
-  async (keyword = '', { rejectWithValue }) => {
+  async (keyword = '', { dispatch, getState, rejectWithValue }) => {
+    const state = getState().book;
+    const newRequestId = state.currentDistributorRequestId + 1;
+    dispatch(setDistributorRequestId(newRequestId));
     try {
       const response = await api.get('/distributors', { params: { keyword } });
       console.log('Fetch distributors response:', response.data);
       if (response.status === 200 && response.data.result) {
-        return response.data.result;
+        return { data: response.data.result, requestId: newRequestId };
       }
       throw new Error(response.data.message || 'Không thể lấy danh sách nhà phát hành!');
     } catch (error) {
@@ -89,12 +101,15 @@ export const fetchDistributors = createAsyncThunk(
 
 export const fetchBooks = createAsyncThunk(
   'book/fetchBooks',
-  async (filters, { rejectWithValue }) => {
+  async (filters, { dispatch, getState, rejectWithValue }) => {
+    const state = getState().book;
+    const newRequestId = state.currentBooksRequestId + 1;
+    dispatch(setBooksRequestId(newRequestId));
     try {
       const response = await api.get('/books', { params: filters });
       console.log('Fetch books response:', response.data);
       if (response.status === 200 && response.data.result) {
-        return response.data.result;
+        return { data: response.data.result, requestId: newRequestId };
       }
       throw new Error(response.data.message || 'Không thể lấy danh sách sách!');
     } catch (error) {
@@ -221,6 +236,16 @@ const bookSlice = createSlice({
     totalReviews: 0,
     loading: false,
     error: null,
+    currentCategoryRequestId: 0,
+    currentAuthorRequestId: 0,
+    currentPublisherRequestId: 0,
+    currentDistributorRequestId: 0,
+    currentBooksRequestId: 0,
+    categoryLoading: false,
+    authorLoading: false,
+    publisherLoading: false,
+    distributorLoading: false,
+    booksLoading: false,
   },
   reducers: {
     clearFilters: (state) => {
@@ -228,6 +253,21 @@ const bookSlice = createSlice({
       state.totalPages = 1;
       state.currentPage = 1;
       state.totalElements = 0;
+    },
+    setCategoryRequestId: (state, action) => {
+      state.currentCategoryRequestId = action.payload;
+    },
+    setAuthorRequestId: (state, action) => {
+      state.currentAuthorRequestId = action.payload;
+    },
+    setPublisherRequestId: (state, action) => {
+      state.currentPublisherRequestId = action.payload;
+    },
+    setDistributorRequestId: (state, action) => {
+      state.currentDistributorRequestId = action.payload;
+    },
+    setBooksRequestId: (state, action) => {
+      state.currentBooksRequestId = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -248,74 +288,89 @@ const bookSlice = createSlice({
       })
       // Fetch Categories
       .addCase(fetchCategories.pending, (state) => {
-        state.loading = true;
+        state.categoryLoading = true;
         state.error = null;
       })
       .addCase(fetchCategories.fulfilled, (state, action) => {
-        state.loading = false;
-        state.categories = action.payload;
+        const { data, requestId } = action.payload;
+        if (requestId === state.currentCategoryRequestId) {
+          state.categories = data;
+        }
+        state.categoryLoading = false;
       })
       .addCase(fetchCategories.rejected, (state, action) => {
-        state.loading = false;
+        state.categoryLoading = false;
         state.error = action.payload;
         toast.error(action.payload);
       })
       // Fetch Authors
       .addCase(fetchAuthors.pending, (state) => {
-        state.loading = true;
+        state.authorLoading = true;
         state.error = null;
       })
       .addCase(fetchAuthors.fulfilled, (state, action) => {
-        state.loading = false;
-        state.authors = action.payload;
+        const { data, requestId } = action.payload;
+        if (requestId === state.currentAuthorRequestId) {
+          state.authors = data;
+        }
+        state.authorLoading = false;
       })
       .addCase(fetchAuthors.rejected, (state, action) => {
-        state.loading = false;
+        state.authorLoading = false;
         state.error = action.payload;
         toast.error(action.payload);
       })
       // Fetch Publishers
       .addCase(fetchPublishers.pending, (state) => {
-        state.loading = true;
+        state.publisherLoading = true;
         state.error = null;
       })
       .addCase(fetchPublishers.fulfilled, (state, action) => {
-        state.loading = false;
-        state.publishers = action.payload;
+        const { data, requestId } = action.payload;
+        if (requestId === state.currentPublisherRequestId) {
+          state.publishers = data;
+        }
+        state.publisherLoading = false;
       })
       .addCase(fetchPublishers.rejected, (state, action) => {
-        state.loading = false;
+        state.publisherLoading = false;
         state.error = action.payload;
         toast.error(action.payload);
       })
       // Fetch Distributors
       .addCase(fetchDistributors.pending, (state) => {
-        state.loading = true;
+        state.distributorLoading = true;
         state.error = null;
       })
       .addCase(fetchDistributors.fulfilled, (state, action) => {
-        state.loading = false;
-        state.distributors = action.payload;
+        const { data, requestId } = action.payload;
+        if (requestId === state.currentDistributorRequestId) {
+          state.distributors = data;
+        }
+        state.distributorLoading = false;
       })
       .addCase(fetchDistributors.rejected, (state, action) => {
-        state.loading = false;
+        state.distributorLoading = false;
         state.error = action.payload;
         toast.error(action.payload);
       })
       // Fetch Books
       .addCase(fetchBooks.pending, (state) => {
-        state.loading = true;
+        state.booksLoading = true;
         state.error = null;
       })
       .addCase(fetchBooks.fulfilled, (state, action) => {
-        state.loading = false;
-        state.books = action.payload.content;
-        state.totalPages = action.payload.totalPages;
-        state.currentPage = action.payload.number + 1;
-        state.totalElements = action.payload.totalElements;
+        const { data, requestId } = action.payload;
+        if (requestId === state.currentBooksRequestId) {
+          state.books = data.content;
+          state.totalPages = data.totalPages;
+          state.currentPage = data.number + 1;
+          state.totalElements = data.totalElements;
+        }
+        state.booksLoading = false;
       })
       .addCase(fetchBooks.rejected, (state, action) => {
-        state.loading = false;
+        state.booksLoading = false;
         state.error = action.payload;
         toast.error(action.payload);
       })
@@ -405,5 +460,12 @@ const bookSlice = createSlice({
   },
 });
 
-export const { clearFilters } = bookSlice.actions;
+export const {
+  clearFilters,
+  setCategoryRequestId,
+  setAuthorRequestId,
+  setPublisherRequestId,
+  setDistributorRequestId,
+  setBooksRequestId,
+} = bookSlice.actions;
 export default bookSlice.reducer;

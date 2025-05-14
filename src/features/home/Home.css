@@ -1,16 +1,26 @@
 .home-container {
   padding: 20px;
+  font-family: 'Inter', sans-serif;
 }
 
 .home-section {
   margin-bottom: 40px;
 }
 
+.home-section h2 {
+  font-family: 'Lora', serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: #2d3748;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
 .home-carousel {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 70%;
+  width: 80%;
   margin: 0 auto;
   position: relative;
 }
@@ -19,23 +29,29 @@
   display: flex;
   overflow: hidden;
   width: 100%;
-  border: 2px solid #ddd;
   border-radius: 10px;
-  padding: 10px;
-  background-color: #f9f9f9;
-  box-sizing: border-box; /* Đảm bảo padding không làm tăng kích thước */
+  padding: 12px;
+  background-color: #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
 }
 
 .home-book-card {
-  flex: 0 0 16%; /* Giảm xuống 16% để bù đắp padding và viền */
-  margin: 0;
+  flex: 0 0 16%;
+  margin: 0 8px;
   text-align: center;
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 5px;
-  box-sizing: border-box; /* Đảm bảo padding không làm tăng kích thước */
+  padding: 8px;
+  box-sizing: border-box;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.home-book-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .home-book-image-wrapper {
@@ -48,44 +64,61 @@
   width: 120px;
   height: 160px;
   object-fit: cover;
+  border-radius: 4px;
 }
 
 .home-new-tag {
   position: absolute;
-  top: -10px;
-  right: -10px;
-  background-color: red;
+  top: -8px;
+  right: -8px;
+  background-color: #ef4444;
   color: white;
-  padding: 5px 10px;
-  border-radius: 5px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
   z-index: 1;
 }
 
 .home-book-title {
   font-size: 14px;
-  margin: 5px 0;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  margin: 8px 0;
   min-height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
-  color: #007bff;
+  color: #2d3748;
   text-decoration: none;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  transition: color 0.3s ease;
+}
+
+.home-book-card a {
+  text-decoration: none;
+}
+
+.home-book-title:hover {
+  color: #3b82f6;
 }
 
 .home-book-price,
 .home-book-rating {
   font-size: 12px;
-  margin: 3px 0;
+  font-family: 'Inter', sans-serif;
+  color: #4a5568;
+  margin: 4px 0;
   min-height: 20px;
 }
 
 .home-prev-btn,
 .home-next-btn {
-  background-color: #007bff;
+  background-color: #3b82f6;
   color: white;
   border: none;
   padding: 10px;
@@ -100,17 +133,38 @@
   top: 50%;
   transform: translateY(-50%);
   font-size: 18px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease;
 }
 
 .home-prev-btn {
-  left: -50px;
+  left: -60px;
 }
 
 .home-next-btn {
-  right: -50px;
+  right: -60px;
 }
 
 .home-prev-btn:hover,
 .home-next-btn:hover {
-  background-color: #0056b3;
+  background-color: #2563eb;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .home-carousel {
+    width: 100%;
+  }
+
+  .home-book-card {
+    flex: 0 0 30%;
+  }
+
+  .home-prev-btn {
+    left: -40px;
+  }
+
+  .home-next-btn {
+    right: -40px;
+  }
 }

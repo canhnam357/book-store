@@ -13,7 +13,7 @@
   display: flex;
   align-items: center;
   padding: 0 16px;
-  justify-content: space-between; /* Phân bố đều và xích các div về vị trí */
+  justify-content: space-between;
 }
 
 .header-left {
@@ -25,7 +25,7 @@
 .header-title {
   margin: 0;
   font-size: 28px;
-  font-family: 'Playfair Display', serif;
+  font-family: 'Lora', serif;
   font-weight: 700;
   color: #3b82f6;
 }
@@ -41,7 +41,7 @@
 }
 
 .header-center {
-  flex-grow: 1; /* Chiếm không gian giữa */
+  flex-grow: 1;
   max-width: 500px;
   position: relative;
 }
@@ -57,7 +57,7 @@
   padding: 8px 40px 8px 12px;
   border: 1px solid #e2e8f0;
   border-radius: 6px;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 14px;
   color: #2d3748;
   outline: none;
@@ -121,7 +121,7 @@
 }
 
 .header-search-title {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 12px;
   color: #2d3748;
   white-space: nowrap;
@@ -138,7 +138,7 @@
 
 .header-button {
   text-decoration: none;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-weight: 500;
   font-size: 16px;
   transition: all 0.3s ease;
@@ -170,7 +170,7 @@
 }
 
 .header-username {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 16px;
   color: #4a5568;
 }
@@ -217,7 +217,7 @@
   justify-content: center;
   align-items: center;
   font-size: 12px;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-weight: 600;
 }
 
@@ -250,7 +250,7 @@
   padding: 10px 16px;
   text-decoration: none;
   color: #2d3748;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 14px;
   background: none;
   border: none;

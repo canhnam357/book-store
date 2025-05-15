@@ -31,7 +31,7 @@ const Login = () => {
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = 'https://api.erotskoob.xyz/api/auth/oauth2/authorization/google';
+    window.location.href = process.env.REACT_APP_API_URL_BASE + '/auth/oauth2/authorization/google';
   };
 
   return (

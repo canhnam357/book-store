@@ -62,6 +62,26 @@ export const fetchMostPopularBooks = createAsyncThunk(
   }
 );
 
+export const fetchDiscountBooks = createAsyncThunk(
+  'home/fetchDiscountBooks',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get('/books/discount_books');
+      console.log('Fetch discount books response:', response.data);
+      if (response.status === 200 && response.data.result) {
+        return response.data.result;
+      }
+      throw new Error(response.data.message || 'Không thể lấy sách khuyến mãi!');
+    } catch (error) {
+      console.error('Fetch discount books error:', error.response?.data || error);
+      if (error.response?.status === 500) {
+        return rejectWithValue('Lỗi server khi lấy sách khuyến mãi!');
+      }
+      return rejectWithValue(error.response?.data?.message || 'Lỗi khi lấy sách khuyến mãi!');
+    }
+  }
+);
+
 export const fetchTopCategories = createAsyncThunk(
   'home/fetchTopCategories',
   async (_, { rejectWithValue }) => {
@@ -88,6 +108,7 @@ const homeSlice = createSlice({
     newArrivals: [],
     highRated: [],
     mostPopular: [],
+    discountBooks: [],
     topCategories: [],
     loading: false,
     error: null,
@@ -133,6 +154,20 @@ const homeSlice = createSlice({
         state.mostPopular = action.payload || [];
       })
       .addCase(fetchMostPopularBooks.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+        toast.error(action.payload);
+      })
+      // Fetch Discount Books
+      .addCase(fetchDiscountBooks.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchDiscountBooks.fulfilled, (state, action) => {
+        state.loading = false;
+        state.discountBooks = action.payload || [];
+      })
+      .addCase(fetchDiscountBooks.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
         toast.error(action.payload);

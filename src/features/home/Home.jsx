@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchNewArrivals, fetchHighRatedBooks, fetchMostPopularBooks, fetchTopCategories } from '../../features/home/homeSlice';
+import { fetchNewArrivals, fetchHighRatedBooks, fetchMostPopularBooks, fetchDiscountBooks, fetchTopCategories } from '../../features/home/homeSlice';
 import { Link } from 'react-router-dom';
 import './Home.css';
 
 const Home = () => {
   const dispatch = useDispatch();
-  const { newArrivals, highRated, mostPopular, topCategories, loading } = useSelector((state) => state.home);
+  const { newArrivals, highRated, mostPopular, discountBooks, topCategories, loading } = useSelector((state) => state.home);
 
   useEffect(() => {
     dispatch(fetchNewArrivals());
     dispatch(fetchHighRatedBooks());
     dispatch(fetchMostPopularBooks());
+    dispatch(fetchDiscountBooks());
     dispatch(fetchTopCategories());
   }, [dispatch]);
 
@@ -51,13 +52,17 @@ const Home = () => {
         return highRated?.length || 0;
       case 'mostPopular':
         return mostPopular?.length || 0;
+      case 'discountBooks':
+        return discountBooks?.length || 0;
       default:
         return 0;
     }
   };
 
   const getBooksForSection = (section) => {
-    const books = section === 'newArrivals' ? newArrivals : section === 'highRated' ? highRated : mostPopular;
+    const books = section === 'newArrivals' ? newArrivals :
+                  section === 'highRated' ? highRated :
+                  section === 'mostPopular' ? mostPopular : discountBooks;
     if (!books || books.length === 0) return [];
     const index = currentIndex[section] || 0;
     const startIndex = index % books.length;
@@ -130,6 +135,49 @@ const Home = () => {
       </section>
 
       <section className="home-section">
+        <h2>Sách khuyến mãi</h2>
+        <div className="home-carousel">
+          {(discountBooks?.length || 0) >= 5 && (
+            <button onClick={() => handlePrev('discountBooks')} className="home-prev-btn">
+              ←
+            </button>
+          )}
+          <div className="home-book-list">
+            {getBooksForSection('discountBooks').map((book) => (
+              <div key={book.bookId} className="home-book-card">
+                <Link to={`/books/${book.bookId}`}>
+                  <div className="home-book-image-wrapper">
+                    <img src={book.urlThumbnail || '/no-image.png'} alt={book.bookName || 'Sách'} />
+                    {book.priceAfterSale && <div className="home-discount-tag">Khuyến mãi</div>}
+                  </div>
+                </Link>
+                <Link to={`/books/${book.bookId}`}>
+                  <h3 className="home-book-title">{truncateText(book.bookName, 20)}</h3>
+                </Link>
+                <p className="home-book-price">
+                  {book.priceAfterSale ? (
+                    <>
+                      <span className="home-book-price-original">
+                        {(book.price || 0).toLocaleString('vi-VN')}
+                      </span>
+                      <span>{(book.priceAfterSale || 0).toLocaleString('vi-VN')} VND</span>
+                    </>
+                  ) : (
+                    <span>{(book.price || 0).toLocaleString('vi-VN')} VND</span>
+                  )}
+                </p>
+              </div>
+            ))}
+          </div>
+          {(discountBooks?.length || 0) >= 5 && (
+            <button onClick={() => handleNext('discountBooks')} className="home-next-btn">
+              →
+            </button>
+          )}
+        </div>
+      </section>
+
+      <section className="home-section">
         <h2>Sách được đánh giá cao</h2>
         <div className="home-carousel">
           {(highRated?.length || 0) >= 5 && (
@@ -183,7 +231,8 @@ const Home = () => {
                   <h3 className="home-book-title">{truncateText(book.bookName, 20)}</h3>
                 </Link>
                 <p className="home-book-price">
-                  {(book.priceAfterSale || book.price || 0).toLocaleString('vi-VN')} VND
+                  <span>{(book.priceAfterSale || book.price || 0).toLocaleString('vi-VN')} VND</span>
+                  <span className="home-book-sold">Đã bán: {(book.soldQuantity || 0).toLocaleString('vi-VN')}</span>
                 </p>
               </div>
             ))}

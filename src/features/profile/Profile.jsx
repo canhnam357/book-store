@@ -15,7 +15,7 @@ const Profile = () => {
     email: '',
     avatar: null,
     gender: 'OTHER',
-    dateOfBirth: '',
+    dateOfBirth: '', // Lưu giá trị yyyy-MM-dd cho input type="date"
   });
   const [originalFormData, setOriginalFormData] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -29,6 +29,20 @@ const Profile = () => {
     dispatch(fetchProfile());
   }, [dispatch, isAuthenticated]);
 
+  // Hàm chuyển đổi từ dd-MM-yyyy sang yyyy-MM-dd
+  const convertToInputFormat = (dateStr) => {
+    if (!dateStr) return '';
+    const [day, month, year] = dateStr.split('-');
+    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`; // Chuyển sang yyyy-MM-dd
+  };
+
+  // Hàm chuyển đổi từ yyyy-MM-dd sang dd-MM-yyyy
+  const convertToApiFormat = (dateStr) => {
+    if (!dateStr) return '';
+    const [year, month, day] = dateStr.split('-');
+    return `${day.padStart(2, '0')}-${month.padStart(2, '0')}-${year}`; // Chuyển sang dd-MM-yyyy
+  };
+
   useEffect(() => {
     if (profile) {
       const profileData = {
@@ -37,7 +51,7 @@ const Profile = () => {
         email: profile.email || '',
         avatar: profile.avatar || null,
         gender: profile.gender || 'OTHER',
-        dateOfBirth: profile.dateOfBirth ? profile.dateOfBirth.split('T')[0] : '',
+        dateOfBirth: convertToInputFormat(profile.dateOfBirth) || '', // Chuyển dd-MM-yyyy sang yyyy-MM-dd
       };
       setFormData(profileData);
       setOriginalFormData(profileData);
@@ -55,7 +69,6 @@ const Profile = () => {
 
     try {
       const result = await dispatch(changeAvatar(file)).unwrap();
-      console.log('Change avatar result:', result);
       setFormData((prev) => ({ ...prev, avatar: result.avatar || prev.avatar }));
       toast.success('Thay đổi avatar thành công!');
     } catch (error) {
@@ -69,23 +82,40 @@ const Profile = () => {
     return phoneRegex.test(phoneNumber);
   };
 
+  const validateDateOfBirth = (dateStr) => {
+    if (!dateStr) return true; // Cho phép để trống
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
+    return (
+      date.getDate() === day &&
+      date.getMonth() + 1 === month &&
+      date.getFullYear() === year &&
+      year <= new Date().getFullYear()
+    );
+  };
+
   const handleSubmit = async () => {
     if (formData.phoneNumber && !validatePhoneNumber(formData.phoneNumber)) {
       toast.error('Số điện thoại phải gồm 10 chữ số!');
       return;
     }
 
+    if (formData.dateOfBirth && !validateDateOfBirth(formData.dateOfBirth)) {
+      toast.error('Ngày sinh không hợp lệ! Vui lòng chọn ngày hợp lệ.');
+      return;
+    }
+
     try {
-      const result = await dispatch(
-        changeProfile({
-          fullName: formData.fullName,
-          phoneNumber: formData.phoneNumber,
-          gender: formData.gender,
-          dateOfBirth: formData.dateOfBirth,
-        })
-      ).unwrap();
-      console.log('Change profile result:', result);
+      const updatedProfile = {
+        fullName: formData.fullName,
+        phoneNumber: formData.phoneNumber,
+        gender: formData.gender,
+        dateOfBirth: convertToApiFormat(formData.dateOfBirth), // Chuyển yyyy-MM-dd sang dd-MM-yyyy
+      };
+      await dispatch(changeProfile(updatedProfile)).unwrap();
+      setOriginalFormData({ ...formData });
       setIsEditing(false);
+      toast.success('Cập nhật thông tin thành công!');
     } catch (error) {
       console.error('Lỗi khi cập nhật thông tin:', error);
       toast.error(error || 'Lỗi khi cập nhật thông tin!');

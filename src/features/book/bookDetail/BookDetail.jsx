@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -68,6 +68,21 @@ const BookDetail = () => {
       setMainImage(bookDetail.urlThumbnail || '');
     }
   }, [bookDetail]);
+
+  // Hàm định dạng ngày thành dd-MM-yyyy
+  const formatDisplayDate = (dateString) => {
+    if (!dateString) return 'Không rõ';
+    const dateRegex = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
+    if (dateRegex.test(dateString)) {
+      return dateString; // Giữ nguyên nếu đã đúng định dạng dd-MM-yyyy
+    }
+    try {
+      const [day, month, year] = dateString.split('-');
+      return `${day.padStart(2, '0')}-${month.padStart(2, '0')}-${year}`;
+    } catch {
+      return 'Không rõ';
+    }
+  };
 
   const handleImageClick = (image) => {
     setMainImage(image);
@@ -155,7 +170,6 @@ const BookDetail = () => {
     setEditRating(0);
   };
 
-
   const handlePageChange = (page) => {
     setReviewFilters((prev) => ({ ...prev, index: page }));
   };
@@ -224,6 +238,27 @@ const BookDetail = () => {
   if (loading) return <p>Đang tải...</p>;
   if (!bookDetail) return <p>Sách không tìm thấy!</p>;
 
+  const formatCreatedAt = (dateString) => {
+    if (!dateString) return 'N/A';
+    const dateRegex = /^(\d{2}):(\d{2}):(\d{2}) (\d{2})-(\d{2})-(\d{4})$/;
+    if (dateRegex.test(dateString)) {
+      return dateString; // Giữ nguyên nếu đúng định dạng
+    }
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return 'N/A';
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      const seconds = String(date.getSeconds()).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = date.getFullYear();
+      return `${hours}:${minutes}:${seconds} ${day}-${month}-${year}`;
+    } catch {
+      return 'N/A';
+    }
+  };
+
   return (
     <div className="bookdetail-container">
       <div className="bookdetail-main">
@@ -271,15 +306,13 @@ const BookDetail = () => {
               </span>
             )}
           </div>
-          <p className="bookdetail-stock">Còn hàng: {bookDetail.inStock || 0}</p>
+          <p className="bookdetail-sold"><strong>Đã bán:</strong> {(bookDetail.soldQuantity || 0).toLocaleString('vi-VN')}</p>
+          <p className="bookdetail-stock"><strong>Còn hàng:</strong> {bookDetail.inStock || 0}</p>
           <p className="bookdetail-detail">
             <strong>Số trang:</strong> {bookDetail.numberOfPage || 'Không rõ'}
           </p>
           <p className="bookdetail-detail">
-            <strong>Ngày xuất bản:</strong>{' '}
-            {bookDetail.publishedDate
-              ? new Date(bookDetail.publishedDate).toLocaleDateString('vi-VN')
-              : 'Không rõ'}
+            <strong>Ngày xuất bản:</strong> {formatDisplayDate(bookDetail.publishedDate)}
           </p>
           <p className="bookdetail-detail">
             <strong>Trọng lượng:</strong> {bookDetail.weight || 0}g
@@ -384,7 +417,7 @@ const BookDetail = () => {
                   <div className="bookdetail-review-header">
                     <span className="bookdetail-review-user">{review.userReviewed || 'Ẩn danh'}</span>
                     <span className="bookdetail-review-date">
-                      {new Date(review.createdAt).toLocaleDateString('vi-VN')}
+                      {formatCreatedAt(review.createdAt)}
                     </span>
                   </div>
                   {editingReviewId === review.reviewId ? (

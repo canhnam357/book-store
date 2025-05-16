@@ -105,27 +105,26 @@ const Orders = () => {
     return statusObj ? statusObj.label : status || 'N/A';
   };
 
-  const formatDate = (dateString) => {
+  const formatOrderDate = (dateString) => {
     if (!dateString) return 'N/A';
-    const date = new Date(dateString);
-    return date.toLocaleString('vi-VN', {
-      dateStyle: 'short',
-      timeStyle: 'short',
-    });
-  };
-
-  const formatDateTime = (dateTimeString) => {
-    if (!dateTimeString || dateTimeString.length !== 14) return 'N/A';
-    const year = parseInt(dateTimeString.substring(0, 4), 10);
-    const month = parseInt(dateTimeString.substring(4, 6), 10) - 1;
-    const day = parseInt(dateTimeString.substring(6, 8), 10);
-    const hour = parseInt(dateTimeString.substring(8, 10), 10);
-    const minute = parseInt(dateTimeString.substring(10, 12), 10);
-    const second = parseInt(dateTimeString.substring(12, 14), 10);
-
-    const date = new Date(year, month, day, hour, minute, second);
-    if (isNaN(date.getTime())) return 'N/A';
-    return date.toLocaleString('vi-VN', { dateStyle: 'short', timeStyle: 'short' });
+    const dateRegex = /^(\d{2}):(\d{2}):(\d{2}) (\d{2})-(\d{2})-(\d{4})$/;
+    if (dateRegex.test(dateString)) {
+      return dateString; // Giữ nguyên nếu đã đúng định dạng hh:mm:ss dd-MM-yyyy
+    }
+    try {
+      // Thử parse chuỗi nếu định dạng khác
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return 'N/A';
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      const seconds = String(date.getSeconds()).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = date.getFullYear();
+      return `${hours}:${minutes}:${seconds} ${day}-${month}-${year}`;
+    } catch {
+      return 'N/A';
+    }
   };
 
   const formatPrice = (price) => {
@@ -193,7 +192,7 @@ const Orders = () => {
                   </p>
                   {order.refundStatus === 'REFUNDED' && order.refundAt && (
                     <p>
-                      <strong>Thời gian hoàn tiền:</strong> {formatDateTime(order.refundAt)}
+                      <strong>Thời gian hoàn tiền:</strong> {formatOrderDate(order.refundAt)}
                     </p>
                   )}
                   <p>
@@ -203,7 +202,7 @@ const Orders = () => {
                     <strong>Số điện thoại:</strong> {order.phoneNumber || 'N/A'}
                   </p>
                   <p>
-                    <strong>Ngày đặt hàng:</strong> {formatDate(order.orderAt)}
+                    <strong>Ngày đặt hàng:</strong> {formatOrderDate(order.orderAt)}
                   </p>
                   <p>
                     <strong>Tổng tiền:</strong> {formatPrice(order.totalPrice)}

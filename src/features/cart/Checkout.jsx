@@ -53,7 +53,6 @@ const Checkout = () => {
       ).unwrap();
       console.log('Create order result:', result);
       if (paymentMethod === 'CARD') {
-        alert(result);
         window.location.href = result; // Redirect tới VNPAY URL
       } else {
         navigate('/orders');

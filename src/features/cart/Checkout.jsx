@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { fetchAddresses } from '../addresses/addressSlice';
 import { createOrder } from './cartSlice';
+import { fetchCart } from './cartSlice';
 import './Checkout.css';
 
 const Checkout = () => {
@@ -81,6 +82,7 @@ const Checkout = () => {
       } else {
         navigate('/orders');
       }
+      dispatch(fetchCart());
     } catch (error) {
       console.error('Lỗi khi tạo đơn hàng:', error);
       setIsRedirecting(false);

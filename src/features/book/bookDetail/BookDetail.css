@@ -213,8 +213,13 @@
   cursor: pointer;
 }
 
-.bookdetail-add-to-cart:hover {
+.bookdetail-add-to-cart:hover:not(:disabled) {
   background-color: #2563eb;
+}
+
+.bookdetail-add-to-cart:disabled {
+  background-color: #d1d5db;
+  cursor: not-allowed;
 }
 
 .bookdetail-description {
@@ -275,8 +280,13 @@
   cursor: pointer;
 }
 
-.bookdetail-review-form button:hover {
+.bookdetail-review-form button:hover:not(:disabled) {
   background-color: #2563eb;
+}
+
+.bookdetail-review-form button:disabled {
+  background-color: #d1d5db;
+  cursor: not-allowed;
 }
 
 .bookdetail-review-list {

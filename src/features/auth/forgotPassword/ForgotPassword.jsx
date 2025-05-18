@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { sendOTPResetPassword } from '../authSlice';
+import { toast } from 'react-toastify'; // Thêm import toast
 import './ForgotPassword.css';
 
 const ForgotPassword = () => {
@@ -12,6 +13,15 @@ const ForgotPassword = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    // Kiểm tra độ dài email
+    if (email.length > 255) {
+      toast.dismiss(); // Xóa toast cũ
+      toast.error('Email có độ dài tối đa 255 ký tự!');
+      return;
+    }
+
+    // Tiến hành gửi OTP nếu vượt qua kiểm tra
     dispatch(sendOTPResetPassword(email)).then((result) => {
       console.log('Send OTP result:', result);
       if (result.meta.requestStatus === 'fulfilled') {

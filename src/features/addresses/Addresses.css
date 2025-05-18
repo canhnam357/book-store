@@ -2,53 +2,53 @@
     display: flex;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 20px;
-  }
-  
-  .addresses-content {
+    padding: 24px; /* Đồng bộ với .profile-container */
+}
+
+.addresses-content {
     flex: 1;
     padding-left: 20px;
-  }
-  
-  .addresses-title {
+}
+
+.addresses-title {
     font-size: 24px;
     font-weight: bold;
     margin-bottom: 20px;
     color: #333;
-  }
-  
-  .addresses-form {
+}
+
+.addresses-form {
     background-color: #f9f9f9;
     padding: 20px;
     border-radius: 8px;
     margin-bottom: 20px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-  
-  .addresses-form h3 {
+}
+
+.addresses-form h3 {
     font-size: 18px;
     font-weight: bold;
     margin-bottom: 15px;
     color: #333;
-  }
-  
-  .addresses-form-group {
+}
+
+.addresses-form-group {
     margin-bottom: 15px;
-  }
-  
-  .addresses-form-group label {
+}
+
+.addresses-form-group label {
     display: block;
     font-size: 14px;
     font-weight: 500;
     margin-bottom: 5px;
     color: #555;
-  }
-  
-  .addresses-form-group label .required {
+}
+
+.addresses-form-group label .required {
     color: #ff4d4f;
-  }
-  
-  .addresses-form-group input {
+}
+
+.addresses-form-group input {
     width: 100%;
     padding: 8px;
     font-size: 14px;
@@ -56,13 +56,13 @@
     border-radius: 4px;
     outline: none;
     transition: border-color 0.2s;
-  }
-  
-  .addresses-form-group input:focus {
+}
+
+.addresses-form-group input:focus {
     border-color: #007bff;
-  }
-  
-  .addresses-submit-button {
+}
+
+.addresses-submit-button {
     background-color: #007bff;
     color: #fff;
     padding: 10px 20px;
@@ -71,41 +71,41 @@
     font-size: 14px;
     cursor: pointer;
     transition: background-color 0.2s;
-  }
-  
-  .addresses-submit-button:hover {
+}
+
+.addresses-submit-button:hover {
     background-color: #0056b3;
-  }
-  
-  .addresses-submit-button:disabled {
+}
+
+.addresses-submit-button:disabled {
     background-color: #cccccc;
     cursor: not-allowed;
-  }
-  
-  .addresses-list {
+}
+
+.addresses-list {
     margin-top: 20px;
-  }
-  
-  .addresses-item {
+}
+
+.addresses-item {
     background-color: #fff;
     padding: 15px;
     margin-bottom: 15px;
     border: 1px solid #ddd;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-  
-  .addresses-info p {
+}
+
+.addresses-info p {
     margin: 5px 0;
     font-size: 14px;
     color: #333;
-  }
-  
-  .addresses-info p strong {
+}
+
+.addresses-info p strong {
     color: #555;
-  }
-  
-  .addresses-default-label {
+}
+
+.addresses-default-label {
     display: inline-block;
     margin-left: 10px;
     padding: 2px 8px;
@@ -113,83 +113,93 @@
     color: #fff;
     background-color: #28a745;
     border-radius: 4px;
-  }
-  
-  .addresses-actions {
+}
+
+.addresses-actions {
     margin-top: 10px;
     display: flex;
     gap: 10px;
-  }
-  
-  .addresses-set-default-button,
-  .addresses-edit-button,
-  .addresses-delete-button,
-  .addresses-confirm-button,
-  .addresses-cancel-button {
+}
+
+.addresses-set-default-button,
+.addresses-edit-button,
+.addresses-delete-button,
+.addresses-confirm-button,
+.addresses-cancel-button {
     padding: 8px 15px;
     font-size: 14px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.2s;
-  }
-  
-  .addresses-set-default-button {
+}
+
+.addresses-set-default-button {
     background-color: #28a745;
     color: #fff;
-  }
-  
-  .addresses-set-default-button:hover {
+}
+
+.addresses-set-default-button:hover {
     background-color: #218838;
-  }
-  
-  .addresses-edit-button {
+}
+
+.addresses-edit-button {
     background-color: #007bff;
     color: #fff;
-  }
-  
-  .addresses-edit-button:hover {
+}
+
+.addresses-edit-button:hover {
     background-color: #0056b3;
-  }
-  
-  .addresses-delete-button {
+}
+
+.addresses-delete-button {
     background-color: #dc3545;
     color: #fff;
-  }
-  
-  .addresses-delete-button:hover {
+}
+
+.addresses-delete-button:hover {
     background-color: #c82333;
-  }
-  
-  .addresses-confirm-button {
+}
+
+.addresses-confirm-button {
     background-color: #28a745;
     color: #fff;
-  }
-  
-  .addresses-confirm-button:hover {
+}
+
+.addresses-confirm-button:hover {
     background-color: #218838;
-  }
-  
-  .addresses-cancel-button {
+}
+
+.addresses-cancel-button {
     background-color: #6c757d;
     color: #fff;
-  }
-  
-  .addresses-cancel-button:hover {
+}
+
+.addresses-cancel-button:hover {
     background-color: #5a6268;
-  }
-  
-  .addresses-set-default-button:disabled,
-  .addresses-edit-button:disabled,
-  .addresses-delete-button:disabled,
-  .addresses-confirm-button:disabled,
-  .addresses-cancel-button:disabled {
+}
+
+.addresses-set-default-button:disabled,
+.addresses-edit-button:disabled,
+.addresses-delete-button:disabled,
+.addresses-confirm-button:disabled,
+.addresses-cancel-button:disabled {
     background-color: #cccccc;
     cursor: not-allowed;
-  }
-  
-  .addresses-loading {
+}
+
+.addresses-loading {
     text-align: center;
     font-size: 16px;
     color: #555;
-  }
+}
+
+/* CSS để xử lý xuống hàng cho chuỗi dài, chỉ áp dụng trong .addresses-info */
+.addresses-info .wrapped-text {
+    max-width: 900px; /* Giới hạn chiều rộng phù hợp với khung */
+    overflow-wrap: break-word; /* Tự động xuống hàng, kể cả chuỗi không có khoảng trắng */
+    max-height: 80px; /* Giới hạn 2-3 dòng với font-size 14px và line-height ~20px */
+    overflow: hidden; /* Ẩn nội dung vượt quá */
+    color: #333; /* Đồng bộ với addresses-info p */
+    line-height: 20px; /* Đảm bảo khoảng cách dòng phù hợp */
+}

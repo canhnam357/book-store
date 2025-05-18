@@ -47,6 +47,10 @@ const Addresses = () => {
 
   const isValidPhoneNumber = (phone) => /^\d{10,11}$/.test(phone);
 
+  const isValidStringLength = (str) => str.length <= 255;
+
+  const isValidFullNameLength = (str) => str.length <= 50;
+
   const handleCreateAddress = async (e) => {
     e.preventDefault();
     if (
@@ -54,10 +58,31 @@ const Addresses = () => {
       !newAddress.phoneNumber ||
       !newAddress.addressInformation
     ) {
+      toast.dismiss();
       toast.error('Vui lòng điền đầy đủ thông tin bắt buộc!');
       return;
     }
+
+    if (!isValidFullNameLength(newAddress.fullName)) {
+      toast.dismiss();
+      toast.error('Họ và tên có tối đa 50 ký tự!');
+      return;
+    }
+
+    if (!isValidStringLength(newAddress.addressInformation)) {
+      toast.dismiss();
+      toast.error('Địa chỉ có tối đa 255 ký tự!');
+      return;
+    }
+
+    if (newAddress.otherDetail && !isValidStringLength(newAddress.otherDetail)) {
+      toast.dismiss();
+      toast.error('Chi tiết khác có tối đa 255 ký tự!');
+      return;
+    }
+
     if (!isValidPhoneNumber(newAddress.phoneNumber)) {
+      toast.dismiss();
       toast.error('Số điện thoại phải có 10-11 chữ số!');
       return;
     }
@@ -95,13 +120,35 @@ const Addresses = () => {
       !editAddress.phoneNumber ||
       !editAddress.addressInformation
     ) {
+      toast.dismiss();
       toast.error('Vui lòng điền đầy đủ thông tin bắt buộc!');
       return;
     }
+
+    if (!isValidFullNameLength(editAddress.fullName)) {
+      toast.dismiss();
+      toast.error('Họ và tên có tối đa 50 ký tự!');
+      return;
+    }
+
+    if (!isValidStringLength(editAddress.addressInformation)) {
+      toast.dismiss();
+      toast.error('Địa chỉ có tối đa 255 ký tự!');
+      return;
+    }
+
+    if (editAddress.otherDetail && !isValidStringLength(editAddress.otherDetail)) {
+      toast.dismiss();
+      toast.error('Chi tiết khác có tối đa 255 ký tự!');
+      return;
+    }
+
     if (!isValidPhoneNumber(editAddress.phoneNumber)) {
+      toast.dismiss();
       toast.error('Số điện thoại phải có 10-11 chữ số!');
       return;
     }
+
     try {
       const result = await dispatch(
         updateAddress({ addressId, addressData: editAddress })
@@ -291,11 +338,11 @@ const Addresses = () => {
                       <p>
                         <strong>Số điện thoại:</strong> {address.phoneNumber}
                       </p>
-                      <p>
+                      <p className="wrapped-text">
                         <strong>Địa chỉ:</strong> {address.addressInformation}
                       </p>
                       {address.otherDetail && (
-                        <p>
+                        <p className="wrapped-text">
                           <strong>Chi tiết khác:</strong> {address.otherDetail}
                         </p>
                       )}

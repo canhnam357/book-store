@@ -21,6 +21,7 @@ const BookDetail = () => {
     (state) => state.book
   );
   const { isAuthenticated } = useSelector((state) => state.auth);
+  const { loading: cartLoading } = useSelector((state) => state.cart); // Lấy loading từ cartSlice
 
   const [mainImage, setMainImage] = useState('');
   const [quantity, setQuantity] = useState(1);
@@ -31,6 +32,7 @@ const BookDetail = () => {
   const [editContent, setEditContent] = useState('');
   const [editRating, setEditRating] = useState(0);
   const [submitting, setSubmitting] = useState(false);
+  const [isAdding, setIsAdding] = useState(false); // State cho nút Thêm vào giỏ hàng
   const [reviewFilters, setReviewFilters] = useState({
     index: 1,
     size: 10,
@@ -112,12 +114,18 @@ const BookDetail = () => {
       navigate('/login');
       return;
     }
-    const result = await dispatch(addToCart({ bookId, quantity }));
-    console.log('Add to cart result:', result);
-    if (result.meta.requestStatus === 'fulfilled') {
+    if (isAdding) return; // Ngăn click khi đang xử lý
+    setIsAdding(true);
+    try {
+      const result = await dispatch(addToCart({ bookId, quantity })).unwrap();
+      console.log('Add to cart result:', result);
+      toast.dismiss();
       toast.success(`Đã thêm ${quantity} cuốn "${bookDetail?.bookName || 'sách'}" vào giỏ hàng!`);
-      const fetchCartResult = await dispatch(fetchCart());
-      console.log('Dữ liệu giỏ hàng sau khi thêm:', fetchCartResult);
+      await dispatch(fetchCart());
+    } catch (error) {
+      // toast.error đã được xử lý trong cartSlice
+    } finally {
+      setIsAdding(false);
     }
   };
 
@@ -235,9 +243,6 @@ const BookDetail = () => {
     navigate(`/books?distributorId=${distributorId}`);
   };
 
-  if (loading) return <p>Đang tải...</p>;
-  if (!bookDetail) return <p>Sách không tìm thấy!</p>;
-
   const formatCreatedAt = (dateString) => {
     if (!dateString) return 'N/A';
     const dateRegex = /^(\d{2}):(\d{2}):(\d{2}) (\d{2})-(\d{2})-(\d{4})$/;
@@ -258,6 +263,9 @@ const BookDetail = () => {
       return 'N/A';
     }
   };
+
+  if (loading) return <p>Đang tải...</p>;
+  if (!bookDetail) return <p>Sách không tìm thấy!</p>;
 
   return (
     <div className="bookdetail-container">
@@ -321,7 +329,7 @@ const BookDetail = () => {
             <strong>Tác giả:</strong>{' '}
             <span
               onClick={() => handleAuthorClick(bookDetail.author?.authorId, bookDetail.author?.authorName)}
-              style={{ cursor: 'pointer', color: 'blue' }}
+              style={{ cursor: 'pointer', color: '#3b82f6' }}
             >
               {bookDetail.author?.authorName || 'Không rõ'}
             </span>
@@ -333,7 +341,7 @@ const BookDetail = () => {
                   <span
                     key={cat.categoryId}
                     onClick={() => handleCategoryClick(cat.categoryId, cat.categoryName)}
-                    style={{ cursor: 'pointer', color: 'blue', marginRight: '5px' }}
+                    style={{ cursor: 'pointer', color: '#3b82f6', marginRight: '5px' }}
                   >
                     {cat.categoryName}
                   </span>
@@ -344,7 +352,7 @@ const BookDetail = () => {
             <strong>Nhà xuất bản:</strong>{' '}
             <span
               onClick={() => handlePublisherClick(bookDetail.publisher?.publisherId, bookDetail.publisher?.publisherName)}
-              style={{ cursor: 'pointer', color: 'blue' }}
+              style={{ cursor: 'pointer', color: '#3b82f6' }}
             >
               {bookDetail.publisher?.publisherName || 'Không rõ'}
             </span>
@@ -353,7 +361,7 @@ const BookDetail = () => {
             <strong>Nhà phát hành:</strong>{' '}
             <span
               onClick={() => handleDistributorClick(bookDetail.distributor?.distributorId, bookDetail.distributor?.distributorName)}
-              style={{ cursor: 'pointer', color: 'blue' }}
+              style={{ cursor: 'pointer', color: '#3b82f6' }}
             >
               {bookDetail.distributor?.distributorName || 'Không rõ'}
             </span>
@@ -371,8 +379,12 @@ const BookDetail = () => {
                 +
               </button>
             </div>
-            <button className="bookdetail-add-to-cart" onClick={handleAddToCart}>
-              Thêm vào giỏ hàng
+            <button
+              className="bookdetail-add-to-cart"
+              onClick={handleAddToCart}
+              disabled={isAdding || cartLoading}
+            >
+              {isAdding ? 'Đang thêm...' : 'Thêm vào giỏ hàng'}
             </button>
           </div>
         </div>

@@ -210,6 +210,7 @@ const cartSlice = createSlice({
         const bookId = action.payload;
         state.cartItems = state.cartItems.filter((item) => item.bookId !== bookId);
         state.totalCartPrice = state.cartItems.reduce((total, item) => total + (item.totalPrice || 0), 0);
+        toast.dismiss();
         toast.success('Đã xóa sản phẩm khỏi giỏ hàng!');
       })
       .addCase(removeFromCart.rejected, (state, action) => {

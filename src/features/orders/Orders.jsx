@@ -195,7 +195,7 @@ const Orders = () => {
                       <strong>Thời gian hoàn tiền:</strong> {formatOrderDate(order.refundAt)}
                     </p>
                   )}
-                  <p>
+                  <p className="wrapped-text">
                     <strong>Địa chỉ:</strong> {order.address || 'N/A'}
                   </p>
                   <p>

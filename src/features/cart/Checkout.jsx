@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -17,6 +17,9 @@ const Checkout = () => {
   const [selectedItems, setSelectedItems] = useState([]);
   const [selectedAddressId, setSelectedAddressId] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState('COD');
+  const [isRedirecting, setIsRedirecting] = useState(false);
+  const [isAddressDropdownOpen, setIsAddressDropdownOpen] = useState(false);
+  const addressDropdownRef = useRef(null);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -37,8 +40,26 @@ const Checkout = () => {
     }
   }, [addresses]);
 
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (addressDropdownRef.current && !addressDropdownRef.current.contains(e.target)) {
+        setIsAddressDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const truncateText = (text, maxLength = 50) => {
+    if (!text) return 'Không có';
+    return text.length > maxLength ? `${text.slice(0, maxLength)}...` : text;
+  };
+
   const selectedCartItems = (cartItems || []).filter((item) => selectedItems.includes(item.bookId));
   const selectedTotalPrice = selectedCartItems.reduce((total, item) => total + (item.totalPrice || 0), 0);
+  const selectedAddress = addresses.find((addr) => addr.addressId === selectedAddressId);
 
   const handleConfirmCheckout = async () => {
     if (!selectedAddressId) {
@@ -48,19 +69,31 @@ const Checkout = () => {
     }
 
     try {
+      if (paymentMethod === 'CARD') {
+        setIsRedirecting(true);
+      }
       const result = await dispatch(
         createOrder({ bookIds: selectedItems, addressId: selectedAddressId, paymentMethod })
       ).unwrap();
       console.log('Create order result:', result);
       if (paymentMethod === 'CARD') {
-        window.location.href = result; // Redirect tới VNPAY URL
+        window.location.href = result;
       } else {
         navigate('/orders');
       }
     } catch (error) {
       console.error('Lỗi khi tạo đơn hàng:', error);
-      // Toast đã được hiển thị trong cartSlice, không cần lặp lại
+      setIsRedirecting(false);
     }
+  };
+
+  const toggleAddressDropdown = () => {
+    setIsAddressDropdownOpen(!isAddressDropdownOpen);
+  };
+
+  const handleSelectAddress = (addressId) => {
+    setSelectedAddressId(addressId);
+    setIsAddressDropdownOpen(false);
   };
 
   if (!isAuthenticated) {
@@ -68,6 +101,15 @@ const Checkout = () => {
   }
 
   if (loading) return <p>Đang tải...</p>;
+
+  if (isRedirecting) {
+    return (
+      <div className="checkout-container redirecting-container">
+        <div className="loading-spinner"></div>
+        <p className="redirecting-text">Đang chuyển hướng tới VNPAY...</p>
+      </div>
+    );
+  }
 
   if (selectedCartItems.length === 0) {
     return (
@@ -125,19 +167,80 @@ const Checkout = () => {
               Chưa có địa chỉ! <a href="/addresses">Tạo địa chỉ</a>
             </p>
           ) : (
-            <select
-              value={selectedAddressId || ''}
-              onChange={(e) => setSelectedAddressId(e.target.value)}
-              className="checkout-address-select"
-            >
-              {addresses.map((address) => (
-                <option key={address.addressId} value={address.addressId}>
-                  {address.fullName || 'Không có tên'} - {address.phoneNumber || 'Không có số điện thoại'} -{' '}
-                  {address.addressInformation || 'Không có địa chỉ'}
-                  {address.default && ' (Mặc định)'}
-                </option>
-              ))}
-            </select>
+            <div className="checkout-address-dropdown" ref={addressDropdownRef}>
+              <div className="checkout-address-selected" onClick={toggleAddressDropdown}>
+                <div className="checkout-address-table">
+                  <div className="checkout-address-row">
+                    <span className="checkout-address-label">Họ và tên:</span>
+                    <span className="checkout-address-value">
+                      {selectedAddress ? (selectedAddress.fullName || 'Không có tên') : 'Chọn địa chỉ'}
+                    </span>
+                  </div>
+                  <div className="checkout-address-row">
+                    <span className="checkout-address-label">Số điện thoại:</span>
+                    <span className="checkout-address-value">
+                      {selectedAddress ? (selectedAddress.phoneNumber || 'Không có số điện thoại') : '-'}
+                    </span>
+                  </div>
+                  <div className="checkout-address-row">
+                    <span className="checkout-address-label">Địa chỉ:</span>
+                    <span className="checkout-address-value">
+                      {selectedAddress
+                        ? truncateText(selectedAddress.addressInformation || 'Không có địa chỉ')
+                        : '-'}
+                    </span>
+                  </div>
+                  <div className="checkout-address-row">
+                    <span className="checkout-address-label">Chi tiết khác:</span>
+                    <span className="checkout-address-value">
+                      {selectedAddress ? truncateText(selectedAddress.otherDetail || 'Không có') : '-'}
+                    </span>
+                  </div>
+                </div>
+                {selectedAddress?.default && <span className="checkout-address-default"> (Mặc định)</span>}
+              </div>
+              {isAddressDropdownOpen && (
+                <div className="checkout-address-dropdown-menu">
+                  {addresses
+                    .filter((address) => address.addressId !== selectedAddressId)
+                    .map((address) => (
+                      <div
+                        key={address.addressId}
+                        className="checkout-address-option"
+                        onClick={() => handleSelectAddress(address.addressId)}
+                      >
+                        <div className="checkout-address-table">
+                          <div className="checkout-address-row">
+                            <span className="checkout-address-label">Họ và tên:</span>
+                            <span className="checkout-address-value">
+                              {address.fullName || 'Không có tên'}
+                            </span>
+                          </div>
+                          <div className="checkout-address-row">
+                            <span className="checkout-address-label">Số điện thoại:</span>
+                            <span className="checkout-address-value">
+                              {address.phoneNumber || 'Không có số điện thoại'}
+                            </span>
+                          </div>
+                          <div className="checkout-address-row">
+                            <span className="checkout-address-label">Địa chỉ:</span>
+                            <span className="checkout-address-value">
+                              {truncateText(address.addressInformation || 'Không có địa chỉ')}
+                            </span>
+                          </div>
+                          <div className="checkout-address-row">
+                            <span className="checkout-address-label">Chi tiết khác:</span>
+                            <span className="checkout-address-value">
+                              {truncateText(address.otherDetail || 'Không có')}
+                            </span>
+                          </div>
+                        </div>
+                        {address.default && <span className="checkout-address-default"> (Mặc định)</span>}
+                      </div>
+                    ))}
+                </div>
+              )}
+            </div>
           )}
         </div>
         <div className="checkout-payment-method">

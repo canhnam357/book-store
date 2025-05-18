@@ -2,7 +2,7 @@
   display: flex;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 24px; /* Đồng bộ với .profile-container và .addresses-container */
 }
 
 .orders-content {
@@ -309,4 +309,14 @@
 
 .orders-modal-confirm:hover {
   background-color: #c82333;
+}
+
+/* CSS để xử lý xuống hàng cho chuỗi địa chỉ dài */
+.orders-summary .wrapped-text {
+  max-width: 900px; /* Giới hạn chiều rộng phù hợp với khung */
+  overflow-wrap: break-word; /* Tự động xuống hàng, kể cả chuỗi không có khoảng trắng */
+  max-height: 80px; /* Giới hạn 2-3 dòng với font-size 14px và line-height ~20px */
+  overflow: hidden; /* Ẩn nội dung vượt quá */
+  color: #333; /* Đồng bộ với orders-summary p */
+  line-height: 20px; /* Đảm bảo khoảng cách dòng phù hợp */
 }

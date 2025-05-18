@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { loginUser } from '../authSlice';
+import { toast } from 'react-toastify'; // Thêm import toast
 import './Login.css';
 
 const Login = () => {
@@ -22,6 +23,22 @@ const Login = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    // Kiểm tra độ dài email
+    if (email.length > 255) {
+      toast.dismiss(); // Xóa toast cũ
+      toast.error('Email có độ dài tối đa 255 ký tự!');
+      return;
+    }
+
+    // Kiểm tra độ dài mật khẩu
+    if (password.length < 8 || password.length > 32) {
+      toast.dismiss(); // Xóa toast cũ
+      toast.error('Mật khẩu phải có độ dài từ 8 đến 32 ký tự!');
+      return;
+    }
+
+    // Tiến hành đăng nhập nếu vượt qua kiểm tra
     dispatch(loginUser({ email, password })).then((result) => {
       console.log('Login result:', result);
       if (result.meta.requestStatus === 'fulfilled') {

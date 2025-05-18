@@ -95,6 +95,12 @@ const Profile = () => {
   };
 
   const handleSubmit = async () => {
+
+    if (formData.fullName && formData.fullName.length > 50) {
+      toast.error('Họ và tên có độ dài tối đa 50 ký tự!');
+      return;
+    }
+
     if (formData.phoneNumber && !validatePhoneNumber(formData.phoneNumber)) {
       toast.error('Số điện thoại phải gồm 10 chữ số!');
       return;

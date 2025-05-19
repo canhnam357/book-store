@@ -16,8 +16,10 @@ const PaymentReturn = () => {
   useEffect(() => {
     console.log('Payment return params:', { paymentStatus, orderId, paymentTime, transactionId, totalPrice });
     if (paymentStatus === '1') {
+      toast.dismiss();
       toast.success('Thanh toán thành công!');
     } else {
+      toast.dismiss();
       toast.error('Thanh toán thất bại!');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

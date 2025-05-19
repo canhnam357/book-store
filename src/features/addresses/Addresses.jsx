@@ -90,7 +90,6 @@ const Addresses = () => {
       const result = await dispatch(createAddress(newAddress)).unwrap();
       console.log('Create address result:', result);
       if (result?.result) {
-        toast.success(result.message || 'Thêm địa chỉ thành công!');
         setNewAddress({
           fullName: '',
           phoneNumber: '',
@@ -100,7 +99,6 @@ const Addresses = () => {
       }
     } catch (error) {
       console.error('Lỗi khi thêm địa chỉ:', error);
-      // Không hiển thị toast.error vì addressSlice.js đã xử lý
     }
   };
 
@@ -155,7 +153,6 @@ const Addresses = () => {
       ).unwrap();
       console.log('Update address result:', result);
       if (result?.result) {
-        toast.success(result.message || 'Cập nhật địa chỉ thành công!');
         setEditingAddressId(null);
         setEditAddress({
           fullName: '',
@@ -166,7 +163,6 @@ const Addresses = () => {
       }
     } catch (error) {
       console.error('Lỗi khi cập nhật địa chỉ:', error);
-      // Không hiển thị toast.error vì addressSlice.js đã xử lý
     }
   };
 
@@ -185,12 +181,8 @@ const Addresses = () => {
       try {
         const result = await dispatch(deleteAddress(addressId)).unwrap();
         console.log('Delete address result:', result);
-        if (result?.addressId) {
-          toast.success(result.message || 'Xóa địa chỉ thành công!');
-        }
       } catch (error) {
         console.error('Lỗi khi xóa địa chỉ:', error);
-        // Không hiển thị toast.error vì addressSlice.js đã xử lý
       }
     }
   };
@@ -199,12 +191,8 @@ const Addresses = () => {
     try {
       const result = await dispatch(setDefaultAddress(addressId)).unwrap();
       console.log('Set default address result:', result);
-      if (result?.addressId) {
-        toast.success(result.message || 'Đặt địa chỉ mặc định thành công!');
-      }
     } catch (error) {
       console.error('Lỗi khi đặt địa chỉ mặc định:', error);
-      // Không hiển thị toast.error vì addressSlice.js đã xử lý
     }
   };
 

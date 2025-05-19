@@ -100,6 +100,7 @@ const profileSlice = createSlice({
       .addCase(fetchProfile.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.dismiss();
         toast.error(action.payload);
       })
       // Change Avatar
@@ -112,11 +113,13 @@ const profileSlice = createSlice({
         if (state.profile) {
           state.profile.avatar = action.payload;
         }
+        toast.dismiss();
         toast.success('Thay đổi avatar thành công!');
       })
       .addCase(changeAvatar.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.dismiss();
         toast.error(action.payload);
       })
       // Change Profile
@@ -127,11 +130,13 @@ const profileSlice = createSlice({
       .addCase(changeProfile.fulfilled, (state, action) => {
         state.loading = false;
         state.profile = action.payload;
+        toast.dismiss();
         toast.success('Cập nhật thông tin thành công!');
       })
       .addCase(changeProfile.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.dismiss();
         toast.error(action.payload);
       });
   },

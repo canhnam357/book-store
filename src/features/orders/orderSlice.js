@@ -81,6 +81,30 @@ export const changeOrderStatus = createAsyncThunk(
   }
 );
 
+export const fetchPaymentDetail = createAsyncThunk(
+  'orders/fetchPaymentDetail',
+  async (orderId, { rejectWithValue }) => {
+    try {
+      const response = await api.get(`/order/payment-detail/${orderId}`);
+      console.log('Fetch payment detail response:', response.data);
+      if (response.status === 200 && response.data.result) {
+        return response.data.result;
+      }
+      throw new Error(response.data.message || 'Không thể lấy chi tiết thanh toán!');
+    } catch (error) {
+      console.error('Fetch payment detail error:', error.response?.data || error);
+      const message = error.response?.data?.message || 'Lỗi khi lấy chi tiết thanh toán!';
+      if (error.response?.status === 404) {
+        return rejectWithValue('Đơn hàng không tồn tại!');
+      }
+      if (error.response?.status === 500) {
+        return rejectWithValue('Lỗi server khi lấy chi tiết thanh toán!');
+      }
+      return rejectWithValue(message);
+    }
+  }
+);
+
 const orderSlice = createSlice({
   name: 'orders',
   initialState: {
@@ -94,6 +118,9 @@ const orderSlice = createSlice({
       last: true,
       first: true,
     },
+    paymentDetail: null,
+    paymentDetailLoading: false,
+    paymentDetailError: null,
     loading: false,
     error: null,
   },
@@ -109,6 +136,9 @@ const orderSlice = createSlice({
         last: true,
         first: true,
       };
+      state.paymentDetail = null;
+      state.paymentDetailLoading = false;
+      state.paymentDetailError = null;
       state.loading = false;
       state.error = null;
     },
@@ -164,12 +194,29 @@ const orderSlice = createSlice({
         if (order) {
           order.orderStatus = toStatus;
         }
+        toast.dismiss();
         toast.success('Hủy đơn thành công!');
       })
       .addCase(changeOrderStatus.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-        // Toast đã được hiển thị trong handleChangeOrderStatus, không cần lặp lại
+        toast.dismiss();
+        toast.error(action.payload);
+      })
+      // Fetch Payment Detail
+      .addCase(fetchPaymentDetail.pending, (state) => {
+        state.paymentDetailLoading = true;
+        state.paymentDetailError = null;
+        state.paymentDetail = null;
+      })
+      .addCase(fetchPaymentDetail.fulfilled, (state, action) => {
+        state.paymentDetailLoading = false;
+        state.paymentDetail = action.payload;
+      })
+      .addCase(fetchPaymentDetail.rejected, (state, action) => {
+        state.paymentDetailLoading = false;
+        state.paymentDetailError = action.payload;
+        state.paymentDetail = null;
       });
   },
 });

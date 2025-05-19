@@ -37,6 +37,7 @@ api.interceptors.response.use(
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
         store.dispatch(logoutUser());
+        toast.dismiss();
         toast.error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!');
         window.location.href = '/login';
         return Promise.reject(new Error('Không tìm thấy refresh token'));
@@ -58,17 +59,13 @@ api.interceptors.response.use(
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
         store.dispatch(logoutUser());
+        toast.dismiss();
         toast.error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!');
         window.location.href = '/login';
         return Promise.reject(refreshError);
       }
     }
 
-    // // Xử lý các lỗi khác
-    // if (error.response) {
-    //   console.error('Lỗi API:', error.response.data);
-    //   toast.error(error.response.data.message || 'Đã có lỗi xảy ra, vui lòng thử lại!');
-    // }
     return Promise.reject(error);
   }
 );

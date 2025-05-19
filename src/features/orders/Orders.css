@@ -101,7 +101,7 @@
 }
 
 .orders-refund-status {
-  font-size: 12px;
+  font-size: 14px; /* Đồng bộ với orders-summary p */
   margin-left: 5px;
 }
 
@@ -113,6 +113,45 @@
 .orders-refund-status-FAILED_REFUND {
   color: #FF0000; /* Màu đỏ */
   font-weight: 500;
+}
+
+.payment-status-pending {
+  color: #1E90FF; /* Màu xanh dương */
+  font-weight: 500;
+}
+
+.payment-status-success {
+  color: #008000; /* Màu xanh lá */
+  font-weight: 500;
+}
+
+.payment-status-failed {
+  color: #FF0000; /* Màu đỏ */
+  font-weight: 500;
+}
+
+.orders-payment-button,
+.orders-payment-detail-button {
+  margin-left: 10px;
+  padding: 8px 15px;
+  font-size: 14px;
+  border: none;
+  border-radius: 4px;
+  background-color: #007bff;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.orders-payment-button:hover,
+.orders-payment-detail-button:hover {
+  background-color: #0056b3;
+}
+
+.orders-payment-button:disabled,
+.orders-payment-detail-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
 }
 
 .orders-actions {
@@ -239,7 +278,8 @@
   color: #555;
 }
 
-.orders-modal {
+.orders-modal,
+.orders-payment-detail-modal {
   position: fixed;
   top: 0;
   left: 0;
@@ -252,7 +292,8 @@
   z-index: 1000;
 }
 
-.orders-modal-content {
+.orders-modal-content,
+.orders-payment-detail-modal-content {
   background-color: #fff;
   padding: 20px;
   border-radius: 8px;
@@ -261,7 +302,8 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-.orders-modal-content h3 {
+.orders-modal-content h3,
+.orders-payment-detail-modal-content h3 {
   font-size: 18px;
   font-weight: bold;
   margin-bottom: 15px;

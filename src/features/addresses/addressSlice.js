@@ -108,6 +108,7 @@ const addressSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
         state.addresses = [];
+        toast.dismiss();
         toast.error(action.payload);
       })
       // Create Address
@@ -121,11 +122,14 @@ const addressSlice = createSlice({
           state.addresses.push(action.payload.result);
           // Sắp xếp lại để địa chỉ mặc định lên đầu
           state.addresses.sort((a, b) => (b.default ? 1 : 0) - (a.default ? 1 : 0));
+          toast.dismiss();
+          toast.success('Tạo địa chỉ thành công!');
         }
       })
       .addCase(createAddress.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.dismiss();
         toast.error(action.payload);
       })
       // Delete Address
@@ -140,10 +144,13 @@ const addressSlice = createSlice({
             (address) => address.addressId !== action.payload.addressId
           );
         }
+        toast.dismiss();
+        toast.success('Xoá địa chỉ thành công!');
       })
       .addCase(deleteAddress.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.dismiss();
         toast.error(action.payload);
       })
       // Update Address
@@ -164,10 +171,13 @@ const addressSlice = createSlice({
           // Sắp xếp lại để địa chỉ mặc định lên đầu
           state.addresses.sort((a, b) => (b.default ? 1 : 0) - (a.default ? 1 : 0));
         }
+        toast.dismiss();
+        toast.success('Thay đổi địa chỉ thành công!');
       })
       .addCase(updateAddress.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.dismiss();
         toast.error(action.payload);
       })
       // Set Default Address
@@ -186,10 +196,13 @@ const addressSlice = createSlice({
           // Sắp xếp lại để địa chỉ mặc định lên đầu
           state.addresses.sort((a, b) => (b.default ? 1 : 0) - (a.default ? 1 : 0));
         }
+        toast.dismiss();
+        toast.success('Đặt làm địa chỉ mặc định thành công!');
       })
       .addCase(setDefaultAddress.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.dismiss();
         toast.error(action.payload);
       });
   },

@@ -1,20 +1,21 @@
 import { useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { fetchOrders, fetchOrderDetails, changeOrderStatus } from '../../features/orders/orderSlice';
+import { fetchOrders, fetchOrderDetails, changeOrderStatus, fetchPaymentDetail } from '../../features/orders/orderSlice';
 import ProfileSidebar from '../profile/ProfileSidebar';
 import { toast } from 'react-toastify';
 import './Orders.css';
 
 const Orders = () => {
   const dispatch = useDispatch();
-  const { orders, orderDetails, pagination, loading } = useSelector((state) => state.orders);
+  const { orders, orderDetails, pagination, loading, paymentDetail, paymentDetailLoading } = useSelector((state) => state.orders);
   const { isAuthenticated } = useSelector((state) => state.auth);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedStatus, setSelectedStatus] = useState('');
   const [expandedOrderId, setExpandedOrderId] = useState(null);
   const [showCancelModal, setShowCancelModal] = useState(false);
+  const [showPaymentDetailModal, setShowPaymentDetailModal] = useState(false);
   const [cancelOrderData, setCancelOrderData] = useState({ orderId: null, fromStatus: '', cause: '' });
 
   const orderStatuses = [
@@ -63,7 +64,6 @@ const Orders = () => {
           const result = await dispatch(fetchOrderDetails(orderId)).unwrap();
           console.log('Fetch order details result:', result);
         } catch (error) {
-          toast.error(error || 'Lỗi khi lấy chi tiết đơn hàng!');
         }
       }
     }
@@ -96,8 +96,30 @@ const Orders = () => {
       console.log('Change order status result:', result);
       handleCloseCancelModal();
     } catch (error) {
-      toast.error(error || 'Lỗi khi hủy đơn hàng!');
     }
+  };
+
+  const handlePaymentRedirect = (paymentUrl) => {
+    if (paymentUrl) {
+      window.location.href = paymentUrl;
+    } else {
+      toast.error('Không tìm thấy liên kết thanh toán!');
+    }
+  };
+
+  const handleOpenPaymentDetailModal = async (orderId) => {
+    try {
+      const result = await dispatch(fetchPaymentDetail(orderId)).unwrap();
+      console.log('Fetch payment detail result:', result);
+      setShowPaymentDetailModal(true);
+    } catch (error) {
+      toast.dismiss();
+      toast.error(error || 'Lỗi khi lấy chi tiết thanh toán!');
+    }
+  };
+
+  const handleClosePaymentDetailModal = () => {
+    setShowPaymentDetailModal(false);
   };
 
   const getStatusLabel = (status) => {
@@ -105,14 +127,26 @@ const Orders = () => {
     return statusObj ? statusObj.label : status || 'N/A';
   };
 
+  const getPaymentStatusLabel = (status) => {
+    switch (status) {
+      case 'PENDING':
+        return <span className="payment-status-pending">Đang thanh toán</span>;
+      case 'SUCCESS':
+        return <span className="payment-status-success">Thanh toán thành công</span>;
+      case 'FAILED':
+        return <span className="payment-status-failed">Thanh toán thất bại</span>;
+      default:
+        return status || 'N/A';
+    }
+  };
+
   const formatOrderDate = (dateString) => {
     if (!dateString) return 'N/A';
     const dateRegex = /^(\d{2}):(\d{2}):(\d{2}) (\d{2})-(\d{2})-(\d{4})$/;
     if (dateRegex.test(dateString)) {
-      return dateString; // Giữ nguyên nếu đã đúng định dạng hh:mm:ss dd-MM-yyyy
+      return dateString;
     }
     try {
-      // Thử parse chuỗi nếu định dạng khác
       const date = new Date(dateString);
       if (isNaN(date.getTime())) return 'N/A';
       const hours = String(date.getHours()).padStart(2, '0');
@@ -121,6 +155,21 @@ const Orders = () => {
       const day = String(date.getDate()).padStart(2, '0');
       const month = String(date.getMonth() + 1).padStart(2, '0');
       const year = date.getFullYear();
+      return `${hours}:${minutes}:${seconds} ${day}-${month}-${year}`;
+    } catch {
+      return 'N/A';
+    }
+  };
+
+  const formatPayDate = (payDate) => {
+    if (!payDate || !/^\d{14}$/.test(payDate)) return 'N/A';
+    try {
+      const year = payDate.slice(0, 4);
+      const month = payDate.slice(4, 6);
+      const day = payDate.slice(6, 8);
+      const hours = payDate.slice(8, 10);
+      const minutes = payDate.slice(10, 12);
+      const seconds = payDate.slice(12, 14);
       return `${hours}:${minutes}:${seconds} ${day}-${month}-${year}`;
     } catch {
       return 'N/A';
@@ -173,23 +222,47 @@ const Orders = () => {
                     </span>
                   </p>
                   <p>
-                    <strong>Phương thức thanh toán:</strong> {order.paymentMethod || 'N/A'}
+                    <strong>Phương thức thanh toán:</strong>{' '}
+                    {order.paymentMethod === 'COD' ? 'Thanh toán khi nhận hàng' : 'Thẻ tín dụng'}
                   </p>
-                  <p>
-                    <strong>Trạng thái thanh toán:</strong> {order.paymentStatus || 'N/A'}
-                    {order.refundStatus === 'REFUNDED' && (
-                      <span className="orders-refund-status orders-refund-status-REFUNDED">
-                        {' '}
-                        - Hoàn tiền thành công, kiểm tra email để xem thông tin chi tiết
-                      </span>
-                    )}
-                    {order.refundStatus === 'FAILED_REFUND' && order.refundTimesRemain === 0 && (
-                      <span className="orders-refund-status orders-refund-status-FAILED_REFUND">
-                        {' '}
-                        - Hoàn tiền thất bại, vui lòng liên hệ admin để hoàn tiền
-                      </span>
-                    )}
-                  </p>
+                  {order.paymentMethod !== 'COD' && (
+                    <p>
+                      <strong>Trạng thái thanh toán:</strong>{' '}
+                      {getPaymentStatusLabel(order.paymentStatus)}
+                      {order.paymentMethod === 'CARD' && order.paymentStatus === 'PENDING' && order.paymentUrl && (
+                        <button
+                          className="orders-payment-button"
+                          onClick={() => handlePaymentRedirect(order.paymentUrl)}
+                        >
+                          Thanh toán
+                        </button>
+                      )}
+                      {order.paymentMethod === 'CARD' && order.paymentStatus === 'SUCCESS' && (
+                        <button
+                          className="orders-payment-detail-button"
+                          onClick={() => handleOpenPaymentDetailModal(order.orderId)}
+                          disabled={paymentDetailLoading}
+                        >
+                          Xem chi tiết thanh toán
+                        </button>
+                      )}
+                    </p>
+                  )}
+                  {(order.refundStatus === 'REFUNDED' || 
+                    (order.refundStatus !== 'REFUNDED' && order.refundTimesRemain === 0)) && (
+                    <p>
+                      <strong>Trạng thái hoàn tiền:</strong>{' '}
+                      {order.refundStatus === 'REFUNDED' ? (
+                        <span className="orders-refund-status orders-refund-status-REFUNDED">
+                          Hoàn tiền thành công, vui lòng kiểm tra email để xem thông tin chi tiết
+                        </span>
+                      ) : (
+                        <span className="orders-refund-status orders-refund-status-FAILED_REFUND">
+                          Hoàn tiền thất bại, vui lòng liên hệ quản trị viên để hoàn tiền
+                        </span>
+                      )}
+                    </p>
+                  )}
                   {order.refundStatus === 'REFUNDED' && order.refundAt && (
                     <p>
                       <strong>Thời gian hoàn tiền:</strong> {formatOrderDate(order.refundAt)}
@@ -343,6 +416,31 @@ const Orders = () => {
                 onClick={handleChangeOrderStatus}
               >
                 Xác nhận
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showPaymentDetailModal && paymentDetail && (
+        <div className="orders-payment-detail-modal">
+          <div className="orders-payment-detail-modal-content">
+            <h3>Chi tiết thanh toán</h3>
+            <p>
+              <strong>Số tiền:</strong> {formatPrice(paymentDetail.amount)}
+            </p>
+            <p>
+              <strong>Ngày thanh toán:</strong> {formatPayDate(paymentDetail.payDate)}
+            </p>
+            <p>
+              <strong>Mã ngân hàng:</strong> {paymentDetail.bankCode || 'N/A'}
+            </p>
+            <div className="orders-modal-actions">
+              <button
+                className="orders-modal-button orders-modal-cancel"
+                onClick={handleClosePaymentDetailModal}
+              >
+                Đóng
               </button>
             </div>
           </div>

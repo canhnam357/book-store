@@ -183,6 +183,7 @@ const cartSlice = createSlice({
         state.error = action.payload;
         state.cartItems = [];
         state.totalCartPrice = 0;
+        toast.dismiss();
         toast.error(action.payload);
       })
       // Add to Cart
@@ -198,6 +199,7 @@ const cartSlice = createSlice({
       .addCase(addToCart.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.dismiss();
         toast.error(action.payload);
       })
       // Remove from Cart
@@ -216,6 +218,7 @@ const cartSlice = createSlice({
       .addCase(removeFromCart.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.dismiss();
         toast.error(action.payload);
       })
       // Change Quantity
@@ -231,10 +234,13 @@ const cartSlice = createSlice({
           state.cartItems[itemIndex] = updatedItem;
         }
         state.totalCartPrice = state.cartItems.reduce((total, item) => total + (item.totalPrice || 0), 0);
+        toast.dismiss();
+        toast.success('Thay đổi số lượng sản phầm thành công!');
       })
       .addCase(changeQuantity.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.dismiss();
         toast.error(action.payload);
       })
       // Update Quantity
@@ -250,10 +256,13 @@ const cartSlice = createSlice({
           state.cartItems[itemIndex] = updatedItem;
         }
         state.totalCartPrice = state.cartItems.reduce((total, item) => total + (item.totalPrice || 0), 0);
+        toast.dismiss();
+        toast.success('Thay đổi số lượng sản phẩm thành công!');
       })
       .addCase(updateQuantity.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.dismiss();
         toast.error(action.payload);
       })
       // Create Order
@@ -265,11 +274,13 @@ const cartSlice = createSlice({
         state.loading = false;
         state.cartItems = [];
         state.totalCartPrice = 0;
+        toast.dismiss();
         toast.success('Đặt hàng thành công!');
       })
       .addCase(createOrder.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.dismiss();
         toast.error(action.payload);
       });
   },

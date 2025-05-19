@@ -200,23 +200,6 @@ export const updateReview = createAsyncThunk(
   }
 );
 
-export const deleteReview = createAsyncThunk(
-  'book/deleteReview',
-  async (reviewId, { rejectWithValue }) => {
-    try {
-      const response = await api.delete(`/reviews/${reviewId}`);
-      console.log('Delete review response:', response.data);
-      if (response.status === 200) {
-        return reviewId;
-      }
-      throw new Error(response.data.message || 'Không thể xóa đánh giá!');
-    } catch (error) {
-      console.error('Delete review error:', error.response?.data || error);
-      return rejectWithValue(error.response?.data?.message || 'Không thể xóa đánh giá!');
-    }
-  }
-);
-
 const bookSlice = createSlice({
   name: 'book',
   initialState: {
@@ -414,11 +397,13 @@ const bookSlice = createSlice({
         state.loading = false;
         state.reviews.unshift(action.payload);
         state.totalReviews += 1;
+        toast.dismiss();
         toast.success('Tạo đánh giá thành công!');
       })
       .addCase(createReview.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.dismiss();
         toast.error(action.payload);
       })
       // Update Review
@@ -433,28 +418,13 @@ const bookSlice = createSlice({
         if (reviewIndex !== -1) {
           state.reviews[reviewIndex] = updatedReview;
         }
+        toast.dismiss();
         toast.success('Cập nhật đánh giá thành công!');
       })
       .addCase(updateReview.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-        toast.error(action.payload);
-      })
-      // Delete Review
-      .addCase(deleteReview.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(deleteReview.fulfilled, (state, action) => {
-        state.loading = false;
-        const reviewId = action.payload;
-        state.reviews = state.reviews.filter((review) => review.reviewId !== reviewId);
-        state.totalReviews -= 1;
-        toast.success('Xóa đánh giá thành công!');
-      })
-      .addCase(deleteReview.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
+        toast.dismiss();
         toast.error(action.payload);
       });
   },

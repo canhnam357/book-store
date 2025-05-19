@@ -170,17 +170,20 @@ const authSlice = createSlice({
         state.loading = false;
         state.isAuthenticated = true;
         state.user = action.payload;
+        toast.dismiss();
         toast.success('Đăng nhập thành công!');
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.dismiss();
         toast.error(action.payload);
       })
       // Google Callback
       .addCase(handleGoogleCallback.fulfilled, (state, action) => {
         state.isAuthenticated = true;
         state.user = action.payload;
+        toast.dismiss();
         toast.success('Đăng nhập bằng Google thành công!');
       })
       .addCase(handleGoogleCallback.rejected, (state, action) => {
@@ -188,6 +191,7 @@ const authSlice = createSlice({
         const message = action.payload === 'account_locked'
           ? 'Đăng nhập bằng Google thất bại do tài khoản bị khóa!'
           : action.payload;
+        toast.dismiss();
         toast.error(message);
       })
       // Register User
@@ -198,11 +202,13 @@ const authSlice = createSlice({
       .addCase(registerUser.fulfilled, (state, action) => {
         state.loading = false;
         state.registerEmail = action.payload;
+        toast.dismiss();
         toast.success('Đăng ký thành công, vui lòng kiểm tra email để nhận OTP xác thực tài khoản.');
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.dismiss();
         toast.error(action.payload);
       })
       // Verify OTP
@@ -213,11 +219,13 @@ const authSlice = createSlice({
       .addCase(verifyOTP.fulfilled, (state) => {
         state.loading = false;
         state.registerEmail = null;
+        toast.dismiss();
         toast.success('Xác thực tài khoản thành công, bây giờ bạn có thể tiến hành đăng nhập.');
       })
       .addCase(verifyOTP.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.dismiss();
         toast.error(action.payload);
       })
       // Send OTP Reset Password
@@ -228,11 +236,13 @@ const authSlice = createSlice({
       .addCase(sendOTPResetPassword.fulfilled, (state, action) => {
         state.loading = false;
         state.resetPasswordEmail = action.payload;
+        toast.dismiss();
         toast.success('Gửi OTP qua email thành công, vui lòng kiểm tra email để lấy OTP đặt lại mật khẩu!');
       })
       .addCase(sendOTPResetPassword.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.dismiss();
         toast.error(action.payload);
       })
       // Reset Password
@@ -243,23 +253,27 @@ const authSlice = createSlice({
       .addCase(resetPassword.fulfilled, (state) => {
         state.loading = false;
         state.resetPasswordEmail = null;
+        toast.dismiss();
         toast.success('Đặt lại mật khẩu thành công!');
       })
       .addCase(resetPassword.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.dismiss();
         toast.error(action.payload);
       })
       // Logout User
       .addCase(logoutUser.fulfilled, (state) => {
         state.isAuthenticated = false;
         state.user = null;
+        toast.dismiss();
         toast.success('Đăng xuất thành công!');
       })
       .addCase(logoutUser.rejected, (state, action) => {
         state.isAuthenticated = false;
         state.user = null;
         state.error = action.payload;
+        toast.dismiss();
         toast.error(action.payload);
       });
   },

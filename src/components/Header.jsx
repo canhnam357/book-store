@@ -5,6 +5,7 @@ import { logoutUser } from '../features/auth/authSlice';
 import { FaShoppingCart, FaUser, FaSearch } from 'react-icons/fa';
 import api from '../api/api';
 import './Header.css';
+import { toast } from 'react-toastify';
 
 const Header = () => {
   const { isAuthenticated } = useSelector((state) => state.auth);
@@ -51,10 +52,8 @@ const Header = () => {
         setSearchResults(results);
       }
     } catch (error) {
-      console.error('Lỗi tìm kiếm sách:', error);
-      if (error.response?.status === 500) {
-        alert('Tìm kiếm thất bại do lỗi server. Vui lòng thử lại sau!');
-      }
+      toast.dismiss();
+      toast.error(error.response.data.message);
       setSearchResults([]);
     }
   };

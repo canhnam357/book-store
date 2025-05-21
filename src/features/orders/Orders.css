@@ -2,7 +2,9 @@
   display: flex;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 24px; /* Đồng bộ với .profile-container và .addresses-container */
+  padding: 24px;
+  min-height: calc(100vh - 100px); /* Đảm bảo chiều cao tối thiểu để footer không nhảy lên */
+  position: relative; /* Để spinner-overlay hoạt động đúng */
 }
 
 .orders-content {
@@ -101,32 +103,32 @@
 }
 
 .orders-refund-status {
-  font-size: 14px; /* Đồng bộ với orders-summary p */
+  font-size: 14px;
   margin-left: 5px;
 }
 
 .orders-refund-status-REFUNDED {
-  color: #008000; /* Màu xanh lá */
+  color: #008000;
   font-weight: 500;
 }
 
 .orders-refund-status-FAILED_REFUND {
-  color: #FF0000; /* Màu đỏ */
+  color: #FF0000;
   font-weight: 500;
 }
 
 .payment-status-pending {
-  color: #1E90FF; /* Màu xanh dương */
+  color: #1E90FF;
   font-weight: 500;
 }
 
 .payment-status-success {
-  color: #008000; /* Màu xanh lá */
+  color: #008000;
   font-weight: 500;
 }
 
 .payment-status-failed {
-  color: #FF0000; /* Màu đỏ */
+  color: #FF0000;
   font-weight: 500;
 }
 
@@ -355,10 +357,38 @@
 
 /* CSS để xử lý xuống hàng cho chuỗi địa chỉ dài */
 .orders-summary .wrapped-text {
-  max-width: 900px; /* Giới hạn chiều rộng phù hợp với khung */
-  overflow-wrap: break-word; /* Tự động xuống hàng, kể cả chuỗi không có khoảng trắng */
-  max-height: 80px; /* Giới hạn 2-3 dòng với font-size 14px và line-height ~20px */
-  overflow: hidden; /* Ẩn nội dung vượt quá */
-  color: #333; /* Đồng bộ với orders-summary p */
-  line-height: 20px; /* Đảm bảo khoảng cách dòng phù hợp */
+  max-width: 900px;
+  overflow-wrap: break-word;
+  max-height: 80px;
+  overflow: hidden;
+  color: #333;
+  line-height: 20px;
+}
+
+/* Style cho spinner */
+.spinner-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.3); /* Overlay mờ */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Đảm bảo spinner ở trên cùng */
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3; /* Màu viền nhạt */
+  border-top: 4px solid #007bff; /* Màu viền chính, đồng bộ với orders-details-button */
+  border-radius: 50%;
+  animation: spinner 1s linear infinite;
+}
+
+@keyframes spinner {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }

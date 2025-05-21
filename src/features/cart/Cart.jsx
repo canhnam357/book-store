@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
 import { fetchCart, changeQuantity, updateQuantity, removeFromCart } from './cartSlice';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
+import CartItem from './CartItem';
 import './Cart.css';
 
 const Cart = () => {
@@ -54,13 +54,21 @@ const Cart = () => {
   };
 
   const handleIncreaseQuantity = async (bookId) => {
+    try {
     const result = await dispatch(changeQuantity({ bookId, delta: 1 })).unwrap();
     console.log('Increase quantity result:', result);
+    } catch(error) {
+      
+    }
   };
 
   const handleDecreaseQuantity = async (bookId) => {
+    try {
     const result = await dispatch(changeQuantity({ bookId, delta: -1 })).unwrap();
     console.log('Decrease quantity result:', result);
+    } catch(error) {
+
+    }
   };
 
   const handleQuantityInputChange = (bookId, value) => {
@@ -101,18 +109,23 @@ const Cart = () => {
     navigate('/checkout', { state: { selectedItems } });
   };
 
-  const selectedTotalPrice = (cartItems || [])
-    .filter((item) => selectedItems.includes(item.bookId))
-    .reduce((total, item) => total + (item.totalPrice || 0), 0);
+  const selectedTotalPrice = useMemo(() => {
+    return (cartItems || [])
+      .filter((item) => selectedItems.includes(item.bookId))
+      .reduce((total, item) => total + (item.totalPrice || 0), 0);
+  }, [cartItems, selectedItems]);
 
   if (!isAuthenticated) {
     return <p>Vui lòng đăng nhập để xem giỏ hàng!</p>;
   }
 
-  if (loading) return <p>Đang tải giỏ hàng...</p>;
-
   return (
     <div className="cart-container">
+      {loading && (
+        <div className="spinner-overlay">
+          <div className="spinner"></div>
+        </div>
+      )}
       <h2>Giỏ hàng</h2>
       {(cartItems?.length || 0) === 0 ? (
         <p>Giỏ hàng của bạn đang trống!</p>
@@ -134,68 +147,18 @@ const Cart = () => {
           </div>
           <div className="cart-items">
             {cartItems.map((item) => (
-              <div key={item.bookId} className="cart-item">
-                <input
-                  type="checkbox"
-                  className="cart-item-checkbox"
-                  checked={selectedItems.includes(item.bookId)}
-                  onChange={() => handleSelectItem(item.bookId)}
-                />
-                <img
-                  src={item.urlThumbnail || '/no-image.png'}
-                  alt={item.bookName || 'Sách'}
-                  className="cart-item-image"
-                />
-                <h3 className="cart-item-name">
-                  <Link to={`/books/${item.bookId}`}>{item.bookName || 'Không có tiêu đề'}</Link>
-                </h3>
-                <p className="cart-item-price">
-                  {item.priceAfterSales !== null && (
-                    <span className="original-price">
-                      {(item.price || 0).toLocaleString('vi-VN')}
-                    </span>
-                  )}
-                  <span>
-                    {(item.priceAfterSales !== null ? item.priceAfterSales : item.price || 0).toLocaleString('vi-VN')} VNĐ
-                  </span>
-                </p>
-                <div className="cart-item-quantity">
-                  <button
-                    className="cart-item-quantity-button"
-                    onClick={() => handleDecreaseQuantity(item.bookId)}
-                  >
-                    -
-                  </button>
-                  <input
-                    type="number"
-                    className="cart-item-quantity-input"
-                    value={inputQuantities[item.bookId] || item.quantity}
-                    onChange={(e) => handleQuantityInputChange(item.bookId, e.target.value)}
-                    onBlur={() => handleQuantityInputBlurOrEnter(item.bookId, item.quantity)}
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter') {
-                        handleQuantityInputBlurOrEnter(item.bookId, item.quantity);
-                      }
-                    }}
-                    min="1"
-                  />
-                  <button
-                    className="cart-item-quantity-button"
-                    onClick={() => handleIncreaseQuantity(item.bookId)}
-                  >
-                    +
-                  </button>
-                </div>
-                <p className="cart-item-total-price">
-                  {(item.totalPrice || 0).toLocaleString('vi-VN')} VNĐ
-                </p>
-                <button
-                  className="cart-item-remove"
-                  onClick={() => handleRemoveFromCart(item.bookId)}
-                >
-                  Xóa
-                </button>
-              </div>
+              <CartItem
+                key={item.bookId}
+                item={item}
+                selectedItems={selectedItems}
+                handleSelectItem={handleSelectItem}
+                handleIncreaseQuantity={handleIncreaseQuantity}
+                handleDecreaseQuantity={handleDecreaseQuantity}
+                handleQuantityInputChange={handleQuantityInputChange}
+                handleQuantityInputBlurOrEnter={handleQuantityInputBlurOrEnter}
+                handleRemoveFromCart={handleRemoveFromCart}
+                inputQuantities={inputQuantities}
+              />
             ))}
           </div>
           <div className="cart-summary">

@@ -17,6 +17,7 @@ const Orders = () => {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showPaymentDetailModal, setShowPaymentDetailModal] = useState(false);
   const [cancelOrderData, setCancelOrderData] = useState({ orderId: null, fromStatus: '', cause: '' });
+  const [isFetchingDetails, setIsFetchingDetails] = useState(false); // State để theo dõi tải chi tiết
 
   const orderStatuses = [
     { value: '', label: 'Tất cả trạng thái' },
@@ -60,10 +61,14 @@ const Orders = () => {
     } else {
       setExpandedOrderId(orderId);
       if (!orderDetails[orderId]) {
+        setIsFetchingDetails(true); // Bật spinner khi tải chi tiết
         try {
           const result = await dispatch(fetchOrderDetails(orderId)).unwrap();
           console.log('Fetch order details result:', result);
         } catch (error) {
+          toast.error(error || 'Lỗi khi lấy chi tiết đơn hàng!');
+        } finally {
+          setIsFetchingDetails(false); // Tắt spinner sau khi tải xong
         }
       }
     }
@@ -96,6 +101,7 @@ const Orders = () => {
       console.log('Change order status result:', result);
       handleCloseCancelModal();
     } catch (error) {
+      toast.error(error || 'Lỗi khi hủy đơn hàng!');
     }
   };
 
@@ -184,10 +190,13 @@ const Orders = () => {
     }).format(price);
   };
 
-  if (loading) return <p className="orders-loading">Đang tải danh sách đơn hàng...</p>;
-
   return (
     <div className="orders-container">
+      {(loading || isFetchingDetails) && (
+        <div className="spinner-overlay">
+          <div className="spinner"></div>
+        </div>
+      )}
       <ProfileSidebar />
       <div className="orders-content">
         <h2 className="orders-title">Danh sách đơn hàng</h2>

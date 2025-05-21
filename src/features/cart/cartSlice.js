@@ -3,8 +3,8 @@ import api from '../../api/api';
 import { toast } from 'react-toastify';
 
 // Cấu hình timeout cho API (30 giây)
-const apiWithTimeout = api; // Giả định api đã là axios instance, nếu không, tạo instance mới
-apiWithTimeout.defaults.timeout = 30000; // Đặt timeout toàn cục cho tất cả các yêu cầu
+const apiWithTimeout = api;
+apiWithTimeout.defaults.timeout = 30000;
 
 export const fetchCart = createAsyncThunk(
   'cart/fetchCart',
@@ -74,17 +74,10 @@ export const changeQuantity = createAsyncThunk(
       const response = await apiWithTimeout.post('/cart/change-quantity', { bookId, quantity: delta });
       console.log('Change quantity response:', response.data);
       if (response.status === 200 && response.data.result) {
-        return response.data.result;
+        return response.data.result; // Trả về cartItem trực tiếp từ result
       }
       throw new Error(response.data.message || 'Không thể thay đổi số lượng!');
     } catch (error) {
-      console.error('Change quantity error:', error.response?.data || error);
-      if (error.response?.status === 404) {
-        return rejectWithValue('Sản phẩm không có trong giỏ hàng!');
-      }
-      if (error.response?.status === 422) {
-        return rejectWithValue('Số lượng không hợp lệ!');
-      }
       return rejectWithValue(error.response?.data?.message || 'Lỗi khi thay đổi số lượng!');
     }
   }
@@ -97,17 +90,11 @@ export const updateQuantity = createAsyncThunk(
       const response = await apiWithTimeout.post('/cart/update-quantity', { bookId, quantity });
       console.log('Update quantity response:', response.data);
       if (response.status === 200 && response.data.result) {
-        return response.data.result;
+        return response.data.result; // Trả về cartItem trực tiếp từ result
       }
       throw new Error(response.data.message || 'Không thể cập nhật số lượng!');
     } catch (error) {
       console.error('Update quantity error:', error.response?.data || error);
-      if (error.response?.status === 404) {
-        return rejectWithValue('Sản phẩm không có trong giỏ hàng!');
-      }
-      if (error.response?.status === 422) {
-        return rejectWithValue('Số lượng không hợp lệ!');
-      }
       return rejectWithValue(error.response?.data?.message || 'Lỗi khi cập nhật số lượng!');
     }
   }
@@ -120,33 +107,11 @@ export const createOrder = createAsyncThunk(
       const response = await apiWithTimeout.post('/create-order', { bookIds, addressId, paymentMethod });
       console.log('Create order response:', response.data);
       if (response.status === 201 && response.data.result) {
-        return response.data.result; // Nếu paymentMethod là CARD, result sẽ là URL VNPAY
+        return response.data.result;
       }
       throw new Error(response.data.message || 'Không thể tạo đơn hàng!');
     } catch (error) {
       console.error('Create order error:', error.response?.data || error);
-      if (error.response?.status === 403) {
-        return rejectWithValue('Tài khoản của bạn bị khóa hoặc chưa xác thực!');
-      }
-      if (error.response?.status === 404 && error.response?.data?.message?.includes('addressId')) {
-        return rejectWithValue('Địa chỉ không tồn tại!');
-      }
-      if (error.response?.status === 404 && error.response?.data?.message?.includes('paymentMethod')) {
-        return rejectWithValue('Phương thức thanh toán không hợp lệ!');
-      }
-      if (error.response?.status === 422 && error.response?.data?.message?.includes('cart is empty')) {
-        return rejectWithValue('Giỏ hàng của bạn đang rỗng!');
-      }
-      if (error.response?.status === 409) {
-        await dispatch(fetchCart());
-        return rejectWithValue(error.response?.data?.message);
-      }
-      if (error.response?.status === 422 && error.response?.data?.message?.includes('at least 1 product')) {
-        return rejectWithValue('Vui lòng chọn ít nhất một sản phẩm để thanh toán!');
-      }
-      if (error.response?.status === 500) {
-        return rejectWithValue('Lỗi server khi tạo đơn hàng!');
-      }
       return rejectWithValue(error.response?.data?.message || 'Lỗi khi tạo đơn hàng!');
     }
   }
@@ -231,11 +196,11 @@ const cartSlice = createSlice({
         const updatedItem = action.payload;
         const itemIndex = state.cartItems.findIndex((item) => item.bookId === updatedItem.bookId);
         if (itemIndex !== -1) {
-          state.cartItems[itemIndex] = updatedItem;
+          state.cartItems[itemIndex] = updatedItem; // Cập nhật chỉ cartItem tương ứng
+          state.totalCartPrice = state.cartItems.reduce((total, item) => total + (item.totalPrice || 0), 0);
         }
-        state.totalCartPrice = state.cartItems.reduce((total, item) => total + (item.totalPrice || 0), 0);
         toast.dismiss();
-        toast.success('Thay đổi số lượng sản phầm thành công!');
+        toast.success('Thay đổi số lượng sản phẩm thành công!');
       })
       .addCase(changeQuantity.rejected, (state, action) => {
         state.loading = false;
@@ -253,11 +218,11 @@ const cartSlice = createSlice({
         const updatedItem = action.payload;
         const itemIndex = state.cartItems.findIndex((item) => item.bookId === updatedItem.bookId);
         if (itemIndex !== -1) {
-          state.cartItems[itemIndex] = updatedItem;
+          state.cartItems[itemIndex] = updatedItem; // Cập nhật chỉ cartItem tương ứng
+          state.totalCartPrice = state.cartItems.reduce((total, item) => total + (item.totalPrice || 0), 0);
         }
-        state.totalCartPrice = state.cartItems.reduce((total, item) => total + (item.totalPrice || 0), 0);
         toast.dismiss();
-        toast.success('Thay đổi số lượng sản phẩm thành công!');
+        toast.success('Cập nhật số lượng sản phẩm thành công!');
       })
       .addCase(updateQuantity.rejected, (state, action) => {
         state.loading = false;

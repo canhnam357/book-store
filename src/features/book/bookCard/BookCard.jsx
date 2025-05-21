@@ -4,21 +4,12 @@ import './BookCard.css';
 const BookCard = ({ book }) => {
   const { bookId, bookName, price, urlThumbnail, inStock, priceAfterSale, newArrival } = book;
 
-  // Optimize Cloudinary URL with width, format, and quality
-  const optimizedUrl = urlThumbnail ? `${urlThumbnail}?w=200&f=auto&q=auto` : '/no-image.png';
-
   return (
     <Link to={`/books/${bookId}`} className="book-card-link">
       <div className="book-card">
         <div className="book-card-image">
           {urlThumbnail ? (
-            <img
-              src={optimizedUrl}
-              alt={bookName || 'Sách'}
-              loading="lazy"
-              width="200"
-              height="200"
-            />
+            <img src={urlThumbnail} alt={bookName || 'Sách'} />
           ) : (
             <div className="book-card-placeholder">No Image</div>
           )}

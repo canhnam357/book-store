@@ -14,7 +14,6 @@
   align-items: center;
   padding: 0 16px;
   justify-content: space-between;
-  min-height: 60px; /* Cố định chiều cao tối thiểu để tránh shift */
 }
 
 .header-left {
@@ -235,7 +234,6 @@
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   min-width: 180px;
-  min-height: 100px; /* Cố định chiều cao tối thiểu để tránh shift */
   z-index: 10;
   opacity: 0;
   transform: translateY(10px);

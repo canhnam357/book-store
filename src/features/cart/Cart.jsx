@@ -14,6 +14,8 @@ const Cart = () => {
   const [inputQuantities, setInputQuantities] = useState({});
   const [selectedItems, setSelectedItems] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [itemToRemove, setItemToRemove] = useState(null);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -55,19 +57,19 @@ const Cart = () => {
 
   const handleIncreaseQuantity = async (bookId) => {
     try {
-    const result = await dispatch(changeQuantity({ bookId, delta: 1 })).unwrap();
-    console.log('Increase quantity result:', result);
-    } catch(error) {
-      
+      const result = await dispatch(changeQuantity({ bookId, delta: 1 })).unwrap();
+      console.log('Increase quantity result:', result);
+    } catch (error) {
+      console.error('Lỗi khi tăng số lượng:', error);
     }
   };
 
   const handleDecreaseQuantity = async (bookId) => {
     try {
-    const result = await dispatch(changeQuantity({ bookId, delta: -1 })).unwrap();
-    console.log('Decrease quantity result:', result);
-    } catch(error) {
-
+      const result = await dispatch(changeQuantity({ bookId, delta: -1 })).unwrap();
+      console.log('Decrease quantity result:', result);
+    } catch (error) {
+      console.error('Lỗi khi giảm số lượng:', error);
     }
   };
 
@@ -91,14 +93,36 @@ const Cart = () => {
       }));
       return;
     }
-    const result = await dispatch(updateQuantity({ bookId, quantity: newQuantity })).unwrap();
-    console.log('Update quantity result:', result);
+    try {
+      const result = await dispatch(updateQuantity({ bookId, quantity: newQuantity })).unwrap();
+      console.log('Update quantity result:', result);
+    } catch (error) {
+      console.error('Lỗi khi cập nhật số lượng:', error);
+    }
   };
 
-  const handleRemoveFromCart = async (bookId) => {
-    const result = await dispatch(removeFromCart(bookId)).unwrap();
-    console.log('Remove from cart result:', result);
-    setSelectedItems((prev) => prev.filter((id) => id !== bookId));
+  const handleRemoveFromCart = (bookId) => {
+    setItemToRemove(bookId);
+    setShowConfirm(true);
+  };
+
+  const confirmRemove = async () => {
+    if (itemToRemove) {
+      try {
+        const result = await dispatch(removeFromCart(itemToRemove)).unwrap();
+        console.log('Remove from cart result:', result);
+        setSelectedItems((prev) => prev.filter((id) => id !== itemToRemove));
+      } catch (error) {
+        console.error('Lỗi khi xóa sản phẩm:', error);
+      }
+    }
+    setShowConfirm(false);
+    setItemToRemove(null);
+  };
+
+  const cancelRemove = () => {
+    setShowConfirm(false);
+    setItemToRemove(null);
   };
 
   const handleCheckout = () => {
@@ -126,9 +150,41 @@ const Cart = () => {
           <div className="spinner"></div>
         </div>
       )}
+      {showConfirm && (
+        <div className="confirmation-modal">
+          <div className="confirmation-modal-content">
+            <h3>Xác nhận xóa</h3>
+            <p>Bạn có chắc muốn xóa sản phẩm này khỏi giỏ hàng?</p>
+            <div className="confirmation-modal-actions">
+              <button className="confirmation-modal-confirm" onClick={confirmRemove}>
+                Xác nhận
+              </button>
+              <button className="confirmation-modal-cancel" onClick={cancelRemove}>
+                Hủy
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <h2>Giỏ hàng</h2>
       {(cartItems?.length || 0) === 0 ? (
-        <p>Giỏ hàng của bạn đang trống!</p>
+        <div className="cart-empty">
+          <img
+            src="https://cdn-icons-png.flaticon.com/512/2038/2038854.png"
+            alt="Empty cart"
+            className="cart-empty-icon"
+          />
+          <h3 className="cart-empty-message">Giỏ hàng của bạn đang trống!</h3>
+          <p className="cart-empty-submessage">
+            Khám phá ngay các sản phẩm tuyệt vời và bắt đầu mua sắm!
+          </p>
+          <button
+            className="cart-empty-shop-button"
+            onClick={() => navigate('/books')}
+          >
+            Bắt đầu mua sắm
+          </button>
+        </div>
       ) : (
         <>
           <div className="cart-header">

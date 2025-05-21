@@ -17,7 +17,6 @@ const Addresses = () => {
   const navigate = useNavigate();
   const { addresses, loading } = useSelector((state) => state.addresses);
   const { isAuthenticated } = useSelector((state) => state.auth);
-
   const [newAddress, setNewAddress] = useState({
     fullName: '',
     phoneNumber: '',
@@ -31,6 +30,8 @@ const Addresses = () => {
     addressInformation: '',
     otherDetail: '',
   });
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [addressToDelete, setAddressToDelete] = useState(null);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -176,15 +177,27 @@ const Addresses = () => {
     });
   };
 
-  const handleDeleteAddress = async (addressId) => {
-    if (window.confirm('Bạn có chắc muốn xóa địa chỉ này không?')) {
+  const handleDeleteAddress = (addressId) => {
+    setAddressToDelete(addressId);
+    setShowConfirm(true);
+  };
+
+  const confirmDelete = async () => {
+    if (addressToDelete) {
       try {
-        const result = await dispatch(deleteAddress(addressId)).unwrap();
+        const result = await dispatch(deleteAddress(addressToDelete)).unwrap();
         console.log('Delete address result:', result);
       } catch (error) {
         console.error('Lỗi khi xóa địa chỉ:', error);
       }
     }
+    setShowConfirm(false);
+    setAddressToDelete(null);
+  };
+
+  const cancelDelete = () => {
+    setShowConfirm(false);
+    setAddressToDelete(null);
   };
 
   const handleSetDefault = async (addressId) => {
@@ -202,6 +215,22 @@ const Addresses = () => {
     <div className="addresses-container">
       <ProfileSidebar />
       <div className="addresses-content">
+        {showConfirm && (
+          <div className="confirmation-modal">
+            <div className="confirmation-modal-content">
+              <h3>Xác nhận xóa</h3>
+              <p>Bạn có chắc muốn xóa địa chỉ này không?</p>
+              <div className="confirmation-modal-actions">
+                <button className="confirmation-modal-confirm" onClick={confirmDelete}>
+                  Xác nhận
+                </button>
+                <button className="confirmation-modal-cancel" onClick={cancelDelete}>
+                  Hủy
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
         <h2 className="addresses-title">Danh sách địa chỉ</h2>
         <form className="addresses-form" onSubmit={handleCreateAddress}>
           <h3>Thêm địa chỉ mới</h3>

@@ -94,12 +94,6 @@ export const fetchPaymentDetail = createAsyncThunk(
     } catch (error) {
       console.error('Fetch payment detail error:', error.response?.data || error);
       const message = error.response?.data?.message || 'Lỗi khi lấy chi tiết thanh toán!';
-      if (error.response?.status === 404) {
-        return rejectWithValue('Đơn hàng không tồn tại!');
-      }
-      if (error.response?.status === 500) {
-        return rejectWithValue('Lỗi server khi lấy chi tiết thanh toán!');
-      }
       return rejectWithValue(message);
     }
   }

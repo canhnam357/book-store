@@ -5,32 +5,41 @@
     background-color: white;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
-  }
-  
-  .register-container h2 {
+}
+
+.register-container h2 {
     font-size: 24px;
     font-weight: bold;
     margin-bottom: 24px;
     text-align: center;
-  }
-  
-  .form-group {
+}
+
+.form-group {
     margin-bottom: 16px;
-  }
-  
-  .form-group label {
+}
+
+.form-group label {
     display: block;
     color: #4a5568;
-  }
-  
-  .form-group input {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.form-group input {
     width: 100%;
     padding: 8px;
     border: 1px solid #e2e8f0;
     border-radius: 4px;
-  }
-  
-  .button {
+    font-size: 14px;
+    transition: border-color 0.2s;
+}
+
+.form-group input:focus {
+    border-color: #3b82f6;
+    outline: none;
+}
+
+.button {
     width: 100%;
     padding: 8px;
     background-color: #3b82f6;
@@ -38,27 +47,65 @@
     border: none;
     border-radius: 4px;
     cursor: pointer;
-  }
-  
-  .button:hover {
+    font-size: 14px;
+}
+
+.button:hover {
     background-color: #2563eb;
-  }
-  
-  .button:disabled {
+}
+
+.button:disabled {
     background-color: #a0aec0;
     cursor: not-allowed;
-  }
-  
-  .link {
+}
+
+.link {
     color: #3b82f6;
     text-decoration: none;
-  }
-  
-  .link:hover {
+    font-size: 14px;
+}
+
+.link:hover {
     text-decoration: underline;
-  }
-  
-  .text-center {
+}
+
+.text-center {
     text-align: center;
     margin-top: 16px;
-  }
+}
+
+.password-feedback {
+    margin-top: 8px;
+    font-size: 12px;
+    font-family: 'Poppins', sans-serif;
+    line-height: 1.5;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.password-feedback.show {
+    opacity: 1;
+}
+
+.password-feedback p {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 4px 0;
+    transition: color 0.3s ease;
+}
+
+.password-feedback .valid {
+    color: #22c55e;
+}
+
+.password-feedback .invalid {
+    color: #ef4444;
+}
+
+.error-message {
+    color: #ef4444;
+    font-size: 12px;
+    margin-top: 8px;
+    font-family: 'Poppins', sans-serif;
+}

@@ -13,20 +13,51 @@ const Register = () => {
     password: '',
     confirmPassword: '',
   });
+  const [passwordErrors, setPasswordErrors] = useState({
+    length: false,
+    letter: false,
+    number: false,
+  });
+  const [confirmPasswordError, setConfirmPasswordError] = useState('');
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { loading } = useSelector((state) => state.auth);
 
+  const validatePassword = (password) => {
+    const lengthValid = password.length >= 8 && password.length <= 32;
+    const letterValid = /[a-zA-Z]/.test(password);
+    const numberValid = /[0-9]/.test(password);
+    setPasswordErrors({
+      length: lengthValid,
+      letter: letterValid,
+      number: numberValid,
+    });
+    return lengthValid && letterValid && numberValid;
+  };
+
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+
+    if (name === 'password') {
+      validatePassword(value);
+    }
+    if (name === 'confirmPassword' || name === 'password') {
+      setConfirmPasswordError(
+        formData.password !== value && name === 'confirmPassword'
+          ? 'Mật khẩu và xác nhận mật khẩu không khớp!'
+          : ''
+      );
+    }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     const { fullName, email, phoneNumber, password, confirmPassword } = formData;
 
-    if (password.length < 8 || password.length > 32) {
-      toast.error('Mật khẩu phải dài từ 8 đến 32 ký tự!');
+    if (!validatePassword(password)) {
+      toast.error('Mật khẩu phải dài từ 8 đến 32 ký tự, có ít nhất một chữ cái và một chữ số!');
       return;
     }
     if (password !== confirmPassword) {
@@ -85,6 +116,19 @@ const Register = () => {
             onChange={handleChange}
             required
           />
+          {formData.password && (
+            <div className="password-feedback show">
+              <p className={passwordErrors.length ? 'valid' : 'invalid'}>
+                • Độ dài 8 - 32
+              </p>
+              <p className={passwordErrors.letter ? 'valid' : 'invalid'}>
+                • Có ít nhất một chữ cái
+              </p>
+              <p className={passwordErrors.number ? 'valid' : 'invalid'}>
+                • Có ít nhất một chữ số
+              </p>
+            </div>
+          )}
         </div>
         <div className="form-group">
           <label>Xác nhận mật khẩu</label>
@@ -95,6 +139,9 @@ const Register = () => {
             onChange={handleChange}
             required
           />
+          {confirmPasswordError && (
+            <p className="error-message">{confirmPasswordError}</p>
+          )}
         </div>
         <button type="submit" className="button" disabled={loading}>
           {loading ? 'Đang đăng ký...' : 'Đăng Ký'}

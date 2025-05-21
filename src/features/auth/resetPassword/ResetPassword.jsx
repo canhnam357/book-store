@@ -10,24 +10,52 @@ const ResetPassword = () => {
     newPassword: '',
     confirmPassword: '',
   });
-  const [otp, setOtp] = useState(['', '', '', '', '', '']); // Mảng 6 ô OTP
+  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [passwordErrors, setPasswordErrors] = useState({
+    length: false,
+    letter: false,
+    number: false,
+  });
+  const [confirmPasswordError, setConfirmPasswordError] = useState('');
   const email = useSelector((state) => state.auth.resetPasswordEmail);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { loading } = useSelector((state) => state.auth);
 
+  const validatePassword = (password) => {
+    const lengthValid = password.length >= 8 && password.length <= 32;
+    const letterValid = /[a-zA-Z]/.test(password);
+    const numberValid = /[0-9]/.test(password);
+    setPasswordErrors({
+      length: lengthValid,
+      letter: letterValid,
+      number: numberValid,
+    });
+    return lengthValid && letterValid && numberValid;
+  };
+
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+
+    if (name === 'newPassword') {
+      validatePassword(value);
+    }
+    if (name === 'confirmPassword' || name === 'newPassword') {
+      setConfirmPasswordError(
+        formData.newPassword !== value && name === 'confirmPassword'
+          ? 'Mật khẩu mới và xác nhận mật khẩu không khớp!'
+          : ''
+      );
+    }
   };
 
   const handleOtpChange = (e, index) => {
     const value = e.target.value;
-    if (/^[0-9]?$/.test(value)) { // Chỉ cho phép số hoặc rỗng
+    if (/^[0-9]?$/.test(value)) {
       const newOtp = [...otp];
       newOtp[index] = value;
       setOtp(newOtp);
-
-      // Chuyển focus sang ô tiếp theo nếu nhập số
       if (value && index < 5) {
         document.getElementById(`otp-${index + 1}`).focus();
       }
@@ -36,7 +64,6 @@ const ResetPassword = () => {
 
   const handleOtpKeyDown = (e, index) => {
     if (e.key === 'Backspace' && !otp[index] && index > 0) {
-      // Chuyển focus về ô trước khi xóa
       document.getElementById(`otp-${index - 1}`).focus();
     }
   };
@@ -44,10 +71,10 @@ const ResetPassword = () => {
   const handleOtpPaste = (e) => {
     e.preventDefault();
     const pastedData = e.clipboardData.getData('text').trim();
-    if (/^\d{6}$/.test(pastedData)) { // Kiểm tra chuỗi dán là 6 số
+    if (/^\d{6}$/.test(pastedData)) {
       const newOtp = pastedData.split('').slice(0, 6);
       setOtp(newOtp);
-      document.getElementById('otp-5').focus(); // Focus ô cuối
+      document.getElementById('otp-5').focus();
     } else {
       toast.dismiss();
       toast.error('Vui lòng dán mã OTP gồm 6 số!');
@@ -57,7 +84,7 @@ const ResetPassword = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     const { newPassword, confirmPassword } = formData;
-    const otpString = otp.join(''); // Nối mảng OTP thành chuỗi
+    const otpString = otp.join('');
 
     if (!email) {
       toast.dismiss();
@@ -72,9 +99,9 @@ const ResetPassword = () => {
       return;
     }
 
-    if (newPassword.length < 8 || newPassword.length > 32) {
+    if (!validatePassword(newPassword)) {
       toast.dismiss();
-      toast.error('Mật khẩu mới phải dài từ 8 đến 32 ký tự!');
+      toast.error('Mật khẩu mới phải dài từ 8 đến 32 ký tự, có ít nhất một chữ cái và một chữ số!');
       return;
     }
     if (newPassword !== confirmPassword) {
@@ -108,7 +135,7 @@ const ResetPassword = () => {
                 value={digit}
                 onChange={(e) => handleOtpChange(e, index)}
                 onKeyDown={(e) => handleOtpKeyDown(e, index)}
-                onPaste={index === 0 ? handleOtpPaste : undefined} // Chỉ xử lý paste ở ô đầu
+                onPaste={index === 0 ? handleOtpPaste : undefined}
                 maxLength="1"
                 pattern="[0-9]"
                 required
@@ -125,6 +152,19 @@ const ResetPassword = () => {
             onChange={handleChange}
             required
           />
+          {formData.newPassword && (
+            <div className="password-feedback show">
+              <p className={passwordErrors.length ? 'valid' : 'invalid'}>
+                • Độ dài 8 - 32
+              </p>
+              <p className={passwordErrors.letter ? 'valid' : 'invalid'}>
+                • Có ít nhất một chữ cái
+              </p>
+              <p className={passwordErrors.number ? 'valid' : 'invalid'}>
+                • Có ít nhất một chữ số
+              </p>
+            </div>
+          )}
         </div>
         <div className="form-group">
           <label>Xác nhận mật khẩu</label>
@@ -135,6 +175,9 @@ const ResetPassword = () => {
             onChange={handleChange}
             required
           />
+          {confirmPasswordError && (
+            <p className="error-message">{confirmPasswordError}</p>
+          )}
         </div>
         <button type="submit" className="button" disabled={loading}>
           {loading ? 'Đang reset...' : 'Reset Mật Khẩu'}

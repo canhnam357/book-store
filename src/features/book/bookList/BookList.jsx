@@ -52,6 +52,8 @@ const BookList = () => {
     categoryId: '',
   });
 
+  const [tempPriceRange, setTempPriceRange] = useState({ minPrice: 0, maxPrice: 0 }); // Giá trị tạm thời cho UI
+  const [prevPriceRange, setPrevPriceRange] = useState({ minPrice: 0, maxPrice: 0 }); // Giá trị trước đó để kiểm tra trùng lặp
   const [categorySearch, setCategorySearch] = useState('');
   const [authorSearch, setAuthorSearch] = useState('');
   const [publisherSearch, setPublisherSearch] = useState('');
@@ -79,11 +81,16 @@ const BookList = () => {
       if (result.meta.requestStatus === 'fulfilled') {
         const prices = result.payload;
         if (prices && prices.length > 0) {
+          const minPrice = prices[0] || 0;
+          const maxPrice = prices[prices.length - 1] || 0;
           setFilters((prev) => ({
             ...prev,
-            minPrice: prices[0] || 0,
-            maxPrice: prices[prices.length - 1] || 0,
+            minPrice,
+            maxPrice,
+            index: 1,
           }));
+          setTempPriceRange({ minPrice, maxPrice });
+          setPrevPriceRange({ minPrice, maxPrice });
           setIsPriceRangeReady(true);
         }
       }
@@ -184,6 +191,8 @@ const BookList = () => {
   useEffect(() => {
     if (isInitialFetchDone && filters.minPrice && filters.maxPrice) {
       dispatch(fetchBooks(filters));
+      // Cập nhật prevPriceRange sau khi gọi API
+      setPrevPriceRange({ minPrice: filters.minPrice, maxPrice: filters.maxPrice });
     }
   }, [dispatch, filters, isInitialFetchDone]);
 
@@ -240,16 +249,23 @@ const BookList = () => {
     debouncedFetchDistributors(keyword);
   };
 
-  // Handle price range change with react-range
+  // Handle price range change
   const handlePriceRangeChange = (values) => {
     const minPrice = priceRange[values[0]] || 0;
     const maxPrice = priceRange[values[1]] || 0;
-    setFilters((prev) => ({
-      ...prev,
-      minPrice,
-      maxPrice,
-      index: 1,
-    }));
+
+    // Cập nhật tempPriceRange để hiển thị ngay trên UI
+    setTempPriceRange({ minPrice, maxPrice });
+
+    // Chỉ cập nhật filters nếu khoảng giá khác với lần trước
+    if (minPrice !== prevPriceRange.minPrice || maxPrice !== prevPriceRange.maxPrice) {
+      setFilters((prev) => ({
+        ...prev,
+        minPrice,
+        maxPrice,
+        index: 1,
+      }));
+    }
   };
 
   // Handle book name, sort, and size change
@@ -302,9 +318,11 @@ const BookList = () => {
   // Reset filters
   const handleResetFilters = () => {
     dispatch(clearFilters());
+    const minPrice = priceRange[0] || 0;
+    const maxPrice = priceRange[priceRange.length - 1] || 0;
     setFilters({
-      minPrice: priceRange[0] || 0,
-      maxPrice: priceRange[priceRange.length - 1] || 0,
+      minPrice,
+      maxPrice,
       index: 1,
       size: 10,
       sort: '',
@@ -314,6 +332,8 @@ const BookList = () => {
       distributorId: '',
       categoryId: '',
     });
+    setTempPriceRange({ minPrice, maxPrice });
+    setPrevPriceRange({ minPrice, maxPrice });
     setSelectedCategories([]);
     setSelectedAuthors([]);
     setSelectedPublishers([]);
@@ -344,8 +364,8 @@ const BookList = () => {
   );
 
   // Tính minPriceIndex và maxPriceIndex, đảm bảo không bị -1
-  let minPriceIndex = priceRange.indexOf(filters.minPrice);
-  let maxPriceIndex = priceRange.indexOf(filters.maxPrice);
+  let minPriceIndex = priceRange.indexOf(tempPriceRange.minPrice);
+  let maxPriceIndex = priceRange.indexOf(tempPriceRange.maxPrice);
 
   if (minPriceIndex === -1) minPriceIndex = 0;
   if (maxPriceIndex === -1) maxPriceIndex = priceRange.length > 0 ? priceRange.length - 1 : 0;
@@ -403,7 +423,7 @@ const BookList = () => {
                   step={1}
                   min={0}
                   max={priceRange.length - 1}
-                  onChange={(values) => handlePriceRangeChange(values)}
+                  onChange={handlePriceRangeChange} // Sử dụng hàm không debounce
                   renderTrack={({ props, children }) => (
                     <div
                       {...props}
@@ -446,8 +466,8 @@ const BookList = () => {
                 />
               </div>
               <div className="booklist-price-range-values">
-                <span>{(filters.minPrice || 0).toLocaleString('vi-VN')} VNĐ</span>
-                <span>{(filters.maxPrice || 0).toLocaleString('vi-VN')} VNĐ</span>
+                <span>{(tempPriceRange.minPrice || 0).toLocaleString('vi-VN')} VNĐ</span>
+                <span>{(tempPriceRange.maxPrice || 0).toLocaleString('vi-VN')} VNĐ</span>
               </div>
             </>
           ) : (
@@ -456,7 +476,9 @@ const BookList = () => {
         </div>
         <div className="booklist-filter-group">
           <label>Sắp xếp theo giá</label>
-          <select name="sort" value={filters.sort || ''} onChange={handleFilterChange}>
+          <select name="sort" value={filters.sort || ''
+
+} onChange={handleFilterChange}>
             <option value="">Mặc định</option>
             <option value="asc">Tăng dần</option>
             <option value="desc">Giảm dần</option>

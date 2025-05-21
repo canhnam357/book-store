@@ -50,7 +50,7 @@ const Footer = () => {
               <a href="/contact" className="footer-link">Liên Hệ Hỗ Trợ</a>
             </li>
             <li className="footer-item">
-              <a href="/guide" className="footer-link">Hướng Dẫn Mua Hàng</a>
+              <a href="/guide" classNama="footer-link">Hướng Dẫn Mua Hàng</a>
             </li>
           </ul>
         </div>
@@ -71,7 +71,7 @@ const Footer = () => {
 
       <div className="footer-bottom">
         <p className="footer-copyright">
-          &copy; 2025 Book Store. All rights reserved.
+          © 2025 Book Store. All rights reserved.
         </p>
       </div>
     </footer>

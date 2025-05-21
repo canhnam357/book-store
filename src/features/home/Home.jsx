@@ -109,22 +109,31 @@ const Home = () => {
             </button>
           )}
           <div className="home-book-list">
-            {getBooksForSection('newArrivals').map((book) => (
-              <div key={book.bookId} className="home-book-card">
-                <Link to={`/books/${book.bookId}`}>
-                  <div className="home-book-image-wrapper">
-                    <img src={book.urlThumbnail || '/no-image.png'} alt={book.bookName || 'Sách'} />
-                    <div className="home-new-tag">Mới</div>
-                  </div>
-                </Link>
-                <Link to={`/books/${book.bookId}`}>
-                  <h3 className="home-book-title">{truncateText(book.bookName, 20)}</h3>
-                </Link>
-                <p className="home-book-price">
-                  {(book.priceAfterSale || book.price || 0).toLocaleString('vi-VN')} VND
-                </p>
-              </div>
-            ))}
+            {getBooksForSection('newArrivals').map((book) => {
+              const optimizedUrl = book.urlThumbnail ? `${book.urlThumbnail}?w=120&f=auto&q=auto` : '/no-image.png';
+              return (
+                <div key={book.bookId} className="home-book-card">
+                  <Link to={`/books/${book.bookId}`}>
+                    <div className="home-book-image-wrapper">
+                      <img
+                        src={optimizedUrl}
+                        alt={book.bookName || 'Sách'}
+                        loading="lazy"
+                        width="120"
+                        height="160"
+                      />
+                      <div className="home-new-tag">Mới</div>
+                    </div>
+                  </Link>
+                  <Link to={`/books/${book.bookId}`}>
+                    <h3 className="home-book-title">{truncateText(book.bookName, 20)}</h3>
+                  </Link>
+                  <p className="home-book-price">
+                    {(book.priceAfterSale || book.price || 0).toLocaleString('vi-VN')} VND
+                  </p>
+                </div>
+              );
+            })}
           </div>
           {(newArrivals?.length || 0) >= 5 && (
             <button onClick={() => handleNext('newArrivals')} className="home-next-btn">
@@ -143,31 +152,40 @@ const Home = () => {
             </button>
           )}
           <div className="home-book-list">
-            {getBooksForSection('discountBooks').map((book) => (
-              <div key={book.bookId} className="home-book-card">
-                <Link to={`/books/${book.bookId}`}>
-                  <div className="home-book-image-wrapper">
-                    <img src={book.urlThumbnail || '/no-image.png'} alt={book.bookName || 'Sách'} />
-                    {book.priceAfterSale && <div className="home-discount-tag">Khuyến mãi</div>}
-                  </div>
-                </Link>
-                <Link to={`/books/${book.bookId}`}>
-                  <h3 className="home-book-title">{truncateText(book.bookName, 20)}</h3>
-                </Link>
-                <p className="home-book-price">
-                  {book.priceAfterSale ? (
-                    <>
-                      <span className="home-book-price-original">
-                        {(book.price || 0).toLocaleString('vi-VN')}
-                      </span>
-                      <span>{(book.priceAfterSale || 0).toLocaleString('vi-VN')} VND</span>
-                    </>
-                  ) : (
-                    <span>{(book.price || 0).toLocaleString('vi-VN')} VND</span>
-                  )}
-                </p>
-              </div>
-            ))}
+            {getBooksForSection('discountBooks').map((book) => {
+              const optimizedUrl = book.urlThumbnail ? `${book.urlThumbnail}?w=120&f=auto&q=auto` : '/no-image.png';
+              return (
+                <div key={book.bookId} className="home-book-card">
+                  <Link to={`/books/${book.bookId}`}>
+                    <div className="home-book-image-wrapper">
+                      <img
+                        src={optimizedUrl}
+                        alt={book.bookName || 'Sách'}
+                        loading="lazy"
+                        width="120"
+                        height="160"
+                      />
+                      {book.priceAfterSale && <div className="home-discount-tag">Khuyến mãi</div>}
+                    </div>
+                  </Link>
+                  <Link to={`/books/${book.bookId}`}>
+                    <h3 className="home-book-title">{truncateText(book.bookName, 20)}</h3>
+                  </Link>
+                  <p className="home-book-price">
+                    {book.priceAfterSale ? (
+                      <>
+                        <span className="home-book-price-original">
+                          {(book.price || 0).toLocaleString('vi-VN')}
+                        </span>
+                        <span>{(book.priceAfterSale || 0).toLocaleString('vi-VN')} VND</span>
+                      </>
+                    ) : (
+                      <span>{(book.price || 0).toLocaleString('vi-VN')} VND</span>
+                    )}
+                  </p>
+                </div>
+              );
+            })}
           </div>
           {(discountBooks?.length || 0) >= 5 && (
             <button onClick={() => handleNext('discountBooks')} className="home-next-btn">
@@ -186,22 +204,31 @@ const Home = () => {
             </button>
           )}
           <div className="home-book-list">
-            {getBooksForSection('highRated').map((book) => (
-              <div key={book.bookId} className="home-book-card">
-                <Link to={`/books/${book.bookId}`}>
-                  <div className="home-book-image-wrapper">
-                    <img src={book.urlThumbnail || '/no-image.png'} alt={book.bookName || 'Sách'} />
-                  </div>
-                </Link>
-                <Link to={`/books/${book.bookId}`}>
-                  <h3 className="home-book-title">{truncateText(book.bookName, 20)}</h3>
-                </Link>
-                <p className="home-book-price">
-                  {(book.priceAfterSale || book.price || 0).toLocaleString('vi-VN')} VND
-                </p>
-                <p className="home-book-rating">Rating: {book.rating || 'N/A'}</p>
-              </div>
-            ))}
+            {getBooksForSection('highRated').map((book) => {
+              const optimizedUrl = book.urlThumbnail ? `${book.urlThumbnail}?w=120&f=auto&q=auto` : '/no-image.png';
+              return (
+                <div key={book.bookId} className="home-book-card">
+                  <Link to={`/books/${book.bookId}`}>
+                    <div className="home-book-image-wrapper">
+                      <img
+                        src={optimizedUrl}
+                        alt={book.bookName || 'Sách'}
+                        loading="lazy"
+                        width="120"
+                        height="160"
+                      />
+                    </div>
+                  </Link>
+                  <Link to={`/books/${book.bookId}`}>
+                    <h3 className="home-book-title">{truncateText(book.bookName, 20)}</h3>
+                  </Link>
+                  <p className="home-book-price">
+                    {(book.priceAfterSale || book.price || 0).toLocaleString('vi-VN')} VND
+                  </p>
+                  <p className="home-book-rating">Rating: {book.rating || 'N/A'}</p>
+                </div>
+              );
+            })}
           </div>
           {(highRated?.length || 0) >= 5 && (
             <button onClick={() => handleNext('highRated')} className="home-next-btn">
@@ -220,22 +247,31 @@ const Home = () => {
             </button>
           )}
           <div className="home-book-list">
-            {getBooksForSection('mostPopular').map((book) => (
-              <div key={book.bookId} className="home-book-card">
-                <Link to={`/books/${book.bookId}`}>
-                  <div className="home-book-image-wrapper">
-                    <img src={book.urlThumbnail || '/no-image.png'} alt={book.bookName || 'Sách'} />
-                  </div>
-                </Link>
-                <Link to={`/books/${book.bookId}`}>
-                  <h3 className="home-book-title">{truncateText(book.bookName, 20)}</h3>
-                </Link>
-                <p className="home-book-price">
-                  <span>{(book.priceAfterSale || book.price || 0).toLocaleString('vi-VN')} VND</span>
-                  <span className="home-book-sold">Đã bán: {(book.soldQuantity || 0).toLocaleString('vi-VN')}</span>
-                </p>
-              </div>
-            ))}
+            {getBooksForSection('mostPopular').map((book) => {
+              const optimizedUrl = book.urlThumbnail ? `${book.urlThumbnail}?w=120&f=auto&q=auto` : '/no-image.png';
+              return (
+                <div key={book.bookId} className="home-book-card">
+                  <Link to={`/books/${book.bookId}`}>
+                    <div className="home-book-image-wrapper">
+                      <img
+                        src={optimizedUrl}
+                        alt={book.bookName || 'Sách'}
+                        loading="lazy"
+                        width="120"
+                        height="160"
+                      />
+                    </div>
+                  </Link>
+                  <Link to={`/books/${book.bookId}`}>
+                    <h3 className="home-book-title">{truncateText(book.bookName, 20)}</h3>
+                  </Link>
+                  <p className="home-book-price">
+                    <span>{(book.priceAfterSale || book.price || 0).toLocaleString('vi-VN')} VND</span>
+                    <span className="home-book-sold">Đã bán: {(book.soldQuantity || 0).toLocaleString('vi-VN')}</span>
+                  </p>
+                </div>
+              );
+            })}
           </div>
           {(mostPopular?.length || 0) >= 5 && (
             <button onClick={() => handleNext('mostPopular')} className="home-next-btn">
@@ -260,21 +296,30 @@ const Home = () => {
                 </button>
               )}
               <div className="home-book-list">
-                {getBooksForCategory(category.categoryId, category.books || []).map((book) => (
-                  <div key={book.bookId} className="home-book-card">
-                    <Link to={`/books/${book.bookId}`}>
-                      <div className="home-book-image-wrapper">
-                        <img src={book.urlThumbnail || '/no-image.png'} alt={book.bookName || 'Sách'} />
-                      </div>
-                    </Link>
-                    <Link to={`/books/${book.bookId}`}>
-                      <h3 className="home-book-title">{truncateText(book.bookName, 20)}</h3>
-                    </Link>
-                    <p className="home-book-price">
-                      {(book.priceAfterSale || book.price || 0).toLocaleString('vi-VN')} VND
-                    </p>
-                  </div>
-                ))}
+                {getBooksForCategory(category.categoryId, category.books || []).map((book) => {
+                  const optimizedUrl = book.urlThumbnail ? `${book.urlThumbnail}?w=120&f=auto&q=auto` : '/no-image.png';
+                  return (
+                    <div key={book.bookId} className="home-book-card">
+                      <Link to={`/books/${book.bookId}`}>
+                        <div className="home-book-image-wrapper">
+                          <img
+                            src={optimizedUrl}
+                            alt={book.bookName || 'Sách'}
+                            loading="lazy"
+                            width="120"
+                            height="160"
+                          />
+                        </div>
+                      </Link>
+                      <Link to={`/books/${book.bookId}`}>
+                        <h3 className="home-book-title">{truncateText(book.bookName, 20)}</h3>
+                      </Link>
+                      <p className="home-book-price">
+                        {(book.priceAfterSale || book.price || 0).toLocaleString('vi-VN')} VND
+                      </p>
+                    </div>
+                  );
+                })}
               </div>
               {(category.books?.length || 0) >= 5 && (
                 <button

@@ -110,7 +110,13 @@ const Header = () => {
                   className="header-search-result"
                   onClick={() => handleResultClick(book.bookId)}
                 >
-                  <img src={book.urlThumbnail} alt={book.bookName} className="header-search-thumbnail" />
+                  <img
+                    src={book.urlThumbnail}
+                    alt={book.bookName}
+                    className="header-search-thumbnail"
+                    width="30"
+                    height="40"
+                  />
                   <span className="header-search-title">{book.bookName}</span>
                 </div>
               ))}

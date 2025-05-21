@@ -13,12 +13,14 @@
   flex-wrap: wrap;
   gap: 20px;
   padding: 0 16px;
+  min-height: 200px; /* Cố định chiều cao tối thiểu */
 }
 
 .footer-section {
   flex: 1;
   min-width: 200px;
   margin-bottom: 20px;
+  min-height: 150px; /* Cố định chiều cao tối thiểu cho mỗi section */
 }
 
 .footer-title {
@@ -72,5 +74,6 @@
   .footer-section {
     flex: 1 1 100%;
     text-align: center;
+    min-height: 120px; /* Giảm chiều cao tối thiểu trên mobile */
   }
 }

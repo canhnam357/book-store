@@ -21,7 +21,7 @@ const BookDetail = () => {
     (state) => state.book
   );
   const { isAuthenticated } = useSelector((state) => state.auth);
-  const { loading: cartLoading } = useSelector((state) => state.cart); // Lấy loading từ cartSlice
+  const { loading: cartLoading } = useSelector((state) => state.cart);
 
   const [mainImage, setMainImage] = useState('');
   const [quantity, setQuantity] = useState(1);
@@ -32,12 +32,23 @@ const BookDetail = () => {
   const [editContent, setEditContent] = useState('');
   const [editRating, setEditRating] = useState(0);
   const [submitting, setSubmitting] = useState(false);
-  const [isAdding, setIsAdding] = useState(false); // State cho nút Thêm vào giỏ hàng
+  const [isAdding, setIsAdding] = useState(false);
   const [reviewFilters, setReviewFilters] = useState({
     index: 1,
     size: 10,
     rating: 0,
   });
+
+  // Hàm cắt nội dung thành các dòng 140 ký tự
+  const splitIntoLines = (text) => {
+    if (!text) return ['Không có nội dung'];
+    const maxLineLength = 140;
+    const lines = [];
+    for (let i = 0; i < text.length; i += maxLineLength) {
+      lines.push(text.slice(i, i + maxLineLength));
+    }
+    return lines.length > 0 ? lines : ['Không có nội dung'];
+  };
 
   useEffect(() => {
     const fetchCurrentUserId = async () => {
@@ -71,12 +82,11 @@ const BookDetail = () => {
     }
   }, [bookDetail]);
 
-  // Hàm định dạng ngày thành dd-MM-yyyy
   const formatDisplayDate = (dateString) => {
     if (!dateString) return 'Không rõ';
     const dateRegex = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
     if (dateRegex.test(dateString)) {
-      return dateString; // Giữ nguyên nếu đã đúng định dạng dd-MM-yyyy
+      return dateString;
     }
     try {
       const [day, month, year] = dateString.split('-');
@@ -114,7 +124,7 @@ const BookDetail = () => {
       navigate('/login');
       return;
     }
-    if (isAdding) return; // Ngăn click khi đang xử lý
+    if (isAdding) return;
     setIsAdding(true);
     try {
       const result = await dispatch(addToCart({ bookId, quantity })).unwrap();
@@ -247,7 +257,7 @@ const BookDetail = () => {
     if (!dateString) return 'N/A';
     const dateRegex = /^(\d{2}):(\d{2}):(\d{2}) (\d{2})-(\d{2})-(\d{4})$/;
     if (dateRegex.test(dateString)) {
-      return dateString; // Giữ nguyên nếu đúng định dạng
+      return dateString;
     }
     try {
       const date = new Date(dateString);
@@ -402,6 +412,7 @@ const BookDetail = () => {
               onChange={(e) => setReviewContent(e.target.value)}
               placeholder="Nhập đánh giá của bạn..."
               required
+              maxLength="2000"
             />
             <div className="bookdetail-rating-input">
               {[1, 2, 3, 4, 5].map((star) => (
@@ -451,12 +462,19 @@ const BookDetail = () => {
                         className="bookdetail-review-content-editable"
                         value={editContent}
                         onChange={(e) => setEditContent(e.target.value)}
+                        maxLength="2000"
                       />
                     </>
                   ) : (
                     <>
                       <div className="bookdetail-review-rating">{renderStars(review.rating)}</div>
-                      <p className="bookdetail-review-content">{review.content || 'Không có nội dung'}</p>
+                      <div className="bookdetail-review-content">
+                        {splitIntoLines(review.content).map((line, index) => (
+                          <p key={`line-${index}`} style={{ margin: '0 0 4px 0' }}>
+                            {line}
+                          </p>
+                        ))}
+                      </div>
                     </>
                   )}
                   {currentUserId && currentUserId === review.userId && (

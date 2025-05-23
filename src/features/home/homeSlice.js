@@ -14,9 +14,6 @@ export const fetchNewArrivals = createAsyncThunk(
       throw new Error(response.data.message || 'Không thể lấy sách mới!');
     } catch (error) {
       console.error('Fetch new arrivals error:', error.response?.data || error);
-      if (error.response?.status === 500) {
-        return rejectWithValue('Lỗi server khi lấy sách mới!');
-      }
       return rejectWithValue(error.response?.data?.message || 'Lỗi khi lấy sách mới!');
     }
   }
@@ -34,9 +31,6 @@ export const fetchHighRatedBooks = createAsyncThunk(
       throw new Error(response.data.message || 'Không thể lấy sách đánh giá cao!');
     } catch (error) {
       console.error('Fetch high rated books error:', error.response?.data || error);
-      if (error.response?.status === 500) {
-        return rejectWithValue('Lỗi server khi lấy sách đánh giá cao!');
-      }
       return rejectWithValue(error.response?.data?.message || 'Lỗi khi lấy sách đánh giá cao!');
     }
   }
@@ -54,9 +48,6 @@ export const fetchMostPopularBooks = createAsyncThunk(
       throw new Error(response.data.message || 'Không thể lấy sách bán chạy!');
     } catch (error) {
       console.error('Fetch most popular books error:', error.response?.data || error);
-      if (error.response?.status === 500) {
-        return rejectWithValue('Lỗi server khi lấy sách bán chạy!');
-      }
       return rejectWithValue(error.response?.data?.message || 'Lỗi khi lấy sách bán chạy!');
     }
   }
@@ -74,9 +65,6 @@ export const fetchDiscountBooks = createAsyncThunk(
       throw new Error(response.data.message || 'Không thể lấy sách khuyến mãi!');
     } catch (error) {
       console.error('Fetch discount books error:', error.response?.data || error);
-      if (error.response?.status === 500) {
-        return rejectWithValue('Lỗi server khi lấy sách khuyến mãi!');
-      }
       return rejectWithValue(error.response?.data?.message || 'Lỗi khi lấy sách khuyến mãi!');
     }
   }
@@ -94,9 +82,6 @@ export const fetchTopCategories = createAsyncThunk(
       throw new Error(response.data.message || 'Không thể lấy danh mục hàng đầu!');
     } catch (error) {
       console.error('Fetch top categories error:', error.response?.data || error);
-      if (error.response?.status === 500) {
-        return rejectWithValue('Lỗi server khi lấy danh mục hàng đầu!');
-      }
       return rejectWithValue(error.response?.data?.message || 'Lỗi khi lấy danh mục hàng đầu!');
     }
   }

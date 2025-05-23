@@ -17,9 +17,6 @@ export const fetchOrders = createAsyncThunk(
     } catch (error) {
       console.error('Fetch orders error:', error.response?.data || error);
       const message = error.response?.data?.message || 'Lỗi khi lấy danh sách đơn hàng!';
-      if (error.response?.status === 500) {
-        return rejectWithValue('Lỗi server khi lấy danh sách đơn hàng!');
-      }
       return rejectWithValue(message);
     }
   }
@@ -38,12 +35,6 @@ export const fetchOrderDetails = createAsyncThunk(
     } catch (error) {
       console.error('Fetch order details error:', error.response?.data || error);
       const message = error.response?.data?.message || 'Lỗi khi lấy chi tiết đơn hàng!';
-      if (error.response?.status === 404) {
-        return rejectWithValue('Đơn hàng không tồn tại!');
-      }
-      if (error.response?.status === 500) {
-        return rejectWithValue('Lỗi server khi lấy chi tiết đơn hàng!');
-      }
       return rejectWithValue(message);
     }
   }
@@ -67,15 +58,6 @@ export const changeOrderStatus = createAsyncThunk(
     } catch (error) {
       console.error('Change order status error:', error.response?.data || error);
       const message = error.response?.data?.message || 'Lỗi khi thay đổi trạng thái đơn hàng!';
-      if (error.response?.status === 404) {
-        return rejectWithValue('Đơn hàng không tồn tại!');
-      }
-      if (error.response?.status === 400) {
-        return rejectWithValue('Trạng thái hiện tại của đơn hàng không khớp!');
-      }
-      if (error.response?.status === 500) {
-        return rejectWithValue('Lỗi server khi thay đổi trạng thái đơn hàng!');
-      }
       return rejectWithValue(message);
     }
   }

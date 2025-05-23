@@ -14,15 +14,6 @@ export const sendOtpResetPassword = createAsyncThunk(
       throw new Error(response.data.message || 'Không thể gửi OTP!');
     } catch (error) {
       console.error('Send OTP error:', error.response?.data || error);
-      if (error.response?.status === 403) {
-        return rejectWithValue('Tài khoản của bạn bị khóa!');
-      }
-      if (error.response?.status === 429) {
-        return rejectWithValue('Yêu cầu gửi OTP quá nhiều, vui lòng thử lại sau!');
-      }
-      if (error.response?.status === 500) {
-        return rejectWithValue('Lỗi server khi gửi OTP!');
-      }
       return rejectWithValue(error.response?.data?.message || 'Lỗi khi gửi OTP!');
     }
   }
@@ -44,18 +35,6 @@ export const changePassword = createAsyncThunk(
       throw new Error(response.data.message || 'Không thể đổi mật khẩu!');
     } catch (error) {
       console.error('Change password error:', error.response?.data || error);
-      if (error.response?.status === 400) {
-        return rejectWithValue('OTP không hợp lệ!');
-      }
-      if (error.response?.status === 403) {
-        return rejectWithValue('Tài khoản của bạn bị khóa!');
-      }
-      if (error.response?.status === 422) {
-        return rejectWithValue('Mật khẩu hiện tại không đúng hoặc mật khẩu mới không hợp lệ!');
-      }
-      if (error.response?.status === 500) {
-        return rejectWithValue('Lỗi server khi đổi mật khẩu!');
-      }
       return rejectWithValue(error.response?.data?.message || 'Lỗi khi đổi mật khẩu!');
     }
   }

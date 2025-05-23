@@ -14,9 +14,6 @@ export const fetchProfile = createAsyncThunk(
       throw new Error(response.data.message || 'Không thể lấy thông tin hồ sơ!');
     } catch (error) {
       console.error('Fetch profile error:', error.response?.data || error);
-      if (error.response?.status === 500) {
-        return rejectWithValue('Lỗi server khi lấy thông tin hồ sơ!');
-      }
       return rejectWithValue(error.response?.data?.message || 'Lỗi khi lấy thông tin hồ sơ!');
     }
   }
@@ -39,12 +36,6 @@ export const changeAvatar = createAsyncThunk(
       throw new Error(response.data.message || 'Không thể thay đổi avatar!');
     } catch (error) {
       console.error('Change avatar error:', error.response?.data || error);
-      if (error.response?.status === 400) {
-        return rejectWithValue('File ảnh không hợp lệ!');
-      }
-      if (error.response?.status === 500) {
-        return rejectWithValue('Lỗi server khi thay đổi avatar!');
-      }
       return rejectWithValue(error.response?.data?.message || 'Lỗi khi thay đổi avatar!');
     }
   }
@@ -67,12 +58,6 @@ export const changeProfile = createAsyncThunk(
       throw new Error(response.data.message || 'Không thể cập nhật thông tin!');
     } catch (error) {
       console.error('Change profile error:', error.response?.data || error);
-      if (error.response?.status === 422) {
-        return rejectWithValue('Thông tin không hợp lệ!');
-      }
-      if (error.response?.status === 500) {
-        return rejectWithValue('Lỗi server khi cập nhật thông tin!');
-      }
       return rejectWithValue(error.response?.data?.message || 'Lỗi khi cập nhật thông tin!');
     }
   }

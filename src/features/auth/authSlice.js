@@ -17,7 +17,10 @@ export const loginUser = createAsyncThunk(
       throw new Error(response.data.message || 'Đăng nhập thất bại!');
     } catch (error) {
       console.error('Login error:', error.response?.data || error);
-      return rejectWithValue(error.response?.data?.message || 'Đăng nhập thất bại!');
+      const message = error.response?.data?.statusCode === 403
+        ? 'Quyền truy cập bị từ chối. Vui lòng thử lại!'
+        : error.response?.data?.message || 'Đăng nhập thất bại!';
+      return rejectWithValue(message);
     }
   }
 );
@@ -35,7 +38,10 @@ export const handleGoogleCallback = createAsyncThunk(
       return { username };
     } catch (error) {
       console.error('Google callback error:', error);
-      return rejectWithValue(error.message || 'Đăng nhập bằng Google thất bại!');
+      const message = error.message === 'account_locked'
+        ? 'Đăng nhập bằng Google thất bại do tài khoản bị khóa!'
+        : error.message || 'Đăng nhập bằng Google thất bại!';
+      return rejectWithValue(message);
     }
   }
 );
@@ -58,7 +64,10 @@ export const registerUser = createAsyncThunk(
       throw new Error(response.data.message || 'Đăng ký thất bại!');
     } catch (error) {
       console.error('Register error:', error.response?.data || error);
-      return rejectWithValue(error.response?.data?.message || 'Đăng ký thất bại!');
+      const message = error.response?.data?.statusCode === 403
+        ? 'Quyền truy cập bị từ chối. Vui lòng thử lại!'
+        : error.response?.data?.message || 'Đăng ký thất bại!';
+      return rejectWithValue(message);
     }
   }
 );
@@ -75,7 +84,10 @@ export const verifyOTP = createAsyncThunk(
       throw new Error(response.data.message || 'Xác nhận OTP thất bại!');
     } catch (error) {
       console.error('Verify OTP error:', error.response?.data || error);
-      return rejectWithValue(error.response?.data?.message || 'Xác nhận OTP thất bại!');
+      const message = error.response?.data?.statusCode === 403
+        ? 'Quyền truy cập bị từ chối. Vui lòng thử lại!'
+        : error.response?.data?.message || 'Xác nhận OTP thất bại!';
+      return rejectWithValue(message);
     }
   }
 );
@@ -92,7 +104,10 @@ export const sendOTPResetPassword = createAsyncThunk(
       throw new Error(response.data.message || 'Gửi OTP thất bại!');
     } catch (error) {
       console.error('Send OTP error:', error.response?.data || error);
-      return rejectWithValue(error.response?.data?.message || 'Gửi OTP thất bại!');
+      const message = error.response?.data?.statusCode === 403
+        ? 'Quyền truy cập bị từ chối. Vui lòng thử lại!'
+        : error.response?.data?.message || 'Gửi OTP thất bại!';
+      return rejectWithValue(message);
     }
   }
 );
@@ -114,7 +129,10 @@ export const resetPassword = createAsyncThunk(
       throw new Error(response.data.message || 'Reset mật khẩu thất bại!');
     } catch (error) {
       console.error('Reset password error:', error.response?.data || error);
-      return rejectWithValue(error.response?.data?.message || 'Reset mật khẩu thất bại!');
+      const message = error.response?.data?.statusCode === 403
+        ? 'Quyền truy cập bị từ chối. Vui lòng thử lại!'
+        : error.response?.data?.message || 'Reset mật khẩu thất bại!';
+      return rejectWithValue(message);
     }
   }
 );
@@ -136,7 +154,10 @@ export const logoutUser = createAsyncThunk(
       console.error('Logout error:', error.response?.data || error);
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
-      return rejectWithValue(error.response?.data?.message || 'Đăng xuất thất bại!');
+      const message = error.response?.data?.statusCode === 403
+        ? 'Quyền truy cập bị từ chối. Đăng xuất không thành công!'
+        : error.response?.data?.message || 'Đăng xuất thất bại!';
+      return rejectWithValue(message);
     }
   }
 );
@@ -188,11 +209,8 @@ const authSlice = createSlice({
       })
       .addCase(handleGoogleCallback.rejected, (state, action) => {
         state.error = action.payload;
-        const message = action.payload === 'account_locked'
-          ? 'Đăng nhập bằng Google thất bại do tài khoản bị khóa!'
-          : action.payload;
         toast.dismiss();
-        toast.error(message);
+        toast.error(action.payload);
       })
       // Register User
       .addCase(registerUser.pending, (state) => {

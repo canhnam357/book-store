@@ -3,6 +3,7 @@
   color: #d1d5db;
   padding: 40px 0 20px;
   font-family: 'Inter', sans-serif;
+  margin-top: auto; /* Thêm dòng này để đẩy footer xuống dưới */
 }
 
 .footer-container {

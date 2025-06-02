@@ -39,7 +39,6 @@ const BookDetail = () => {
     rating: 0,
   });
 
-  // Hàm cắt nội dung thành các dòng 140 ký tự
   const splitIntoLines = (text) => {
     if (!text) return ['Không có nội dung'];
     const maxLineLength = 140;
@@ -48,6 +47,27 @@ const BookDetail = () => {
       lines.push(text.slice(i, i + maxLineLength));
     }
     return lines.length > 0 ? lines : ['Không có nội dung'];
+  };
+
+  const adjustTextareaRows = (textarea) => {
+    const lineHeight = parseInt(window.getComputedStyle(textarea).lineHeight) || 20; // Giả định line-height mặc định
+    const minRows = 5;
+    textarea.style.height = 'auto'; // Reset chiều cao để tính lại
+    const contentHeight = textarea.scrollHeight;
+    const newRows = Math.max(minRows, Math.ceil(contentHeight / lineHeight) - 1); // Chừa 1 hàng trống
+    textarea.rows = newRows;
+  };
+
+  const handleReviewContentChange = (e) => {
+    const textarea = e.target;
+    setReviewContent(textarea.value);
+    adjustTextareaRows(textarea);
+  };
+
+  const handleEditContentChange = (e) => {
+    const textarea = e.target;
+    setEditContent(textarea.value);
+    adjustTextareaRows(textarea);
   };
 
   useEffect(() => {
@@ -165,6 +185,11 @@ const BookDetail = () => {
     setEditingReviewId(review.reviewId);
     setEditContent(review.content || '');
     setEditRating(review.rating ?? 0);
+    // Điều chỉnh số rows ngay khi mở chế độ chỉnh sửa
+    setTimeout(() => {
+      const textarea = document.querySelector(`.bookdetail-review-content-editable`);
+      if (textarea) adjustTextareaRows(textarea);
+    }, 0);
   };
 
   const handleConfirmEdit = async (reviewId) => {
@@ -407,13 +432,23 @@ const BookDetail = () => {
         <h2>Đánh giá ({totalReviews || 0})</h2>
         {isAuthenticated && (
           <form className="bookdetail-review-form" onSubmit={handleReviewSubmit}>
-            <textarea
-              value={reviewContent}
-              onChange={(e) => setReviewContent(e.target.value)}
-              placeholder="Nhập đánh giá của bạn..."
-              required
-              maxLength="2000"
-            />
+            <div className="bookdetail-review-textarea-container">
+              <textarea
+                value={reviewContent}
+                onChange={handleReviewContentChange}
+                placeholder="Nhập đánh giá của bạn..."
+                required
+                maxLength="2000"
+                rows="5"
+              />
+              <span
+                className={`bookdetail-review-char-count ${
+                  reviewContent.length === 2000 ? 'char-count-max' : ''
+                }`}
+              >
+                {reviewContent.length}/2000
+              </span>
+            </div>
             <div className="bookdetail-rating-input">
               {[1, 2, 3, 4, 5].map((star) => (
                 <span
@@ -458,12 +493,36 @@ const BookDetail = () => {
                           ))}
                         </div>
                       </div>
-                      <textarea
-                        className="bookdetail-review-content-editable"
-                        value={editContent}
-                        onChange={(e) => setEditContent(e.target.value)}
-                        maxLength="2000"
-                      />
+                      <div className="bookdetail-review-textarea-container">
+                        <textarea
+                          className="bookdetail-review-content-editable"
+                          value={editContent}
+                          onChange={handleEditContentChange}
+                          maxLength="2000"
+                          rows="5"
+                        />
+                        <span
+                          className={`bookdetail-review-char-count ${
+                            editContent.length === 2000 ? 'char-count-max' : ''
+                          }`}
+                        >
+                          {editContent.length}/2000
+                        </span>
+                      </div>
+                      <div className="bookdetail-review-actions">
+                        <button
+                          className="bookdetail-review-button bookdetail-confirm-button"
+                          onClick={() => handleConfirmEdit(review.reviewId)}
+                        >
+                          Xác nhận
+                        </button>
+                        <button
+                          className="bookdetail-review-button bookdetail-cancel-button"
+                          onClick={handleCancelEdit}
+                        >
+                          Hủy
+                        </button>
+                      </div>
                     </>
                   ) : (
                     <>
@@ -477,33 +536,14 @@ const BookDetail = () => {
                       </div>
                     </>
                   )}
-                  {currentUserId && currentUserId === review.userId && (
+                  {currentUserId && currentUserId === review.userId && editingReviewId !== review.reviewId && (
                     <div className="bookdetail-review-actions">
-                      {editingReviewId === review.reviewId ? (
-                        <>
-                          <button
-                            className="bookdetail-review-button bookdetail-confirm-button"
-                            onClick={() => handleConfirmEdit(review.reviewId)}
-                          >
-                            Xác nhận
-                          </button>
-                          <button
-                            className="bookdetail-review-button bookdetail-cancel-button"
-                            onClick={handleCancelEdit}
-                          >
-                            Hủy
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          <button
-                            className="bookdetail-review-button bookdetail-edit-button"
-                            onClick={() => handleEditReview(review)}
-                          >
-                            Sửa
-                          </button>
-                        </>
-                      )}
+                      <button
+                        className="bookdetail-review-button bookdetail-edit-button"
+                        onClick={() => handleEditReview(review)}
+                      >
+                        Sửa
+                      </button>
                     </div>
                   )}
                 </div>

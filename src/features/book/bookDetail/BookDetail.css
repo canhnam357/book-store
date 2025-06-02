@@ -254,14 +254,41 @@
   margin-bottom: 24px;
 }
 
-.bookdetail-review-form textarea {
+.bookdetail-review-textarea-container {
+  position: relative;
+  padding: 0 10px;
+}
+
+.bookdetail-review-form textarea,
+.bookdetail-review-content-editable {
   width: 100%;
-  height: 80px;
   padding: 8px;
   border: 1px solid #d1d5db;
   border-radius: 4px;
   font-family: 'Inter', sans-serif;
   resize: none;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+  overflow-y: hidden; /* Ẩn thanh kéo dọc */
+}
+
+.bookdetail-review-form textarea:focus,
+.bookdetail-review-content-editable:focus {
+  border-color: #3b82f6;
+}
+
+.bookdetail-review-char-count {
+  position: absolute;
+  bottom: 8px;
+  right: 18px;
+  font-size: 12px;
+  font-family: 'Inter', sans-serif;
+  color: #4a5568;
+}
+
+.bookdetail-review-char-count.char-count-max {
+  color: #ef4444;
 }
 
 .bookdetail-rating-input {
@@ -329,36 +356,34 @@
   font-family: 'Inter', sans-serif;
   color: #4a5568;
   margin-bottom: 16px;
-  line-height: 1.4; /* Thêm để các dòng hiển thị rõ ràng */
+  line-height: 1.4;
 }
 
 .bookdetail-review-content-editable {
-  width: 100%;
-  height: 60px;
-  padding: 8px;
-  border: 1px solid #d1d5db;
-  border-radius: 4px;
-  resize: none;
-  font-size: 14px;
-  font-family: 'Inter', sans-serif;
-  margin-bottom: 16px;
+  margin-bottom: 0; /* Loại bỏ margin-bottom để không tạo khoảng cách thừa */
 }
 
 .bookdetail-review-actions {
   display: flex;
-  gap: 8px;
-  position: absolute;
-  bottom: 16px;
-  right: 16px;
+  gap: 12px;
+  margin-top: 16px; /* Khoảng cách với textarea hoặc nội dung phía trên */
 }
 
 .bookdetail-review-button {
-  padding: 4px 12px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
   border: none;
-  border-radius: 4px;
-  font-size: 12px;
-  font-family: 'Inter', sans-serif;
+  border-radius: 6px;
   cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  font-family: 'Inter', sans-serif;
+}
+
+.bookdetail-review-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
 .bookdetail-edit-button {

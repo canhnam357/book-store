@@ -6,12 +6,11 @@ export const loginUser = createAsyncThunk(
   'auth/loginUser',
   async ({ email, password }, { rejectWithValue }) => {
     try {
-      const response = await api.post('/auth/login', { email, password });
+      const response = await api.post('/auth/login', { email, password }, { withCredentials: true });
       console.log('Login response:', response.data);
       if (response.status === 200 && response.data.result) {
-        const { accessToken, refreshToken, username } = response.data.result;
+        const { accessToken, username } = response.data.result;
         localStorage.setItem('accessToken', accessToken);
-        localStorage.setItem('refreshToken', refreshToken);
         return { username };
       }
       throw new Error(response.data.message || 'Đăng nhập thất bại!');
@@ -27,14 +26,13 @@ export const loginUser = createAsyncThunk(
 
 export const handleGoogleCallback = createAsyncThunk(
   'auth/handleGoogleCallback',
-  async ({ accessToken, refreshToken, username, error }, { rejectWithValue }) => {
+  async ({ accessToken, username, error }, { rejectWithValue }) => {
     try {
       if (error) {
         throw new Error(error);
       }
-      console.log('Google callback params:', { accessToken, refreshToken, username });
+      console.log('Google callback params:', { accessToken, username });
       localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('refreshToken', refreshToken);
       return { username };
     } catch (error) {
       console.error('Google callback error:', error);
@@ -141,19 +139,16 @@ export const logoutUser = createAsyncThunk(
   'auth/logoutUser',
   async (_, { rejectWithValue }) => {
     try {
-      const refreshToken = localStorage.getItem('refreshToken');
-      const response = await api.post('/auth/logout', null, { params: { refreshToken } });
+      const response = await api.post('/auth/logout', null, {withCredentials: true});
       console.log('Logout response:', response.data);
       if (response.status === 200) {
         localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
         return true;
       }
       throw new Error(response.data.message || 'Đăng xuất thất bại!');
     } catch (error) {
       console.error('Logout error:', error.response?.data || error);
       localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
       const message = error.response?.data?.statusCode === 403
         ? 'Quyền truy cập bị từ chối. Đăng xuất không thành công!'
         : error.response?.data?.message || 'Đăng xuất thất bại!';

@@ -61,7 +61,8 @@ const ChangePassword = () => {
       toast.error('Mật khẩu mới phải dài từ 8 đến 32 ký tự, có ít nhất một chữ cái và một chữ số!');
       return;
     }
-    const result = await dispatch(
+    try {
+      const result = await dispatch(
       changePassword({
         otp: formData.otp,
         password: formData.password,
@@ -71,6 +72,7 @@ const ChangePassword = () => {
     console.log('Change password result:', result);
     setFormData({ otp: '', password: '', newPassword: '' });
     setPasswordErrors({ length: false, letter: false, number: false });
+    } catch(error) {}
   };
 
   return (

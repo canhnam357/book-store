@@ -10,18 +10,15 @@ const DateInputCustom = ({ value, onChange, disabled }) => {
   const [month, setMonth] = useState('');
   const [year, setYear] = useState('');
 
-  // Chuyển yyyy-MM-dd sang các giá trị ngày, tháng, năm, định dạng đúng
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // Chỉ cập nhật trạng thái từ value (dateOfBirth) khi nhận từ API hoặc reset
   useEffect(() => {
     if (value) {
       const [y, m, d] = value.split('-');
-      setDay(d.padStart(2, '0')); // Định dạng ngày: "9" → "09"
-      setMonth(m.replace(/^0+/, '')); // Loại bỏ số 0 thừa, "03" → "3"
-      setYear(y.padStart(4, '0')); // Định dạng năm: "1" → "0001"
+      setDay(d ? d.replace(/^0+/, '') : '');
+      setMonth(m ? m.replace(/^0+/, '') : '');
+      setYear(y ? y.replace(/^0+/, '') : '');
     } else {
-      setDay('');
-      setMonth('');
-      setYear('');
+      // Không reset các trường khi value rỗng, giữ trạng thái người dùng nhập
     }
   }, [value]);
 
@@ -31,9 +28,11 @@ const DateInputCustom = ({ value, onChange, disabled }) => {
   }));
 
   const handleDayChange = (e) => {
-    let val = e.target.value.replace(/[^0-9]/g, '').replace(/^0+/, ''); // Loại bỏ ký tự không phải số và số 0 đầu
-    setDay(val);
-    updateDate(val, month, year);
+    let val = e.target.value.replace(/[^0-9]/g, '');
+    if (val.length <= 2) {
+      setDay(val);
+      updateDate(val, month, year);
+    }
   };
 
   const handleMonthChange = (e) => {
@@ -43,21 +42,20 @@ const DateInputCustom = ({ value, onChange, disabled }) => {
   };
 
   const handleYearChange = (e) => {
-    let val = e.target.value.replace(/[^0-9]/g, '').replace(/^0+/, ''); // Loại bỏ ký tự không phải số và số 0 đầu
-    setYear(val);
-    updateDate(day, month, val);
+    let val = e.target.value.replace(/[^0-9]/g, '');
+    if (val.length <= 4) {
+      setYear(val);
+      updateDate(day, month, val);
+    }
   };
 
   const updateDate = (d, m, y) => {
-    if (!d && !m && !y) {
-      onChange('');
-      return;
-    }
-    if (d && m && y && !isNaN(d) && !isNaN(m) && !isNaN(y)) {
+    // Chỉ tạo chuỗi ngày nếu cả 3 trường không rỗng
+    if (d && m && y) {
       const dateStr = `${y.padStart(4, '0')}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
       onChange(dateStr);
     } else {
-      onChange(''); // Reset nếu không hợp lệ
+      onChange('');
     }
   };
 
@@ -108,7 +106,7 @@ const Profile = () => {
     email: '',
     avatar: null,
     gender: 'OTHER',
-    dateOfBirth: '', // Lưu giá trị y-M-d
+    dateOfBirth: '',
   });
   const [originalFormData, setOriginalFormData] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -122,18 +120,16 @@ const Profile = () => {
     dispatch(fetchProfile());
   }, [dispatch, isAuthenticated]);
 
-  // Hàm chuyển đổi từ dd-MM-yyyy sang y-M-d (khi nhận từ API)
   const convertToInputFormat = (dateStr) => {
     if (!dateStr) return '';
     const [day, month, year] = dateStr.split('-');
-    return `${year}-${month}-${day}`; // y-M-d
+    return `${year}-${month}-${day}`;
   };
 
-  // Hàm chuyển đổi từ y-M-d sang dd-MM-yyyy (khi gửi API)
   const convertToApiFormat = (dateStr) => {
     if (!dateStr) return '';
     const [year, month, day] = dateStr.split('-');
-    return `${day.padStart(2, '0')}-${month.padStart(2, '0')}-${year.padStart(4, '0')}`; // dd-MM-yyyy
+    return `${day.padStart(2, '0')}-${month.padStart(2, '0')}-${year.padStart(4, '0')}`;
   };
 
   useEffect(() => {
@@ -144,7 +140,7 @@ const Profile = () => {
         email: profile.email || '',
         avatar: profile.avatar || null,
         gender: profile.gender || 'OTHER',
-        dateOfBirth: convertToInputFormat(profile.dateOfBirth) || '', // Chuyển dd-MM-yyyy sang y-M-d
+        dateOfBirth: convertToInputFormat(profile.dateOfBirth) || '',
       };
       setFormData(profileData);
       setOriginalFormData(profileData);
@@ -181,51 +177,61 @@ const Profile = () => {
   const validateDateOfBirth = (dateStr) => {
     if (!dateStr) {
       toast.dismiss();
-      toast.error('Vui lòng nhập đầy đủ ngày sinh!');
+      toast.error('Vui lòng nhập đầy đủ ngày, tháng, năm!');
       return false;
     }
 
-    const [year, month, day] = dateStr.split('-');
-    // Kiểm tra rỗng trước
-    if (day === '' || month === '' || year === '') {
+    const [year, month, day] = dateStr.split('-').map(Number);
+
+    // Kiểm tra thiếu ngày, tháng, năm hoặc rỗng
+    if (!day || !month || !year || isNaN(day) || isNaN(month) || isNaN(year)) {
       toast.dismiss();
-      toast.error('Vui lòng nhập đầy đủ ngày sinh!');
+      toast.error('Vui lòng nhập đầy đủ và đúng định dạng ngày, tháng, năm!');
       return false;
     }
 
-    // Convert thành số
-    const dayNum = parseInt(day);
-    const monthNum = parseInt(month);
-    const yearNum = parseInt(year);
-
-    // Kiểm tra NaN sau khi parse
-    if (isNaN(dayNum) || isNaN(monthNum) || isNaN(yearNum)) {
+    // Kiểm tra số 0 đứng đầu
+    if (String(day).startsWith('0') && String(day).length > 1) {
       toast.dismiss();
-      toast.error('Vui lòng nhập đầy đủ ngày sinh!');
+      toast.error('Ngày không được bắt đầu bằng số 0!');
+      return false;
+    }
+    if (String(year).startsWith('0') && String(year).length > 1) {
+      toast.dismiss();
+      toast.error('Năm không được bắt đầu bằng số 0!');
       return false;
     }
 
-    const maxDays = [31, isLeapYear(yearNum) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][monthNum - 1];
+    // Kiểm tra tháng chưa chọn
+    if (month === 0 || month === '' || isNaN(month)) {
+      toast.dismiss();
+      toast.error('Vui lòng chọn tháng!');
+      return false;
+    }
 
-    if (monthNum < 1 || monthNum > 12) {
+    // Kiểm tra năm hợp lệ
+    const currentYear = new Date().getFullYear();
+    if (year < 1 || year > currentYear) {
+      toast.dismiss();
+      toast.error(`Năm phải từ 1 đến ${currentYear}!`);
+      return false;
+    }
+
+    // Kiểm tra tháng hợp lệ
+    if (month < 1 || month > 12) {
       toast.dismiss();
       toast.error('Tháng phải từ 1 đến 12!');
       return false;
     }
 
-    if (yearNum < 1 || yearNum > 2025) {
+    // Kiểm tra ngày hợp lệ
+    const maxDays = [31, isLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month - 1];
+    if (day < 1 || day > maxDays) {
       toast.dismiss();
-      toast.error('Năm phải từ 1 đến 2025!');
-      return false;
-    }
-
-    if (dayNum < 1 || dayNum > maxDays) {
-      if (monthNum === 2 && dayNum === 29) {
-        toast.dismiss();
-        toast.error(`Năm ${yearNum} không phải năm nhuận, tháng 2 chỉ có 28 ngày!`);
+      if (month === 2 && day === 29) {
+        toast.error(`Năm ${year} không phải năm nhuận, tháng 2 chỉ có 28 ngày!`);
       } else {
-        toast.dismiss();
-        toast.error(`Tháng ${monthNum} chỉ có ${maxDays} ngày!`);
+        toast.error(`Tháng ${month} chỉ có ${maxDays} ngày!`);
       }
       return false;
     }
@@ -246,8 +252,8 @@ const Profile = () => {
       return;
     }
 
-    if (!formData.dateOfBirth || !validateDateOfBirth(formData.dateOfBirth)) {
-      return; // Lỗi đã hiển thị trong validateDateOfBirth
+    if (formData.dateOfBirth && !validateDateOfBirth(formData.dateOfBirth)) {
+      return;
     }
 
     try {
@@ -255,7 +261,7 @@ const Profile = () => {
         fullName: formData.fullName,
         phoneNumber: formData.phoneNumber,
         gender: formData.gender,
-        dateOfBirth: convertToApiFormat(formData.dateOfBirth), // Chuyển y-M-d sang dd-MM-yyyy
+        dateOfBirth: formData.dateOfBirth ? convertToApiFormat(formData.dateOfBirth) : '',
       };
       await dispatch(changeProfile(updatedProfile)).unwrap();
       setOriginalFormData({ ...formData });

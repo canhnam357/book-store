@@ -12,11 +12,9 @@ const Callback = () => {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const accessToken = params.get('accessToken');
-    const refreshToken = params.get('refreshToken');
-    const username = params.get('username');
     const error = params.get('error');
 
-    dispatch(handleGoogleCallback({ accessToken, refreshToken, username, error })).then((result) => {
+    dispatch(handleGoogleCallback({ accessToken, error })).then((result) => {
       console.log('Google callback result:', result);
       if (result.meta.requestStatus === 'fulfilled') {
         navigate('/');

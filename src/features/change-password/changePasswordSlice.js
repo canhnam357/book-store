@@ -13,7 +13,6 @@ export const sendOtpResetPassword = createAsyncThunk(
       }
       throw new Error(response.data.message || 'Không thể gửi OTP!');
     } catch (error) {
-      console.error('Send OTP error:', error.response?.data || error);
       return rejectWithValue(error.response?.data?.message || 'Lỗi khi gửi OTP!');
     }
   }
@@ -34,7 +33,6 @@ export const changePassword = createAsyncThunk(
       }
       throw new Error(response.data.message || 'Không thể đổi mật khẩu!');
     } catch (error) {
-      console.error('Change password error:', error.response?.data || error);
       return rejectWithValue(error.response?.data?.message || 'Lỗi khi đổi mật khẩu!');
     }
   }
@@ -62,11 +60,13 @@ const changePasswordSlice = createSlice({
       .addCase(sendOtpResetPassword.fulfilled, (state) => {
         state.loading = false;
         state.otpSent = true;
+        toast.dismiss();
         toast.success('OTP đã được gửi đến email của bạn!');
       })
       .addCase(sendOtpResetPassword.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.dismiss();
         toast.error(action.payload);
       })
       // Change Password
@@ -77,11 +77,13 @@ const changePasswordSlice = createSlice({
       .addCase(changePassword.fulfilled, (state) => {
         state.loading = false;
         state.otpSent = false;
+        toast.dismiss();
         toast.success('Đổi mật khẩu thành công!');
       })
       .addCase(changePassword.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.dismiss();
         toast.error(action.payload);
       });
   },

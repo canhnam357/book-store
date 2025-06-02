@@ -4,6 +4,7 @@ import { fetchProfile, changeAvatar, changeProfile } from '../../features/profil
 import ProfileSidebar from './ProfileSidebar';
 import { toast } from 'react-toastify';
 import './Profile.css';
+import avatar from './../../assets/images.png'
 
 const DateInputCustom = ({ value, onChange, disabled }) => {
   const [day, setDay] = useState('');
@@ -295,7 +296,7 @@ const Profile = () => {
         <h2 className="profile-title">Thông tin cá nhân</h2>
         <div className="profile-avatar-section">
           <img
-            src={formData.avatar || 'https://via.placeholder.com/150'}
+            src={formData.avatar || avatar}
             alt="Avatar"
             className="profile-avatar"
           />

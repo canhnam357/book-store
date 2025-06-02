@@ -3,8 +3,8 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 24px;
-  min-height: calc(100vh - 100px); /* Đảm bảo chiều cao tối thiểu để footer không nhảy lên */
-  position: relative; /* Để spinner-overlay hoạt động đúng */
+  min-height: calc(100vh - 100px);
+  position: relative;
 }
 
 .orders-content {
@@ -312,14 +312,40 @@
   color: #333;
 }
 
+.orders-cancel-reason-container {
+  position: relative;
+  margin-bottom: 15px;
+  padding: 0 10px; /* Thêm padding để căn đều hai bên */
+}
+
 .orders-cancel-reason {
   width: 100%;
   padding: 10px;
   font-size: 14px;
-  border: 1px solid #ddd;
+  font-family: 'Poppins', sans-serif;
+  border: 1px solid #d1d5db;
   border-radius: 4px;
   resize: vertical;
-  margin-bottom: 15px;
+  outline: none;
+  box-sizing: border-box; /* Đảm bảo padding không làm tăng kích thước */
+  transition: border-color 0.2s;
+}
+
+.orders-cancel-reason:focus {
+  border-color: #3b82f6;
+}
+
+.orders-cancel-char-count {
+  position: absolute;
+  bottom: 8px;
+  right: 18px; /* Điều chỉnh để căn đều với padding của container */
+  font-size: 12px;
+  font-family: 'Poppins', sans-serif;
+  color: #4a5568;
+}
+
+.orders-cancel-char-count.char-count-max {
+  color: #ef4444;
 }
 
 .orders-modal-actions {
@@ -355,7 +381,6 @@
   background-color: #c82333;
 }
 
-/* CSS để xử lý xuống hàng cho chuỗi địa chỉ dài */
 .orders-summary .wrapped-text {
   max-width: 900px;
   overflow-wrap: break-word;
@@ -365,25 +390,24 @@
   line-height: 20px;
 }
 
-/* Style cho spinner */
 .spinner-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.3); /* Overlay mờ */
+  background-color: rgba(0, 0, 0, 0.3);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000; /* Đảm bảo spinner ở trên cùng */
+  z-index: 1000;
 }
 
 .spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid #f3f3f3; /* Màu viền nhạt */
-  border-top: 4px solid #007bff; /* Màu viền chính, đồng bộ với orders-details-button */
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #007bff;
   border-radius: 50%;
   animation: spinner 1s linear infinite;
 }

@@ -17,7 +17,7 @@ const Orders = () => {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showPaymentDetailModal, setShowPaymentDetailModal] = useState(false);
   const [cancelOrderData, setCancelOrderData] = useState({ orderId: null, fromStatus: '', cause: '' });
-  const [isFetchingDetails, setIsFetchingDetails] = useState(false); // State để theo dõi tải chi tiết
+  const [isFetchingDetails, setIsFetchingDetails] = useState(false);
 
   const orderStatuses = [
     { value: '', label: 'Tất cả trạng thái' },
@@ -61,14 +61,14 @@ const Orders = () => {
     } else {
       setExpandedOrderId(orderId);
       if (!orderDetails[orderId]) {
-        setIsFetchingDetails(true); // Bật spinner khi tải chi tiết
+        setIsFetchingDetails(true);
         try {
           const result = await dispatch(fetchOrderDetails(orderId)).unwrap();
           console.log('Fetch order details result:', result);
         } catch (error) {
           toast.error(error || 'Lỗi khi lấy chi tiết đơn hàng!');
         } finally {
-          setIsFetchingDetails(false); // Tắt spinner sau khi tải xong
+          setIsFetchingDetails(false);
         }
       }
     }
@@ -100,6 +100,7 @@ const Orders = () => {
       ).unwrap();
       console.log('Change order status result:', result);
       handleCloseCancelModal();
+      toast.success('Hủy đơn hàng thành công!');
     } catch (error) {
       toast.error(error || 'Lỗi khi hủy đơn hàng!');
     }
@@ -404,15 +405,28 @@ const Orders = () => {
         <div className="orders-modal">
           <div className="orders-modal-content">
             <h3>Lý do hủy đơn hàng</h3>
-            <textarea
-              className="orders-cancel-reason"
-              value={cancelOrderData.cause}
-              onChange={(e) =>
-                setCancelOrderData({ ...cancelOrderData, cause: e.target.value })
-              }
-              placeholder="Nhập lý do hủy đơn hàng..."
-              rows="4"
-            />
+            <div className="orders-cancel-reason-container">
+              <textarea
+                className="orders-cancel-reason"
+                value={cancelOrderData.cause}
+                onChange={(e) =>
+                  setCancelOrderData({
+                    ...cancelOrderData,
+                    cause: e.target.value.slice(0, 500),
+                  })
+                }
+                placeholder="Nhập lý do hủy đơn hàng (tối đa 500 ký tự)"
+                rows="13"
+                maxLength="500"
+              />
+              <span
+                className={`orders-cancel-char-count ${
+                  cancelOrderData.cause.length === 500 ? 'char-count-max' : ''
+                }`}
+              >
+                {cancelOrderData.cause.length}/500
+              </span>
+            </div>
             <div className="orders-modal-actions">
               <button
                 className="orders-modal-button orders-modal-cancel"

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { sendOtpResetPassword, changePassword, resetOtpSent } from '../../features/change-password/changePasswordSlice';
 import ProfileSidebar from '../profile/ProfileSidebar';
@@ -10,7 +10,7 @@ const ChangePassword = () => {
   const { isAuthenticated } = useSelector((state) => state.auth);
   const { otpSent, loading } = useSelector((state) => state.changePassword);
   const [formData, setFormData] = useState({
-    otp: '',
+    otp: ['', '', '', '', '', ''],
     password: '',
     newPassword: '',
   });
@@ -19,6 +19,7 @@ const ChangePassword = () => {
     letter: false,
     number: false,
   });
+  const inputRefs = useRef([]);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -49,30 +50,67 @@ const ChangePassword = () => {
     }
   };
 
+  const handleOtpChange = (index, value) => {
+    if (!/^\d*$/.test(value)) return; // Chỉ cho phép số
+    const newOtp = [...formData.otp];
+    newOtp[index] = value.slice(-1); // Lấy ký tự cuối cùng
+    setFormData((prev) => ({ ...prev, otp: newOtp }));
+
+    // Chuyển focus sang ô tiếp theo nếu nhập đủ 1 ký tự
+    if (value && index < 5) {
+      inputRefs.current[index + 1].focus();
+    }
+  };
+
+  const handleOtpKeyDown = (index, e) => {
+    // Xử lý phím Backspace
+    if (e.key === 'Backspace' && !formData.otp[index] && index > 0) {
+      inputRefs.current[index - 1].focus();
+    }
+  };
+
+  const handleOtpPaste = (e) => {
+    const paste = e.clipboardData.getData('text').replace(/\D/g, ''); // Chỉ lấy số
+    if (paste.length >= 6) {
+      const newOtp = paste.slice(0, 6).split('');
+      setFormData((prev) => ({ ...prev, otp: newOtp }));
+      inputRefs.current[5].focus();
+    }
+    e.preventDefault();
+  };
+
   const handleSendOtp = async () => {
-    const result = await dispatch(sendOtpResetPassword()).unwrap();
-    console.log('Send OTP result:', result);
+    try {
+      const result = await dispatch(sendOtpResetPassword()).unwrap();
+      console.log('Send OTP result:', result);
+    } catch (error) {
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const otpCode = formData.otp.join('');
+    if (otpCode.length !== 6) {
+      toast.error('Vui lòng nhập đủ 6 số OTP!');
+      return;
+    }
     if (!validatePassword(formData.newPassword)) {
-      toast.dismiss();
       toast.error('Mật khẩu mới phải dài từ 8 đến 32 ký tự, có ít nhất một chữ cái và một chữ số!');
       return;
     }
     try {
       const result = await dispatch(
-      changePassword({
-        otp: formData.otp,
-        password: formData.password,
-        newPassword: formData.newPassword,
-      })
-    ).unwrap();
-    console.log('Change password result:', result);
-    setFormData({ otp: '', password: '', newPassword: '' });
-    setPasswordErrors({ length: false, letter: false, number: false });
-    } catch(error) {}
+        changePassword({
+          otp: otpCode,
+          password: formData.password,
+          newPassword: formData.newPassword,
+        })
+      ).unwrap();
+      console.log('Change password result:', result);
+      setFormData({ otp: ['', '', '', '', '', ''], password: '', newPassword: '' });
+      setPasswordErrors({ length: false, letter: false, number: false });
+    } catch (error) {
+    }
   };
 
   return (
@@ -97,14 +135,22 @@ const ChangePassword = () => {
           <form onSubmit={handleSubmit} className="change-password-form">
             <div className="change-password-form-group">
               <label className="change-password-label">OTP</label>
-              <input
-                type="text"
-                name="otp"
-                value={formData.otp}
-                onChange={handleInputChange}
-                className="change-password-input"
-                required
-              />
+              <div className="otp-inputs">
+                {formData.otp.map((digit, index) => (
+                  <input
+                    key={index}
+                    type="text"
+                    maxLength="1"
+                    value={digit}
+                    onChange={(e) => handleOtpChange(index, e.target.value)}
+                    onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                    onPaste={index === 0 ? handleOtpPaste : undefined}
+                    ref={(el) => (inputRefs.current[index] = el)}
+                    className="otp-input"
+                    required
+                  />
+                ))}
+              </div>
             </div>
             <div className="change-password-form-group">
               <label className="change-password-label">Mật khẩu hiện tại</label>
@@ -146,7 +192,7 @@ const ChangePassword = () => {
               className="change-password-submit-button"
               disabled={loading}
             >
-              Đổi mật khẩu
+              {loading ? 'Đang đổi mật khẩu...' : 'Đổi mật khẩu'}
             </button>
           </form>
         )}

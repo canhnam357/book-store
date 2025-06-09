@@ -100,7 +100,6 @@ const Orders = () => {
       ).unwrap();
       console.log('Change order status result:', result);
       handleCloseCancelModal();
-      toast.success('Hủy đơn hàng thành công!');
     } catch (error) {
       toast.error(error || 'Lỗi khi hủy đơn hàng!');
     }

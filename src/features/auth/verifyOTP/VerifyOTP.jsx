@@ -89,11 +89,6 @@ const VerifyOTP = () => {
           {loading ? 'Đang xác nhận...' : 'Xác Nhận'}
         </button>
       </form>
-      <div className="text-center">
-        <a href="/resend-otp" className="link">
-          Gửi lại OTP
-        </a>
-      </div>
     </div>
   );
 };

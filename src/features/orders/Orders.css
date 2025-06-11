@@ -99,7 +99,11 @@
 }
 
 .orders-status-CANCELLED {
-  background-color: #808080;
+  background-color: #272424;
+}
+
+.orders-status-FAILED_DELIVERY {
+  background-color: #272424;
 }
 
 .orders-refund-status {

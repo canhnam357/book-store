@@ -78,7 +78,9 @@ api.interceptors.response.use(
             store.dispatch(logoutUser());
             toast.dismiss();
             toast.error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!');
-            window.location.href = '/login';
+            if (window.location.pathname !== '/login') {
+              window.location.href = '/login';
+            }
             reject(err);
           })
           .finally(() => {

@@ -61,8 +61,8 @@ const Home = () => {
 
   const getBooksForSection = (section) => {
     const books = section === 'newArrivals' ? newArrivals :
-                  section === 'highRated' ? highRated :
-                  section === 'mostPopular' ? mostPopular : discountBooks;
+      section === 'highRated' ? highRated :
+        section === 'mostPopular' ? mostPopular : discountBooks;
     if (!books || books.length === 0) return [];
     const index = currentIndex[section] || 0;
     const startIndex = index % books.length;
@@ -199,7 +199,17 @@ const Home = () => {
                 <p className="home-book-price">
                   {(book.priceAfterSale || book.price || 0).toLocaleString('vi-VN')} VND
                 </p>
-                <p className="home-book-rating">Rating: {book.rating || 'N/A'}</p>
+                <p className="home-book-rating">
+                  {book.rating && book.rating > 0 ? (
+                    <>
+                      <span>Rating: </span>
+                      <span>{book.rating}</span>
+                      <span className="star-icon">★</span>
+                    </>
+                  ) : (
+                    'Chưa có đánh giá'
+                  )}
+                </p>
               </div>
             ))}
           </div>
@@ -230,10 +240,14 @@ const Home = () => {
                 <Link to={`/books/${book.bookId}`}>
                   <h3 className="home-book-title">{truncateText(book.bookName, 20)}</h3>
                 </Link>
-                <p className="home-book-price">
-                  <span>{(book.priceAfterSale || book.price || 0).toLocaleString('vi-VN')} VND</span>
-                  <span className="home-book-sold">Đã bán: {(book.soldQuantity || 0).toLocaleString('vi-VN')}</span>
-                </p>
+                <div className="home-book-price-container">
+                  <p className="home-book-price">
+                    {(book.priceAfterSale || book.price || 0).toLocaleString('vi-VN')} VND
+                  </p>
+                  <p className="home-book-sold">
+                    Đã bán: {(book.soldQuantity || 0).toLocaleString('vi-VN')}
+                  </p>
+                </div>
               </div>
             ))}
           </div>

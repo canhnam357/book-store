@@ -198,3 +198,53 @@
     gap: 4px;
   }
 }
+
+.home-book-rating {
+  font-size: 12px;
+  font-family: 'Inter', sans-serif;
+  color: #4a5568;
+  margin: 4px 0;
+  min-height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.star-icon {
+  color: #f59e0b; /* Màu vàng cho ngôi sao */
+  font-size: 14px;
+}
+
+.star-icon:hover {
+  transform: scale(1.2);
+  transition: transform 0.2s ease;
+}
+
+.home-book-price-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin: 4px 0;
+}
+
+.home-book-price {
+  font-size: 12px;
+  font-family: 'Inter', sans-serif;
+  color: #4a5568;
+  margin: 0;
+  min-height: 20px;
+}
+
+.home-book-sold {
+  font-size: 11px; /* Nhỏ hơn một chút để phân cấp */
+  font-family: 'Inter', sans-serif;
+  color: #6b7280; /* Màu nhạt hơn để tạo độ tương phản */
+  margin: 0;
+}
+
+.home-book-sold:hover {
+  color: #3b82f6;
+  transition: color 0.2s ease;
+}

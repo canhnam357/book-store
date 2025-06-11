@@ -23,6 +23,7 @@ import ChangePassword from './features/change-password/ChangePassword';
 import Addresses from './features/addresses/Addresses';
 import Orders from './features/orders/Orders';
 import './App.css';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 
 function App() {
   const dispatch = useDispatch();
@@ -60,6 +61,7 @@ function App() {
         </div>
         <Footer />
         <ToastContainer />
+        <SpeedInsights />
       </div>
     </Router>
   );

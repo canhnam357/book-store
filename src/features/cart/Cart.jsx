@@ -140,7 +140,19 @@ const Cart = () => {
   }, [cartItems, selectedItems]);
 
   if (!isAuthenticated) {
-    return <p>Vui lòng đăng nhập để xem giỏ hàng!</p>;
+    return (
+      <div className="cart-empty">
+        <img
+          src="https://cdn-icons-png.flaticon.com/512/3037/3037377.png"
+          alt="Login required"
+          className="cart-empty-icon"
+        />
+        <h3 className="cart-empty-message">Vui lòng đăng nhập để xem giỏ hàng!</h3>
+        <p className="cart-empty-submessage">
+          Đăng nhập ngay để khám phá giỏ hàng của bạn và tiếp tục mua sắm!
+        </p>
+      </div>
+    );
   }
 
   return (

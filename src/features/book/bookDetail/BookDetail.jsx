@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -38,6 +38,8 @@ const BookDetail = () => {
     size: 10,
     rating: 0,
   });
+  const reviewSectionRef = useRef(null);
+  const scrollPositionRef = useRef(0);
 
   const splitIntoLines = (text) => {
     if (!text) return ['Không có nội dung'];
@@ -50,11 +52,11 @@ const BookDetail = () => {
   };
 
   const adjustTextareaRows = (textarea) => {
-    const lineHeight = parseInt(window.getComputedStyle(textarea).lineHeight) || 20; // Giả định line-height mặc định
+    const lineHeight = parseInt(window.getComputedStyle(textarea).lineHeight) || 20;
     const minRows = 5;
-    textarea.style.height = 'auto'; // Reset chiều cao để tính lại
+    textarea.style.height = 'auto';
     const contentHeight = textarea.scrollHeight;
-    const newRows = Math.max(minRows, Math.ceil(contentHeight / lineHeight) - 1); // Chừa 1 hàng trống
+    const newRows = Math.max(minRows, Math.ceil(contentHeight / lineHeight) - 1);
     textarea.rows = newRows;
   };
 
@@ -172,11 +174,14 @@ const BookDetail = () => {
     if (submitting) return;
 
     setSubmitting(true);
+    scrollPositionRef.current = window.scrollY;
     const result = await dispatch(createReview({ bookId, content: reviewContent, rating: reviewRating }));
     console.log('Create review result:', result);
     if (result.meta.requestStatus === 'fulfilled') {
       setReviewContent('');
       setReviewRating(0);
+      await dispatch(fetchBookDetail(bookId)); // Tải lại chi tiết sách
+      window.scrollTo(0, scrollPositionRef.current); // Khôi phục vị trí cuộn
     }
     setSubmitting(false);
   };
@@ -185,7 +190,6 @@ const BookDetail = () => {
     setEditingReviewId(review.reviewId);
     setEditContent(review.content || '');
     setEditRating(review.rating ?? 0);
-    // Điều chỉnh số rows ngay khi mở chế độ chỉnh sửa
     setTimeout(() => {
       const textarea = document.querySelector(`.bookdetail-review-content-editable`);
       if (textarea) adjustTextareaRows(textarea);
@@ -198,12 +202,15 @@ const BookDetail = () => {
       return;
     }
 
+    scrollPositionRef.current = window.scrollY;
     const result = await dispatch(updateReview({ reviewId, content: editContent, rating: editRating }));
     console.log('Update review result:', result);
     if (result.meta.requestStatus === 'fulfilled') {
       setEditingReviewId(null);
       setEditContent('');
       setEditRating(0);
+      await dispatch(fetchBookDetail(bookId)); // Tải lại chi tiết sách
+      window.scrollTo(0, scrollPositionRef.current); // Khôi phục vị trí cuộn
     }
   };
 
@@ -214,7 +221,9 @@ const BookDetail = () => {
   };
 
   const handlePageChange = (page) => {
+    scrollPositionRef.current = window.scrollY;
     setReviewFilters((prev) => ({ ...prev, index: page }));
+    window.scrollTo(0, scrollPositionRef.current);
   };
 
   const renderStars = (rating) => {
@@ -425,10 +434,9 @@ const BookDetail = () => {
         </div>
       </div>
       <div className="bookdetail-description">
-        <h2>Mô tả sách</h2>
         <p style={{ whiteSpace: 'pre-wrap' }}>{bookDetail.description || 'Không có mô tả'}</p>
       </div>
-      <div className="bookdetail-reviews">
+      <div className="bookdetail-reviews" ref={reviewSectionRef}>
         <h2>Đánh giá ({totalReviews || 0})</h2>
         {isAuthenticated && (
           <form className="bookdetail-review-form" onSubmit={handleReviewSubmit}>

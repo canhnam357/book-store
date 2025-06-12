@@ -270,7 +270,7 @@
   outline: none;
   box-sizing: border-box;
   transition: border-color 0.2s;
-  overflow-y: hidden; /* Ẩn thanh kéo dọc */
+  overflow-y: hidden;
 }
 
 .bookdetail-review-form textarea:focus,
@@ -360,13 +360,13 @@
 }
 
 .bookdetail-review-content-editable {
-  margin-bottom: 0; /* Loại bỏ margin-bottom để không tạo khoảng cách thừa */
+  margin-bottom: 0;
 }
 
 .bookdetail-review-actions {
   display: flex;
   gap: 12px;
-  margin-top: 16px; /* Khoảng cách với textarea hoặc nội dung phía trên */
+  margin-top: 16px;
 }
 
 .bookdetail-review-button {

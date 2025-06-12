@@ -94,6 +94,32 @@ const Home = () => {
     return text.substring(0, maxLength) + '...';
   };
 
+  const renderPrice = (book) => {
+    return book.priceAfterSale && book.priceAfterSale !== book.price ? (
+      <>
+        <span className="home-book-price-original">
+          {(book.price || 0).toLocaleString('vi-VN')}
+        </span>
+        <span>{(book.priceAfterSale || 0).toLocaleString('vi-VN')} VND</span>
+      </>
+    ) : (
+      <span>{(book.price || 0).toLocaleString('vi-VN')} VND</span>
+    );
+  };
+
+  const renderTag = (book, isNewArrival = false) => {
+    if (isNewArrival) {
+      return <div className="home-new-tag">Mới</div>;
+    }
+    if (book.priceAfterSale && book.priceAfterSale !== book.price) {
+      return <div className="home-discount-tag">Khuyến mãi</div>;
+    }
+    if (book.newArrival) {
+      return <div className="home-new-tag">Mới</div>;
+    }
+    return null;
+  };
+
   if (loading) return <div>Loading...</div>;
 
   return (
@@ -114,14 +140,14 @@ const Home = () => {
                 <Link to={`/books/${book.bookId}`}>
                   <div className="home-book-image-wrapper">
                     <img src={book.urlThumbnail || '/no-image.png'} alt={book.bookName || 'Sách'} />
-                    <div className="home-new-tag">Mới</div>
+                    {renderTag(book, true)}
                   </div>
                 </Link>
                 <Link to={`/books/${book.bookId}`}>
                   <h3 className="home-book-title">{truncateText(book.bookName, 20)}</h3>
                 </Link>
                 <p className="home-book-price">
-                  {(book.priceAfterSale || book.price || 0).toLocaleString('vi-VN')} VND
+                  {renderPrice(book)}
                 </p>
               </div>
             ))}
@@ -148,23 +174,14 @@ const Home = () => {
                 <Link to={`/books/${book.bookId}`}>
                   <div className="home-book-image-wrapper">
                     <img src={book.urlThumbnail || '/no-image.png'} alt={book.bookName || 'Sách'} />
-                    {book.priceAfterSale && <div className="home-discount-tag">Khuyến mãi</div>}
+                    {renderTag(book)}
                   </div>
                 </Link>
                 <Link to={`/books/${book.bookId}`}>
                   <h3 className="home-book-title">{truncateText(book.bookName, 20)}</h3>
                 </Link>
                 <p className="home-book-price">
-                  {book.priceAfterSale ? (
-                    <>
-                      <span className="home-book-price-original">
-                        {(book.price || 0).toLocaleString('vi-VN')}
-                      </span>
-                      <span>{(book.priceAfterSale || 0).toLocaleString('vi-VN')} VND</span>
-                    </>
-                  ) : (
-                    <span>{(book.price || 0).toLocaleString('vi-VN')} VND</span>
-                  )}
+                  {renderPrice(book)}
                 </p>
               </div>
             ))}
@@ -181,7 +198,7 @@ const Home = () => {
         <h2>Sách được đánh giá cao</h2>
         <div className="home-carousel">
           {(highRated?.length || 0) >= 5 && (
-            <button onClick={() => handlePrev('highRated')} className="home-prev-btn">
+            <button listop={true} onClick={() => handlePrev('highRated')} className="home-prev-btn">
               ←
             </button>
           )}
@@ -191,13 +208,14 @@ const Home = () => {
                 <Link to={`/books/${book.bookId}`}>
                   <div className="home-book-image-wrapper">
                     <img src={book.urlThumbnail || '/no-image.png'} alt={book.bookName || 'Sách'} />
+                    {renderTag(book)}
                   </div>
                 </Link>
                 <Link to={`/books/${book.bookId}`}>
                   <h3 className="home-book-title">{truncateText(book.bookName, 20)}</h3>
                 </Link>
                 <p className="home-book-price">
-                  {(book.priceAfterSale || book.price || 0).toLocaleString('vi-VN')} VND
+                  {renderPrice(book)}
                 </p>
                 <p className="home-book-rating">
                   {book.rating && book.rating > 0 ? (
@@ -235,6 +253,7 @@ const Home = () => {
                 <Link to={`/books/${book.bookId}`}>
                   <div className="home-book-image-wrapper">
                     <img src={book.urlThumbnail || '/no-image.png'} alt={book.bookName || 'Sách'} />
+                    {renderTag(book)}
                   </div>
                 </Link>
                 <Link to={`/books/${book.bookId}`}>
@@ -242,7 +261,7 @@ const Home = () => {
                 </Link>
                 <div className="home-book-price-container">
                   <p className="home-book-price">
-                    {(book.priceAfterSale || book.price || 0).toLocaleString('vi-VN')} VND
+                    {renderPrice(book)}
                   </p>
                   <p className="home-book-sold">
                     Đã bán: {(book.soldQuantity || 0).toLocaleString('vi-VN')}
@@ -279,13 +298,14 @@ const Home = () => {
                     <Link to={`/books/${book.bookId}`}>
                       <div className="home-book-image-wrapper">
                         <img src={book.urlThumbnail || '/no-image.png'} alt={book.bookName || 'Sách'} />
+                        {renderTag(book)}
                       </div>
                     </Link>
                     <Link to={`/books/${book.bookId}`}>
                       <h3 className="home-book-title">{truncateText(book.bookName, 20)}</h3>
                     </Link>
                     <p className="home-book-price">
-                      {(book.priceAfterSale || book.price || 0).toLocaleString('vi-VN')} VND
+                      {renderPrice(book)}
                     </p>
                   </div>
                 ))}

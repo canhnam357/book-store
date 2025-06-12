@@ -79,10 +79,10 @@ export const fetchTopCategories = createAsyncThunk(
       if (response.status === 200 && response.data.result) {
         return response.data.result;
       }
-      throw new Error(response.data.message || 'Không thể lấy danh mục hàng đầu!');
+      throw new Error(response.data.message || 'Không thể lấy thể loại hàng đầu!');
     } catch (error) {
       console.error('Fetch top categories error:', error.response?.data || error);
-      return rejectWithValue(error.response?.data?.message || 'Lỗi khi lấy danh mục hàng đầu!');
+      return rejectWithValue(error.response?.data?.message || 'Lỗi khi lấy thể loại hàng đầu!');
     }
   }
 );

@@ -379,7 +379,7 @@ const BookDetail = () => {
             </span>
           </p>
           <p className="bookdetail-detail">
-            <strong>Danh mục:</strong>{' '}
+            <strong>Thể loại:</strong>{' '}
             {bookDetail.categories?.length > 0
               ? bookDetail.categories.map((cat) => (
                   <span
@@ -390,7 +390,7 @@ const BookDetail = () => {
                     {cat.categoryName}
                   </span>
                 ))
-              : 'Không có danh mục'}
+              : 'Không có thể loại'}
           </p>
           <p className="bookdetail-detail">
             <strong>Nhà xuất bản:</strong>{' '}

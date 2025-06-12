@@ -347,6 +347,10 @@ const BookList = () => {
     setShowMorePublishers(false);
     setShowMoreDistributors(false);
     setSearchParams({});
+    dispatch(fetchCategories());
+    dispatch(fetchAuthors());
+    dispatch(fetchPublishers());
+    dispatch(fetchDistributors());
   };
 
   // Filter available options (exclude selected ones)
@@ -485,12 +489,12 @@ const BookList = () => {
           </select>
         </div>
         <div className="booklist-filter-group">
-          <label>Danh mục</label>
+          <label>Thể loại</label>
           <input
             type="text"
             value={categorySearch || ''}
             onChange={handleCategorySearch}
-            placeholder="Tìm kiếm danh mục..."
+            placeholder="Tìm kiếm thể loại..."
           />
           {selectedCategories.length > 0 && (
             <div className="booklist-selected-items">
@@ -518,7 +522,7 @@ const BookList = () => {
                     onChange={() => handleCategorySelect(category)}
                   />
                   <label htmlFor={`category-${category.categoryId}`}>
-                    {category.categoryName || 'Không có tên danh mục'}
+                    {category.categoryName || 'Không có tên thể loại'}
                   </label>
                 </div>
               )

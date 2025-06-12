@@ -31,10 +31,10 @@ export const fetchCategories = createAsyncThunk(
       if (response.status === 200 && response.data.result) {
         return { data: response.data.result, requestId: newRequestId };
       }
-      throw new Error(response.data.message || 'Không thể lấy danh sách danh mục!');
+      throw new Error(response.data.message || 'Không thể lấy danh sách thể loại!');
     } catch (error) {
       console.error('Fetch categories error:', error.response?.data || error);
-      return rejectWithValue(error.response?.data?.message || 'Không thể lấy danh sách danh mục!');
+      return rejectWithValue(error.response?.data?.message || 'Không thể lấy danh sách thể loại!');
     }
   }
 );

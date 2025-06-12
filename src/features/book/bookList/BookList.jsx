@@ -324,7 +324,7 @@ const BookList = () => {
       minPrice,
       maxPrice,
       index: 1,
-      size: 10,
+      size: 20,
       sort: '',
       bookName: '',
       authorId: '',
